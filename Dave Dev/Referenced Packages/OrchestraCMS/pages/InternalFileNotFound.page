@@ -1,0 +1,20 @@
+<apex:page controller="cms.CoreController" id="l">
+
+<html>
+
+<head>
+
+<title>Page Not Found</title>
+
+</head>
+
+<body>
+
+	<br /><br />
+	Page Not Found, this could be because the page is not published, you do not have permission to view it,  or it has a later publish start date.
+
+</body>
+
+</html>
+
+</apex:page>

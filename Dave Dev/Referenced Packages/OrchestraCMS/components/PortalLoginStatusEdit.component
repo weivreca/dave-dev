@@ -1,0 +1,233 @@
+<apex:component controller="cms.PortalLoginStatusController" allowDml="true">
+
+<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+<apex:outputPanel layout="block" style="padding: 5px;">
+
+ 	<script type="text/javascript" language="javascript">
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+            if ({!InlinePopup})
+            {
+                attributes.push({"name":"ForgotPasswordPage", "value":$('#ForgotPasswordPage').val(), "type":"Text"});
+                attributes.push({"name":"SelfRegistrationPage", "value":$('#SelfRegistrationPage').val(), "type":"Text"});
+            }
+            else
+                attributes.push({"name":"LoginPage", "value":$('#LoginPage').val(), "type":"Text"});
+
+			attributes.push({"name":"DefaultStartPage", "value":$('#DefaultStartPage').val(), "type":"Text"});
+            attributes.push({"name":"MyOptionsPage", "value":$('#MyOptionsPage').val(), "type":"Text"});
+            attributes.push({"name":"InlinePopup", "value": $('#InlinePopup').attr('checked'), "type":"Boolean"});
+			attributes.push({"name":"ShowWelcomeLabel", "value": $('#ShowWelcomeLabel').attr('checked'), "type":"Boolean"});
+			attributes.push({"name":"ShowBackToPortalLink", "value": $('#ShowBackToPortalLink').attr('checked'), "type":"Boolean"});
+
+			dynamic_load = 'false';
+			if($('#DynamicLoad:checked').size() > 0){
+				dynamic_load = 'true';
+			}
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null, "dynamic_load":dynamic_load, "dynamic_instance_id":"{!content_layout_instance.Id}"},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	</script>
+
+    <div class="ocms-property-viewer">
+        <div class="ocms-property-viewer-header">Portal Status</div>
+        <div class="ocms-property-viewer-body ocms-property-form" >
+            <div class="ocms-property-form-panel-col" >
+                <fieldset class="ocms-fieldset">
+                    <table cellspacing="1" class="ocms-property-table">
+                        <tbody>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key  ocms-param-key-top"><span class="">My Profile Page</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="MyOptionsPage" id="MyOptionsPage" value="{!MyOptionsPage}" />
+                                <c:PageSelector cPassThroughId="MyOptionsPage" value="{!MyOptionsPage}"
+                                                dialogId="MyOptionsPageDlg" disabled="{!layout_disabled}"
+                                                sname="{!content.cms__Site_Name__c}" token="{!token}" />
+                                <div class="ocms-instructional-text">Page that user will be directed to when clicking the My Profile button, once user is logged in.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Login Page</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="LoginPage" id="LoginPage" value="{!LoginPage}" />
+                                <c:PageSelector cPassThroughId="LoginPage" value="{!LoginPage}"
+                                                dialogId="LoginPageDlg" disabled="{!layout_disabled}"
+                                                sname="{!content.cms__Site_Name__c}" token="{!token}" />
+                                <div class="ocms-instructional-text">Page that will be directed to when user clicks the 'Login' button, if not logged in.</div>
+                                <div class="ocms-instructional-text">This page should contain the LoginForm component to enable the user to login.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Inline Login</span></td>
+                            <td class="ocms-param-value">
+                                <input type="checkbox" name="InlinePopup" id="InlinePopup" value="{!InlinePopup}" disabled=""/>
+                                <div class="ocms-instructional-text">Select this to have the a login form rendered in a popup on the current page when the 'Login' button is clicked.</div>
+                                <div class="ocms-instructional-text">This will render the login form in a popup message box. </div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Default Start Page</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="DefaultStartPage" id="DefaultStartPage" value="{!DefaultStartPage}"/>
+
+                                <c:PageSelector cPassThroughId="DefaultStartPage" value="{!DefaultStartPage}"
+                                                dialogId="DefaultStartPageDlg" disabled="{!layout_disabled}"
+                                                sname="{!content.cms__Site_Name__c}" token="{!token}"/>
+                                <div class="ocms-instructional-text">Page that will be directed to after a successful login.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Forgot Password Page</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="ForgotPasswordPage" id="ForgotPasswordPage"
+                                       value="{!ForgotPasswordPage}"/>
+                                <c:PageSelector cPassThroughId="ForgotPasswordPage" value="{!ForgotPasswordPage}"
+                                                dialogId="ForgotPasswordPageDlg" disabled="{!layout_disabled}"
+                                                sname="{!content.cms__Site_Name__c}" token="{!token}"/>
+                                <div class="ocms-instructional-text">Page that the user goes when selecting the forgot password link.</div>
+                                <div class="ocms-instructional-text">Only available if Inlining the Login.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key  ocms-param-key-bottom"><span class="">Self Registration Page</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="SelfRegistrationPage" id="SelfRegistrationPage"
+                                       value="{!SelfRegistrationPage}"/>
+                                <c:PageSelector cPassThroughId="SelfRegistrationPage" value="{!SelfRegistrationPage}"
+                                                dialogId="SelfRegistrationPageDlg" disabled="{!layout_disabled}"
+                                                sname="{!content.cms__Site_Name__c}" token="{!token}"/>
+                                <div class="ocms-instructional-text">Page that the user goes when selecting the self registration link.</div>
+                                <div class="ocms-instructional-text">Only available if Inlining the Login.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Show Welcome Label</span></td>
+                            <td class="ocms-param-value">
+                                <input type="checkbox" name="ShowWelcomeLabel" id="ShowWelcomeLabel" value="{!ShowwelcomeLabel}" disabled=""/>
+                                <div class="ocms-instructional-text">Select this to show the welcome label before the username</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Show Back to Portal Link </span></td>
+                            <td class="ocms-param-value">
+                                <input type="checkbox" name="ShowBackToPortalLink" id="ShowBackToPortalLink" value="{!ShowBackToPortalLink}" disabled=""/>
+                                <div class="ocms-instructional-text">Select this to show the back to portal link when browsing public pages (pages that don't require login)</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key"><span class="">Dynamic Load</span></td>
+                            <td class="ocms-param-value">
+                                <input type="checkbox" name="DynamicLoad" id="DynamicLoad" value="{!dynamicLoad}" disabled=""/>
+                                <div class="ocms-instructional-text">Select this to have the login status loaded after the intial page load.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <legend>Properties</legend>
+                </fieldset>
+            </div>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+
+</apex:outputPanel>
+
+<script type="text/javascript" language="javascript">
+        $('document').ready(function() {
+
+			if({!DynamicLoad}) {
+				$('#DynamicLoad').attr('checked', 'checked');
+			} else {
+				$('#DynamicLoad').removeAttr('checked');
+			}
+
+			if({!ShowWelcomeLabel}) {
+				$('#ShowWelcomeLabel').attr('checked', 'checked');
+			} else {
+				$('#ShowWelcomeLabel').removeAttr('checked');
+			}
+
+
+			if({!ShowBackToPortalLink}) {
+				$('#ShowBackToPortalLink').attr('checked', 'checked');
+			} else {
+				$('#ShowBackToPortalLink').removeAttr('checked');
+			}
+
+            if({!layout_disabled})
+            {
+                $('#InlinePopup').attr('disabled', 'disabled');
+                $('#DynamicLoad').attr('disabled', 'disabled');
+               	$('#ShowWelcomeLabel').attr('disabled', 'disabled');
+                $('#ShowBackToPortalLink').attr('disabled', 'disabled');
+            }
+            else
+            {
+                if ({!InlinePopup})
+                {
+                    $('#InlinePopup').attr('checked', 'checked');
+                    $('#LoginPageDlg').page_selector_input('disable');
+                    $('#DefaultStartPageDlg').page_selector_input('enable');
+                    $('#ForgotPasswordPageDlg').page_selector_input('enable');
+                    $('#SelfRegistrationPageDlg').page_selector_input('enable');
+                }
+                else
+                {
+                    $('#LoginPageDlg').page_selector_input('enable');
+                    $('#DefaultStartPageDlg').page_selector_input('enable');
+                    $('#ForgotPasswordPageDlg').page_selector_input('disable');
+                    $('#SelfRegistrationPageDlg').page_selector_input('disable');
+                }
+
+                $('#InlinePopup').change(function() {
+                    if($(this).attr('checked'))
+                    {
+                        $('#LoginPageDlg').page_selector_input('disable');
+                        $('#DefaultStartPageDlg').page_selector_input('enable');
+                        $('#ForgotPasswordPageDlg').page_selector_input('enable');
+                        $('#SelfRegistrationPageDlg').page_selector_input('enable');
+                    }
+                    else
+                    {
+                        $('#LoginPageDlg').page_selector_input('enable');
+                        $('#DefaultStartPageDlg').page_selector_input('disable');
+                        $('#ForgotPasswordPageDlg').page_selector_input('disable');
+                        $('#SelfRegistrationPageDlg').page_selector_input('disable');
+                    }
+                });
+            }
+			// @todo: Add this if we can figure it out when editing within Orchestra...
+			// if({!!RegistrationEnabled})
+			// {
+			//		setTimeout("$('#SelfRegistrationPageDlg').page_selector_input('disable')",1000);
+			//		$('#SelfRegistrationPageDlg').attr('title', 'Disabled because Self-Registration has not been enabled within your portals Self-Registration Settings.');
+			// }
+        });
+
+</script>
+</apex:component>

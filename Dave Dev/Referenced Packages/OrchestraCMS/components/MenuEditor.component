@@ -1,0 +1,73 @@
+<apex:component controller="cms.MenuEditorController" >
+
+        <apex:attribute name="content" type="cms__Content__c" description="The menu" assignTo="{!menu}" />
+		<apex:attribute name="disabled" type="Boolean" description="Current Disabled State" assignTo="{!disabled}" />
+
+        <c:CmsScripts />
+
+        <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui,  '/css/ocms.menueditor.css')}" />
+        <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui,  '/css/ocms.fieldselector.css')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/MenuEditor.js')}" />
+
+        <script type="text/javascript">
+
+                $(document).ready(function() {
+                        $("#EditorContainer").menu_editor({
+                                JSONMenu: {!JSONMenu},
+                                sname: '{!JSENCODE(content.Site_Name__c)}',
+                                menu_id : '{!JSENCODE(menu.Id)}',
+                                isPublished: {!content.Published__c},
+		   						isDisabled: {!disabled},
+                                ajaxLoaderImage: '{!$Resource.ajaxLoader}',
+                                tooltipImage: '{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}',
+                                handleIcon:  $(document).data("clear_dot_image"),
+                                removeIcon: '{!URLFOR($Resource.CmsImages, IF(disabled, '/btn_remove_inactive.png', '/btn_remove.png'))}',
+                                editIcon: '{!URLFOR($Resource.CmsImages, IF(disabled, '/btn_edit_inactive.png', '/btn_edit.png'))}',
+                                shareIcon: '{!URLFOR($Resource.CmsImages, '/btn_page_properties.png' )}',
+                        		allowPublicTags:   	{!allowPublicTags},
+                        		allowPersonalTags: 	{!allowPersonalTags},
+                        		allowPrivateShares: {!allowPrivateShares}, 
+                        		token: '{!token}'
+                        });
+
+               		 $('.tooltip').mouseover(function(e){
+                                text = $(this).find('.tooltipText').html();
+                                $('body').append(
+                                        '<div class="livetooltip" style="font-family: arial; font-size: 12px; width: 150px; border: 1px solid #EEA00B; background-color: #FEF3A7; padding: 10px; position: absolute; left: ' + e.pageX + 'px; top: ' + e.pageY + 'px;">' +
+                                        text +
+                                        '</div>'
+                                );
+                        });
+
+                        $('.tooltip').mouseout(function(){
+                                $('body').find('.livetooltip').remove();
+                        });
+
+                });
+        </script>
+        <style type="text/css">
+
+        	.edit-menu{
+
+        		padding:5px;
+        		margin-left: 5px;
+        		font-size: 12px;
+        		font-family: arial;
+        	}
+
+       </style>
+
+    <apex:outputPanel id="o" layout="block" styleClass="edit-menu" >
+
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td style="font-size: 12px; font-weight: bold; font-family: arial;">Menu Items:</td>
+          </tr>
+        </table>
+
+        <br />
+        <div id="EditorContainer">
+        </div>
+
+    </apex:outputPanel>
+</apex:component>

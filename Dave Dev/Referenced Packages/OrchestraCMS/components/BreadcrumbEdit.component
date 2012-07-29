@@ -1,0 +1,58 @@
+<apex:component controller="cms.Breadcrumb" allowDml="true">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	
+ 	<script type="text/javascript" language="javascript">
+		function saveLookAndFeel(cb) {
+						
+			var attributes = new Array(); 
+				
+			attributes.push({"name":"Divider", "value":$('#Divider').val(), "type":"Text"}); 
+				 	
+			$.ocms.saveContentLayoutInstance({"id":"{!layout_instance.Id}","content_layout_id":"{!layout_instance.Content_Layout__c}","content_id":"{!content.Id}"},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			); 				 			
+ 		}
+ 		
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}	  
+	</script>
+	
+	<style type="text/css">
+		
+		.edit-menu{
+			margin-top: 20px;
+		}
+	</style>
+	
+	<div style="position: relative; left: -415px;top:-20px;">
+		<form>			
+			<table>
+				<tr>
+					<td style="font-size: 12px; font-family: arial;">Hierarchy separator</td>
+					<td>
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<input type="text" size="6" value="{!Divider}" id="Divider"  name="Divider" disabled="disabled" />
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<input type="text" size="6" value="{!Divider}" id="Divider"  name="Divider"/>
+						</apex:outputText>						
+					</td>
+					<td></td>					
+				</tr>
+			</table>		
+		</form>
+	</div>
+	
+</apex:component>

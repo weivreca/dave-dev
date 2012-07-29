@@ -1,0 +1,195 @@
+<apex:page controller="cms.ManageLicenseController" standardStylesheets="false" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+
+    <title>Manage Licenses</title>
+
+    <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/JQueryInheritance.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryMessagePane.js')}" />
+  	<apex:includeScript value="{!URLFOR($Resource.cms__CmsLocalization, '/localization/CmsLocalization_en.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/OCMSScripts.js')}" />
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+    <style type="text/css">
+    	.secretHidden{
+    		display: none;
+    	}
+    </style>
+
+	<script type="text/javascript">
+
+		var secretDialog;
+
+		$(document).ready(function(){
+
+			if({!hasMessages}){
+				$('#messagePane').ocmsShowErrorPopup({
+					title : $('#messagePane .title').html(),
+					message : $('#messagePane .message').html(),
+					width: 400
+				});
+			}
+
+			$('#checknow').button().click(function(){
+		 		getLicenses();
+		 	});
+
+			$('#save').button().click(function(){
+		 		updateKeys();
+		 	});
+	 	});
+
+		function toggleSecret(){
+			$('#secretShow').toggleClass('secretHidden');
+			$('#secret').toggleClass('secretHidden');
+		}
+
+	</script>
+
+  </head>
+
+  <body>
+
+    <apex:outputPanel rendered="{!hasAccess}">
+
+	  	<c:SetupMenu sname="{!site_name}" activeitem="licenses" />
+
+	  	<div style="margin-left: 210px; padding: 10px;">
+
+			<div class="ocms-setup-breadcrumb">
+			  <div class="ocms-setup-breadcrumb-start"></div>
+			  <div class="ocms-setup-breadcrumb-item">Setup</div>
+			  <div class="ocms-setup-breadcrumb-separator-active"></div>
+			  <div class="ocms-setup-breadcrumb-item-active">Manage Licenses</div>
+			  <div class="ocms-setup-breadcrumb-end"></div>
+			  <div class="ocms-clear"></div>
+			</div>
+
+	  		<br />
+
+	  		<apex:outputText escape="false" value="{!message + '<br /><br />'}" rendered="{!IF(message != '', true, false)}" />
+
+	    	<apex:form >
+
+				<apex:actionFunction action="{!getLicenses}" name="getLicenses" />
+				<apex:actionFunction action="{!updateKeys}" name="updateKeys" />
+
+				<table border="0" cellspacing="0" cellpadding="0" style="width: 470px;">
+				  <tr>
+				    <td>Last Checked: {!last_checked} &nbsp;&nbsp;</td>
+				    <td><div id="checknow"  style="float: right;">Check Now</div></td>
+				  </tr>
+				</table>
+
+				<br />
+				<div style="background-color: #E7E7E8; width: 450px; padding: 10px;">
+
+	  	  		<table cellspacing="0" cellpadding="5" border="0" style="width: 450px;">
+	  	  		  <tr>
+	  	  		    <td>License Key</td>
+	  	  		    <td><apex:inputText value="{!license_key}" size="45" /></td>
+	  	  		  </tr>
+	  	  		  <tr>
+	  	  		    <td>Secret Key</td>
+	  	  		    <td>
+	  	  		      <apex:outputText rendered="{!IF(license_secret_key != null, true, false)}">
+	  	  		   		 <div id="secretShow">
+	  	  		   		 	<a href="#" class="setup-link" onclick="toggleSecret(); return false;">Show</a>
+	  	  		   		 </div>
+	  	  		   		 <div id="secret" class="secretHidden">
+	  	  		   		 	<apex:inputText value="{!license_secret_key}" size="45" />&nbsp;&nbsp;<a href="#" class="setup-link" onclick="toggleSecret(); return false;">Hide</a>
+	  	  		   		 </div>
+	  	  		      </apex:outputText>
+	  	  		      <apex:outputText rendered="{!IF(license_secret_key != null, false, true)}">
+	  	  		   		 <apex:inputText value="{!license_secret_key}" size="45" />
+	  	  		      </apex:outputText>
+	  	  		    </td>
+	  	  		  </tr>
+	  	  		  <tr>
+	  	  		    <td></td>
+	  	  		    <td><div id="save">Save</div></td>
+	  	  		  </tr>
+	  	  		</table>
+
+	  	  		</div>
+
+	  		</apex:form>
+
+	  		<br /><br />
+
+			<div style="font-size: 16px; padding-bottom: 8px;">Feature Licenses</div>
+	  		<table border="0" cellspacing="0" cellpadding="5" style="width: 470px;">
+			<tr style="background-color: #E7E7E8;">
+			  <td width="320" style="padding: 2px;">Name</td>
+			  <td width="50" style="padding: 2px;">Status</td>
+			  <td width="100" style="padding: 2px;">Expires</td>
+			</tr>
+	  		<apex:repeat value="{!feature_licenses}" var="license">
+	  		  <tr style="{!IF(license.license_expired, 'background-color: #EABAAA; color: #000000', '')}">
+	  		    <td style="padding: 5px 2px 5px 2px;">{!license.license_name}</td>
+	  		    <td style="padding: 5px 2px 5px 2px; {!IF(license.license_status == 'Expired', 'font-weight: bold;', '')}">{!license.license_status}</td>
+	  		    <td style="padding: 5px 2px 5px 2px;">{!license.license_expiry_date_text}</td>
+	  		  </tr>
+	  		</apex:repeat>
+	  		</table>
+	  		<br /><br />
+	  		<div style="font-size: 16px; padding-bottom: 8px;">User Licenses</div>
+	  		<table border="0" cellspacing="0" cellpadding="5" style="width: 470px;">
+			<tr style="background-color: #E7E7E8;">
+			  <td width="220" style="padding: 2px;">Name</td>
+			  <td width="50" style="padding: 2px; text-align: center;">Quantity</td>
+			  <td width="50" style="padding: 2px; text-align: center;">Used</td>
+			  <td width="50" style="padding: 2px;">Status</td>
+			  <td width="100" style="padding: 2px;">Expires</td>
+			</tr>
+	  		<apex:repeat value="{!user_licenses}" var="license">
+	  		  <tr style="{!IF(license.license_expired, 'background-color: #EABAAA; color: #000000', '')}">
+	  		    <td style="padding: 5px 2px 5px 2px;">{!license.license_name}</td>
+	  		    <td style="padding: 5px 2px 5px 2px; text-align: center;">{!license.license_quantity}</td>
+	  		    <td style="padding: 5px 2px 5px 2px; text-align: center;">{!license.license_used}</td>
+	  		    <td style="padding: 5px 2px 5px 2px; {!IF(license.license_status == 'Expired', 'font-weight: bold;', '')}">{!license.license_status}</td>
+	  		    <td style="padding: 5px 2px 5px 2px;">{!license.license_expiry_date_text}</td>
+	  		  </tr>
+	  		</apex:repeat>
+	  		</table>
+
+	  		<br /><br />
+
+			<div style="display: none;">
+
+			Request Encrypted: {!reqEncStr}<br />
+			Request: {!reqStr}<br /><br />
+
+			Response Encrypted: {!respEncStr}<br />
+			Response: {!respStr}<br /><br />
+
+	    	</div>
+
+	    </div>
+
+	    <div id="messagePane" style="display: none;">
+	    	<apex:repeat value="{!messages}" var="err">
+	    		<div>
+	    		<span class="title">{!err.title}</span>
+	    		<span class="message"><apex:outputText escape="false" value="{!err.message}" /></span>
+	    		</div>
+	    	</apex:repeat>
+	    </div>
+
+  </apex:outputPanel>
+
+  <apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Manage -> Licenses permission
+   	</div>
+  </apex:outputPanel>
+
+
+  </body>
+
+</html>
+</apex:page>

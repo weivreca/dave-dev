@@ -1,0 +1,8 @@
+<apex:page controller="cms.CreateContentController"  showHeader="false" sidebar="false" cache="false" title="Orchestra CMS" standardStylesheets="false">
+	<apex:outputPanel layout="block" style="height:70%">
+		<c:TaxonomyEditor disabled="{!disableAll}" content="{!content}" token="{!token}" />
+	</apex:outputPanel>
+	<apex:outputPanel layout="block"  style="height:30%">
+		<c:TaxonomyMenuEdit disabled="{!disableAll}" content="{!content}" disableEmail="{!!emailEnabled}" properties="{!content_properties}" layout_instance="{!current_content_layout_instance}" layout_instance_properties="{!current_content_layout_instance_properties}"  />
+	</apex:outputPanel>
+</apex:page>

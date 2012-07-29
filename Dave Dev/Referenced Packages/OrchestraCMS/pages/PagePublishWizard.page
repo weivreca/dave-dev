@@ -1,0 +1,165 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.EditRouter,cms.EditPagePublishController" showHeader="false" sidebar="false" cache="false">
+
+	<head>
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ 		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ 		<!-- This is the jquery cookie extension only -->
+  		<apex:includeScript value="{!$Resource.cms__jquery}" />
+  		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+	</head>
+
+	<body style="font-size: 12px; font-family: arial; padding: 0px; margin: 0px;">
+		<div style="padding:10px; width: 650px;">
+
+			<apex:form >
+
+				<div style="font-weight: bold; font-size: 16px;">Publish Wizard</div>
+
+			    <apex:outputPanel layout="block" rendered="{!showMessages}" style="margin-top: 15px; padding: 0px; background-color: rgb(255,235,235); border: 1px solid rgb(200,200,200);">
+			      <table border="0" cellspacing="0" cellpadding="5">
+			      <apex:repeat value="{!messages}" var="message">
+			        <tr>
+			          <td><img src="{!URLFOR($Resource.CmsImages,'btn_unpublished.png')}" border="0" /></td>
+			          <td style="font-size: 12px;">{!message.detail}</td>
+			        </tr>
+			      </apex:repeat>
+			      </table>
+			    </apex:outputPanel>
+
+				<br />
+
+				<div style="font-weight: bold; background-color: #DEDEDE; padding: 10px; border-bottom: 1px solid #AAAAAA;">Page Details</div>
+
+				<br />
+
+				<div style="padding-left: 10px;">
+					Page will be available: <strong>{!visibility}</strong>
+				</div>
+
+				<br /><br />
+
+				<apex:outputPanel rendered="{!showContent}">
+
+					<div style="font-weight: bold; background-color: #DEDEDE; padding: 10px; border-bottom: 1px solid #AAAAAA;">Content Details</div>
+
+					<br />
+
+					<apex:outputPanel layout="block" style="padding-left: 10px;" rendered="{!showFutureContent}">
+					  <strong>Note: The following content will be visible on a future date:</strong>
+					  <br /><br />
+					  <table cellspacing="0" cellpadding="5" border="0">
+					    <tr>
+					      <td width="30" style="font-size: 12px;">&nbsp;</td>
+					      <td width="150" style="font-size: 12px;"><u>Name</u></td>
+					      <td width="50" style="font-size: 12px;"><u>Version</u></td>
+					      <td width="100" style="font-size: 12px;"><u>Type</u></td>
+					      <td width="150" style="font-size: 12px;"><u>Published Start Date</u></td>
+					    </tr>
+						<apex:repeat value="{!unpublishedContent}" var="content">
+						  <tr>
+						    <td style="font-size: 12px;"></td>
+						    <td style="font-size: 12px;">{!content.content.Name__c}</td>
+						    <td style="font-size: 12px;">{!content.version}</td>
+						    <td style="font-size: 12px;">{!content.content.Content_Type__r.Label__c}</td>
+						    <td style="font-size: 12px;">{!content.publishedStartDate}</td>
+						  </tr>
+						</apex:repeat>
+					   </table>
+
+					</apex:outputPanel>
+					<br /><br />
+					<apex:outputPanel layout="block" style="padding-left: 10px;" rendered="{!showUnpublishedContent}">
+					  <strong>Note: The following content is unpublished and will not be visible on the live site unless published:</strong><br /><br />
+					  <em>Select content to publish</em><br /><br />
+
+					  <table cellspacing="0" cellpadding="5" border="0">
+					    <tr>
+					      <td width="30" style="font-size: 12px;">&nbsp;</td>
+					      <td width="150" style="font-size: 12px;"><u>Name</u></td>
+					      <td width="50" style="font-size: 12px;"><u>Version</u></td>
+					      <td width="100" style="font-size: 12px;"><u>Type</u></td>
+					      <td width="150" style="font-size: 12px;"><u>Published Start Date</u></td>
+					    </tr>
+						<apex:repeat value="{!unpublishedContent}" var="content">
+						  <tr>
+						    <td style="font-size: 12px;"><apex:inputCheckbox value="{!content.publishNow}" /></td>
+						    <td style="font-size: 12px;"><strong>{!content.content.cms__Name__c}</strong></td>
+						    <td style="font-size: 12px;">{!content.version}</td>
+						    <td style="font-size: 12px;">{!content.content.Content_Type__r.cms__Label__c}</td>
+						    <td style="font-size: 12px;">{!content.publishedStartDate}</td>
+						  </tr>
+						</apex:repeat>
+					   </table>
+					</apex:outputPanel>
+					<br />
+
+				</apex:outputPanel>
+
+				<apex:outputPanel rendered="{!!showCashPanel}">
+					<div><apex:commandButton action="{!publish}" value="Publish" /> <apex:commandButton action="{!cancel}" value="Cancel" /></div>
+				</apex:outputPanel>
+
+
+				<apex:outputPanel layout="block" style="padding-left: 10px;" rendered="{!showCashPanel}">
+
+					<script type="text/javascript" >
+
+						$(document).ready(function(){
+							var sname='{!controller.router.site_name}';
+							var content_ids ='{!content_ids}';
+							var pcli_ids = '{!pcli_ids}'
+
+							if(content_ids != '' && content_ids != 'null') {
+								startRefreshContentCash(sname, null, content_ids);
+							}
+
+							if(pcli_ids != '' && pcli_ids != 'null') {
+								startRefreshPageContentCash(sname, null, pcli_ids);
+							}
+
+							/*var content_ids ='{!content_ids}';
+							var action="processContent";
+
+							if(content_ids === '')
+							{
+								content_ids = '{!pcli_ids}';
+								var action="processPageContent";
+							}
+
+							//;
+							$("#refreshContentStatus").html('Status: <br/><br/><span id="rcs">Initializing</span><br />'+'Content Processed: <span id="content_processed">'+0+'</span> of <span id="total_content">'+'{!total}'+"</span><br />"+'Errors: <span id="number_errors">0</span>');
+							executeCallout(action,content_ids)
+
+							function executeCallout(action,content_ids){
+								var data={};
+								data["action"]=action;
+								data["sname"]='{!controller.router.site_name}';
+								data["content_ids"]=content_ids;
+								data["pcli_ids"]='{!pcli_ids}';
+								$.post("/apex/CachingToolsAjax",data,function(json,status){
+								if(json["status"]=="finished")$("#rcs").html("Refresh Complete");
+									else if(json["status"]=="inprogress"){
+										$("#rcs").html("In Progress");
+										$("#content_processed").html(parseInt($("#content_processed").html())+json["numberProcessed"]);
+										executeCallout(json["action"],json["content_ids"]);
+
+									}
+								},"json");
+							}*/
+
+						});
+
+					</script>
+					<br/><br/>
+					<b>Generating Content Caches (Don't close this tab until the process has completed) </b>
+					<br/><br/><br/>
+
+					<div><apex:commandButton action="{!Cancel}" value="Done" /> </div>
+				</apex:outputPanel>
+
+		    </apex:form>
+		</div>
+	</body>
+
+</apex:page>

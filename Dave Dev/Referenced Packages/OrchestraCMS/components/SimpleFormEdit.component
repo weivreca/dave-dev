@@ -1,0 +1,505 @@
+<apex:component controller="cms.FormController" allowDml="true" >
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+    <style type="text/css">
+
+	    .message {
+	    	color: red;
+	    }
+
+	    .field-header{
+	   		border: 1px solid #CCCCCC;
+	   		border-collapse: collapse;
+	   		padding: 5px;
+	   		background-color: rgb(245, 245, 245);
+	   		font-weight: bold;
+	    }
+
+
+	    .field-cell{
+	   		border: 1px solid #CCCCCC;
+	   		border-collapse: collapse;
+	   		padding: 5px;
+	   		background-color: rgb(235,235,235);
+	   		height: 20px;
+	   		overflow: hidden;
+	    }
+
+	   	.handle{
+			float: left;
+			width: 12px;
+			height: 22px;
+			padding: 4px;
+			border: 1px solid #CCCCCC;
+			background-color: rgb(235,235,235);
+	   	}
+
+	   	.field-placeholder {
+	   		border: 1px solid #CCCCCC;
+	   		background-color: #f8f97f;
+	   		height: 24px;
+	   	}
+
+		.selectable{
+			border: 1px solid rgb(204, 204, 204);
+			margin: 3px;
+			background-color: rgb(226, 226, 226);
+			cursor: pointer;
+		}
+
+    </style>
+
+	<apex:includeScript value="{!$Resource.cms__UniversalLookup}" />
+
+    <script type="text/javascript">
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+			attributes.push({"name":"FormTitle", "value":$('#FormTitle').val(), "type":"Text"});
+			attributes.push({"name":"SaveButtonText", "value":$('#SaveButtonText').val(), "type":"Text"});
+			attributes.push({"name":"ConfirmationLink", "value":$('#ConfirmationLink').val(), "type":"Text"});
+			attributes.push({"name":"ObjectName", "value":$('#ObjectName').val(), "type":"Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+
+        $(document).ready(function() {
+
+           var form_id = '{!content.Id}';
+           var sname = '{!JSENCODE(content.Site_Name__c)}';
+
+           var initially_selected = {!SelectedFieldsJSON};
+           var initially_unselected = {!UnSelectedJSON};
+           var fields = {!UnSelectedJSON};
+		   var init_count = 0;
+		   var selected_object = '{!ObjectName}';
+		   var disabled = '{!layout_disabled}' == 'true';
+		   var published = '{!published}' == 'true';
+		   $(document).data('selected_object', selected_object);
+
+           for(j=0; j < initially_unselected.length; ++j) {
+        		var row = $('<div class="field-row" id="field_'+init_count+'"><div class="handle" style="float: left; width: 12px; height: 22px; padding: 4px;"><img src="{!URLFOR($Resource.CmsImages,'/handle.png')}" border="0" /></div><div class="field-cell" style="float: left; width: 140px;">'+initially_unselected[j]['Label']+'</div><div class="field-cell" style="float: left; width: 140px;">'+initially_unselected[j]['Field_Type']+'</div><div class="field-cell" style="float: left; width: 40px;"><input type="checkbox" value="'+initially_unselected[j]['Required']+'" '+(initially_unselected[j]['Required'] == 'true' ? 'checked' : '')+' disabled /></div><div style="clear: both;"></div></div>');
+        		$('#FieldList').append(row);
+           		++init_count;
+           }
+
+
+           for(i=0; i < initially_selected.length; ++i) {
+				$('#SelectedFieldList').append(getNewItem(initially_selected[i], published, init_count));
+           		fields[init_count] = initially_selected[i];
+           		++init_count;
+           }
+
+           $(document).data('fields', fields);
+
+		   if(!disabled) {
+	           $('#SelectedFieldList').sortable({
+	             items: '.field-row',
+	             connectWith: '#FieldList',
+	             handle: '.handle',
+	             tolerance: 'pointer',
+	             placeholder: 'field-placeholder',
+	             receive: function(event, ui) {
+
+	             	var position = ui.item.prev();
+
+	             	var fields = $(document).data('fields');
+
+	            	var rowId = ui.item.attr('id');
+
+	           		var index = rowId.substr(rowId.indexOf('_')+1);
+
+	    			var field = fields[index];
+	    			field['Value'] = "";
+	    			if(field['Field_Type'] == 'REFERENCE') {
+	    				field['ReferenceValueName']  = "";
+	    			}
+
+
+					ui.item.remove();
+					if(position.hasClass('field-row')) {
+	             		position.after(getNewItem(field, false, index));
+	             	} else {
+	             		$(this).prepend(getNewItem(field, false, index));
+	             	}
+
+	             	$('#SelectedFieldList').sortable('refresh');
+
+	             }
+
+	           });
+
+				$('#FieldList').sortable({
+	           		items: '.field-row',
+				 	connectWith: '#SelectedFieldList',
+				 	handle: '.handle',
+				 	placeholder: 'field-placeholder',
+				 	tolerance: 'pointer',
+	            	receive: function(event, ui) {
+
+	         			var position = ui.item.prev();
+
+	             		var fields = $(document).data('fields');
+	            		var rowId = ui.item.attr('id');
+
+	           			var index = rowId.substr(rowId.indexOf('_')+1);
+
+	    				var field = fields[index];
+
+	             		var row = $('<div class="field-row" id="field_'+index+'"><div class="handle"><img src="{!URLFOR($Resource.CmsImages,'/handle.png')}" border="0" /></div><div class="field-cell" style="float: left; width: 140px;">'+field['Label']+'</div><div class="field-cell" style="float: left; width: 140px;">'+field['Field_Type']+'</div><div class="field-cell" style="float: left; width: 40px;"><input type="checkbox" value="'+field['Required']+'" '+(field['Required'] == 'true' ? 'checked' : '')+' disabled /></div><div style="clear: both;"></div></div>');
+
+						ui.item.remove();
+
+	            		if(position.hasClass('field-row')) {
+	            			position.after(row);
+	            		} else {
+	            			$(this).prepend(row);
+	            		}
+
+
+	             		$('#FieldList').sortable('refresh');
+
+	             	}
+
+	           });
+
+			}
+
+			ce.content_editor('registerSaveFunction', function(){
+
+				//create the save post
+				var fieldset = $(document).data('fields');
+		 		var selected_fields = $('#SelectedFieldList').children('.field-row');
+
+		 		var data = {};
+		 		data['action'] = 'saveSimpleForm';
+		 		data['form_id'] = '{!content.Id}';
+		 		data['site_name'] = sname;
+		 		data['object_name'] = $('#ObjectName').val();
+		 		data['field_count'] = selected_fields.length;
+
+		 		var count = 0;
+
+		 		$.each(selected_fields, function() {
+
+			 		var index = this.id.substr(this.id.indexOf('_')+1);
+	    			var field = fieldset[index];
+
+		 			if(field['Field_Type'] == 'REFERENCE') {
+			 			data['order_'+count] = count;
+			 			data['name_'+count] = field['Name'];
+			 			data['id_'+count] = field['Id'];
+			 			data['label_'+count] = $(this).find('input:first').val();
+			 		 	data['type_'+count] = field['Field_Type'];
+			 			data['hidden_'+count] = $(this).find('input:eq(1)').attr('checked') ? 'true' : 'false';
+			 			data['required_'+count] = $(this).find('input:eq(2)').attr('checked') ? 'true' : 'false';
+			 			data['width_'+count] = $(this).find('input:eq(3)').val();
+			 			data['value_'+count] = $(this).find('#'+field['Name']).val();
+			 			data['valuename_'+count] = $(this).find('.selected-object-name').html();
+			 		} else {
+			 			data['order_'+count] = count;
+			 			data['name_'+count] = field['Name'];
+			 			data['label_'+count] = $(this).find('input:first').val();
+			 		 	data['type_'+count] = field['Field_Type'];
+			 			data['hidden_'+count] = $(this).find('input:eq(1)').attr('checked') ? 'true' : 'false';
+			 			data['required_'+count] = $(this).find('input:eq(2)').attr('checked') ? 'true' : 'false';
+			 			data['width_'+count] = $(this).find('input:eq(3)').val();
+
+		 				if(field['Field_Type'] == 'PICKLIST') {
+		 					data['value_'+count] = $(this).find('select').val();
+		 				} else {
+		 					data['value_'+count] = $(this).find('input:eq(4)').val();
+		 				}
+			 		}
+
+		 			++count;
+
+		 		});
+
+		 		//execute the syncronous save action
+
+		 		$.ajax({
+					url: '/apex/FormAjaxResponse',
+					data: data,
+					async: false,
+					type: 'POST'
+        		});
+
+			});
+
+
+	        function getNewItem(item, published, index) {
+
+				var default_value = getValueControl(item);
+				var newItem = $('<div id="field_'+(index)+'" class="field-row">'+
+		             										'<div class="handle" style="float: left; width: 12px; height: 22px; padding: 4px;"><img src="{!URLFOR($Resource.CmsImages,'/handle.png')}" border="0" /></div>'+
+															'<div class="field-cell" style="float: left; width: 200px;"><input type="text" value="'+item['Label']+'" /></div>'+
+															'<div class="field-cell" style="float: left; width: 140px;">'+item['Field_Type']+'</div>'+
+															'<div class="field-cell" style="float: left; width: 40px;"><input type="checkbox" value="true" '+(item['Hidden'] == true ? 'checked' : '')+' /></div>'+
+															'<div class="field-cell" style="float: left; width: 40px;"><input type="checkbox" value="true" '+(item['Required'] == true ? 'checked disabled' : '')+' /></div>'+
+															'<div class="field-cell" style="float: left; width: 100px;"><input type="text" value="'+item['Width']+'" size="6" /></div>'+
+															'<div class="field-cell" style="float: left; width: 200px;"></div>'+
+															'<div style="clear: both;" />'+
+														'</div>');
+				newItem.find('.field-cell:eq(5)').append(default_value);
+
+				if(published) {
+					newItem.find('input').attr('disabled', true);
+				}
+
+				if(item['Field_Type'] == 'REFERENCE') {
+					newItem.find('input:eq(1)').attr('disabled', true);
+					newItem.find('input:eq(1)').attr('checked', true);
+				}
+
+
+	        	return newItem;
+	        }
+
+        function loadFields(objectName) {
+
+        	//clear existing values
+       		$(document).data('selected_object', objectName);
+        	$('#SelectedFieldList').children().remove();
+			$('#FieldList').children().remove();
+
+        	var data = {};
+        	data['action'] = 'getFieldList';
+        	data['objectName'] = objectName;
+
+        	$.post('/apex/FormAjaxResponse', data, function(json, textStatus){
+
+        		var count = 0;
+
+        		$.each(json, function() {
+
+        			var row = $('<div class="field-row" id="field_'+count+'"><div class="handle"><img src="{!URLFOR($Resource.CmsImages,'/handle.png')}" border="0" /></div><div class="field-cell" style="float: left; width: 140px;">'+this['Label']+'</div><div class="field-cell" style="float: left; width: 140px;">'+this['Field_Type']+'</div><div class="field-cell" style="float: left; width: 40px;"><input type="checkbox" value="'+this['Required']+'" '+(this['Required'] == 'true' ? 'checked' : '')+' disabled /></div><div style="clear: both;"></div></div>');
+        			$('#FieldList').append(row);
+        			++count;
+
+        		});
+
+        		$('#FieldList').sortable('refresh');
+        		$(document).data('fields', json);
+
+        	}, 'json');
+
+        }
+
+
+
+      	function getValueControl(item) {
+
+			var default_value;
+			var published = '{!published}' == 'true';
+
+			if(item['Field_Type'] == 'PICKLIST') {
+
+				var data = {};
+				data['action'] = 'getPicklistOptionsJSON';
+				data['ObjectType'] = $(document).data('selected_object');
+				data['FieldName'] = item['Name'];
+				data['token'] = '{!token}';
+
+				$.ajax({
+					type: 'POST',
+					url: '/apex/OrchestraPublicAjax',
+					data: data,
+					async: false,
+					dataType: 'json',
+					success: function(json, textStatus) {
+
+						default_value = ''
+						if(published) {
+							default_value += '<select disabled>';
+						} else {
+							default_value += '<select>';
+						}
+
+						default_value += '<option></option>';
+						for(var i=0; i < json.length; ++i) {
+							if(json[i]['Value'] == item['Value']) {
+								default_value += '<option value="'+json[i]['Value']+'" selected>'+json[i]['Label']+'</option>';
+							} else {
+								default_value += '<option value="'+json[i]['Value']+'">'+json[i]['Label']+'</option>';
+							}
+						}
+						default_value += '</select>';
+
+						default_value = $(default_value);
+
+					}
+				});
+
+			} else if(item['Field_Type'] == 'REFERENCE') {
+
+				default_value = $('	<input type="hidden" id="'+item['Name']+'" value="'+item['Value']+'"/><div id="universal-'+item['Name']+'">'+
+										'<table>'+
+											'<tr>'+
+												'<td valign="top">'+
+													'<div class="selected-object-name">'+(item['ReferenceValueName'] === undefined ? '':item['ReferenceValueName'])+'</div>'+
+												'</td>'+
+												'<td valign="top">'+
+													'<a href="#" class="lookup-launcher">Select</a>'+
+												'</td>'+
+											'</tr>'+
+										'</table>'+
+									'</div>');
+
+				if(item['Value'] !== undefined && item['Value'] != '') {
+					default_value.ocmsUniversalLookup({
+						passThruId : item['Name'],
+						selected: {Id:item['Value']},
+						lookupType: item['ReferenceTo']
+					});
+				} else {
+					default_value.ocmsUniversalLookup({
+						passThruId : item['Name'],
+						lookupType: item['ReferenceTo']
+					});
+				}
+
+
+			} else {
+				if(published) {
+					default_value = $('<input type="text" value="'+item['Value']+'" disabled />');
+				} else {
+					default_value = $('<input type="text" value="'+item['Value']+'" />');
+				}
+			}
+
+      		return default_value;
+      	}
+
+   			$('#ObjectName').bind('change', function(){
+   				loadFields($(this).val());
+   			});
+
+        });
+
+    </script>
+
+      <form>
+      	<div>
+           <table>
+				<tr>
+				  <td>
+				    Form Title
+				  </td>
+				  <td>
+				    <apex:outputText escape="false" rendered="{!layout_disabled}">
+				  		<input type="text" name="FormTitle" id="FormTitle" value="{!FormTitle}" disabled="disabled" />
+				    </apex:outputText>
+				    <apex:outputText escape="false" rendered="{!!layout_disabled}">
+				  		<input type="text" name="FormTitle" id="FormTitle" value="{!FormTitle}" />
+				    </apex:outputText>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+				  	Save Button Text
+				  </td>
+				  <td>
+				    <apex:outputText escape="false" rendered="{!layout_disabled}">
+				      <input type="text" name="SaveButtonText" id="SaveButtonText" value="{!SaveButtonText}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+					  <input type="text" name="SaveButtonText" id="SaveButtonText" value="{!SaveButtonText}" />
+					</apex:outputText>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+				 	Confirmation Page
+				  </td>
+				  <td>
+					<input type="hidden" name="ConfirmationLink" id="ConfirmationLink" value="{!ConfirmationLink}" />
+			    	<c:PageSelector cPassThroughId="ConfirmationLink" value="{!ConfirmationLink}"  dialogId="ConfirmationLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+				  </td>
+				</tr>
+	             <tr>
+	               <td>
+	                 Object
+	               </td>
+	               <td>
+	                <apex:outputText escape="false" rendered="{!layout_disabled}">
+		                <select name="ObjectName" id="ObjectName" disabled="disabled">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		             </apex:outputText>
+	                 <apex:outputText escape="false" rendered="{!!layout_disabled}">
+		                <select name="ObjectName" id="ObjectName">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		              </apex:outputText>
+				  </td>
+				</tr>
+			  </table>
+          </div>
+
+          <div style="width: 1400px;">
+
+			<div style="height: 404px; width: 395px; overflow: auto; float: left; margin-right: 8px;">
+				<div style="width: 378px; height: 400px; border: 1px solid #CCCCCC;">
+					<div>
+						<div class="field-header" style="float: left; width: 162px;">Name</div>
+						<div class="field-header" style="float: left; width: 140px;">Type</div>
+						<div class="field-header" style="float: left; width: 40px;">Req.</div>
+						<div style="clear: both;"></div>
+					</div>
+					<div id="FieldList" style="margin:0; padding: 0; min-height: 370px; width 356px;">
+					</div>
+				</div>
+			</div>
+
+			<div style="height: 404px; width: 832px; overflow: auto; float: left; margin-right: 8px;">
+				<div style="width: 814px; height: 400px; border: 1px solid #CCCCCC; overflow: clip;">
+						<div>
+			     			<div class="field-header" style="float: left; width: 222px;">Label</div>
+			     			<div class="field-header" style="float: left; width: 140px;">Type</div>
+			     			<div class="field-header" style="float: left; width: 40px;">Hidden</div>
+			     			<div class="field-header" style="float: left; width: 40px;">Req.</div>
+			     			<div class="field-header" style="float: left; width: 100px;">Width</div>
+			     			<div class="field-header" style="float: left; width: 200px;">Value</div>
+			     			<div style="clear: both;"></div>
+			     		</div>
+			     		<div id="SelectedFieldList" style="margin:0; min-height: 370px; padding: 0; width 792px;">
+						</div>
+				  </div>
+      		  </div>
+
+          	  <div style="clear: both;"></div>
+          </div>
+    </form>
+
+</apex:component>

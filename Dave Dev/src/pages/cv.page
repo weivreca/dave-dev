@@ -1,0 +1,236 @@
+<!--
+    demo page for jquery.sheet
+    as simple a piece of code as I can muster to establish spreadsheet inline
+    first step in getting a page setup to provide browser based sforce excel connector functionality.
+
+-->
+
+<apex:page showChat="false" showHeader="true" sidebar="true" controller="jQuerySheetController" id="thePage" standardStylesheets="true" tabstyle="Workbook__c">
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'jquery-1.5.2.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'jquery.sheet.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'parser.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Sheet, 'jquery.sheet.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.Sheet, 'jquery-ui/theme/jquery-ui.css')}"/>
+   
+     
+    <head>
+
+    <script>
+        
+       
+       $(document).ready(function() {
+            var accName = '{!accName}';
+            var accID = '{!accID}';
+            var wbName = '{!wbName}';
+            var wbID = '{!wbID}';
+            var JSONString = '{!strJSON}';
+            
+            $('#jQuerySheet').sheet({
+                     //title: accName + ' - ' + wbName,
+                     //buildSheet: '10x15',
+                     buildSheet: (JSONString == '')?'10x15':jQuery.sheet.makeTable.json(JSONString,true),
+                     editable: true,
+                     calcOff: true,
+                     fnSaveAs: function(){
+                        var newName = prompt('Please enter workbook name');
+                        if (newName) {
+                            //Check that the account doesn't already have a workbook by this name
+                            
+                            jQuerySheetController.workbookExists(accID, newName, function(result,event){
+                                if(result=='TRUE') {
+                                    var replace = confirm(newName + 'already exists, do you want to replace it?');
+                                    if(replace == true) {
+                                         var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                                     var mydata = sht.exportSheet.json();
+                                     jQuerySheetController.saveWorkbook(accID,wbID,newName,JSON.stringify(mydata) ,function(result,event){
+                                         if(result != 'ERROR'){
+                                            //event.id = result;
+                                            alert('Booking created: ' + result );
+                                            
+                                        } else {
+                                            wbName = newName;
+                                            wbID = result;
+                                            //Update the Workbook display name
+                                            $('#jQuerySheet').sheet({ 
+                                               title: accName + ' - ' + wbName 
+                                            }); 
+                                            alert(result);
+                                            
+                                        }
+                                    });
+                                    }
+                                }
+                                
+                                else {
+                                    //Existing workbook so overwrite
+                                     var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                                     var mydata = sht.exportSheet.json();
+                                     jQuerySheetController.saveWorkbook(accID,wbID,newName,JSON.stringify(mydata) ,function(result,event){
+                                     if(result != 'ERROR'){
+                                              //event.id = result;
+                                              alert('Booking created: ' + result );
+                                              
+                                          } else {
+                                              wbName = newName;
+                                              wbID = result;
+                                              alert(result);
+                                              
+                                          }
+                                      });
+                                      
+                                }
+                                
+                                
+                                
+                            });
+                            
+                        }                       
+
+
+
+
+
+                     },
+                     fnSave: function() { 
+                         //Prompt for a name if the workbook is new
+                         if (wbID == '') {
+                            var newName = prompt('Please enter workbook name');
+                            if (newName) {
+                                //Check that the account doesn't already have a workbook by this name
+                                
+                                jQuerySheetController.workbookExists(accID, newName, function(result,event){
+                                    if(result=='TRUE') {
+                                        var replace = confirm(newName + 'already exists, do you want to replace it?');
+                                        if(replace == true) {
+                                             var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                                             var mydata = sht.exportSheet.json();
+                                             jQuerySheetController.saveWorkbook(accID,wbID,newName,JSON.stringify(mydata) ,function(result,event){
+                                                 if(result != 'ERROR'){
+                                                    //event.id = result;
+                                                    alert('Booking created: ' + result );
+                                                    
+                                                } else {
+                                                    wbName = newName;
+                                                    wbID = result;
+                                                    //Update the Workbook display name
+                                                    $('#jQuerySheet').sheet({ 
+                                                       title: accName + ' - ' + wbName 
+                                                    }); 
+                                                    alert(result);
+                                                    
+                                                }
+                                            });
+                                        }
+                                    }
+                                    
+                                    else {
+                                            //Existing workbook so overwrite
+                                             var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                                             var mydata = sht.exportSheet.json();
+                                             jQuerySheetController.saveWorkbook(accID,wbID,newName,JSON.stringify(mydata) ,function(result,event){
+                                             if(result != 'ERROR'){
+                                                      //event.id = result;
+                                                      alert('Booking created: ' + result );
+                                                      
+                                                  } else {
+                                                      wbName = newName;
+                                                      wbID = result;
+                                                      alert(result);
+                                                      
+                                                  }
+                                              });
+                                              
+                                        }
+                                    
+                                    
+                                    
+                                });
+                                
+                            }
+                          
+                         }
+                         else {
+                            //Existing workbook so overwrite
+                             var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                             var mydata = sht.exportSheet.json();
+                             jQuerySheetController.saveWorkbook(accID,wbID,wbName,JSON.stringify(mydata) ,function(result,event){
+                             if(result != 'ERROR'){
+                                      //event.id = result;
+                                      alert('Booking created: ' + result );
+                                      
+                                  } else {
+                                      wbName = newName;
+                                      wbID = result;
+                                      alert(result);
+                                      
+                                  }
+                              });
+                              
+                        }
+                    },
+                     
+                    
+                     fnOpen: function() { 
+                        
+                        jQuerySheetController.getWorkbook(wbID, function(result,event){
+                        
+                        var n = result.replace(/&(lt|gt|quot);/g, function (m, p) { 
+                              
+                            return (p == "lt") ? "<" : ((p == "gt") ? ">" : "'");
+                          });
+                        
+                         $('#jQuerySheet').sheet({ 
+                            buildSheet: (wbID=='') ? '10x15' : jQuery.sheet.makeTable.json(n,true) 
+                          }); 
+                        
+                     });
+                    }
+                     
+              });
+         
+         
+                     
+         
+         });
+    
+        
+        //This function builds the inline menu to make it easy to interact with each sheet instance
+            function inlineMenu(I){
+                I = (I ? I.length : 0);
+                
+                //we want to be able to edit the html for the menu to make them multi-instance
+                var html = $('[id$=inlineMenu]').html().replace(/sheetInstance/g, "$.sheet.instance[" + I + "]");
+                
+                var menu = $(html);
+                
+                
+                
+                return menu;
+            }
+
+        
+        
+    </script>
+</head>    
+<body>
+<apex:sectionHeader subtitle="Inline Spreadsheet:{!wbName}" title="{!accName}"/>
+<apex:actionStatus id="status">
+	<apex:facet name="start">
+	<c:BusyIcon BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" ImageUrl="{!$Resource.AjaxAnimation}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+	</apex:facet>
+</apex:actionStatus>
+<table width="95%" id="theTable">
+    <tr>
+        
+        <td>
+            <div id="jQuerySheet"></div>
+        </td>
+    </tr>
+</table>
+{!heapsize}
+
+
+
+</body>
+</apex:page>

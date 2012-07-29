@@ -1,0 +1,45 @@
+<apex:page id="t" controller="cms.CoreController" sideBar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+  <title>{!router.page_title}</title>
+  <meta name="description" content="{!router.page_description}"/>
+  <meta name="keywords" content="{!router.page_keywords}"/>
+
+    <apex:outputText escape="false">
+      <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+      
+      <apex:includeScript value="{!$Page.cms__ocmsScriptLoader}" />
+      
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/filters.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/DateTimeSelector.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/PickList.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/MultiPickList.js')}" />
+   
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/json2.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTProxy.js')}" /> 
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTDynamicLoad.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTTaxonomyLoad.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/login/OCMSLogin.js')}" />
+      <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/subscriptions/OCMSSubscription.js')}" />
+	  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/taxonomyload/OCMSTaxonomyLoad.js')}" />
+	  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/taxonomyload/OCMSTaxonomySubscription.js')}" />
+	  <apex:includeScript value="https://www.google.com/recaptcha/api/js/recaptcha_ajax.js" />
+	  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/forms/AjaxForm.js')}" />
+      <script type="text/javascript">
+         {!API.InitAPIScript}
+	  </script>
+	  
+	  <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/ocms.production.js')}" />
+	  
+  </apex:outputText>
+
+  <apex:insert name="header" />
+
+</head>
+
+<body>
+	<apex:insert name="body" />
+</body>
+<site:previewAsAdmin />
+</apex:page>

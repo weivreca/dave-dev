@@ -1,0 +1,11 @@
+<apex:page id="m" controller="cms.CoreController" extensions="cms.ErrorRouter" showHeader="false" sidebar="false" cache="{!router.page_cache}" expires="{!router.page_expires}" title="{!router.page_title}" standardStylesheets="false">
+
+	<apex:outputText escape="false" rendered="{!!use_cache_value}">
+		<html>
+			<apex:include id="i" pageName="{!page_layout}"/>
+		</html> 
+	</apex:outputText>
+
+	<apex:outputText escape="false" value="{!cached_content}" rendered="{!use_cache_value}" />     
+
+</apex:page>

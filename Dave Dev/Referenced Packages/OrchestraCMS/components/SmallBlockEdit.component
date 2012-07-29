@@ -1,0 +1,69 @@
+<apex:component controller="cms.SmallBlock" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	  <apex:outputPanel id="o1" rendered="{!layout_rendered}">
+		  <script type="text/javascript" language="javascript">
+
+			function saveLookAndFeel(cb) {
+				var attributes = new Array();
+				attributes.push({"name":"ContentSummary", "value":CKEDITOR.instances.ContentSummary.getData(), "type":"Text"});
+				attributes.push({"name":"TargetPageLink", "value":$('#TargetPageLink').val(), "type":"Text"});
+
+				$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+					attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}'
+				);
+	 		}
+
+	 		function saveLookAndFeelClose(cb) {
+	 			saveLookAndFeel(cb);
+	 			closeTab('{!JSENCODE(tab)}');
+	 		}
+
+		 	$(document).ready(function(){
+		 		$(document).data('sname', '{!SiteName}');
+		 		if(!{!published}) {
+			 		$(function() {
+						CKEDITOR.replace('ContentSummary',
+						{
+							enterMode : CKEDITOR.ENTER_BR
+						});
+					});
+				}
+			});
+		  </script>
+	  </apex:outputPanel>
+
+
+
+	<apex:outputPanel >
+		<form>
+			<table>
+			  <tr>
+			    <td>Content Summary</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<textarea name="ContentSummary" id="ContentSummary" rows="12" cols="50" ><apex:outputText value="{!ContentSummary}" /></textarea>
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!layout_disabled}" value="{!ContentSummary}"/>
+				</td>
+			  </tr>
+			  <tr>
+			    <td>Target Page</td>
+			    <td>
+			    	<input type="hidden" name="TargetPageLink" id="TargetPageLink" value="{!TargetPageLink}" />
+			    	<c:PageSelector cPassThroughId="TargetPageLink" value="{!TargetPageLink}"  dialogId="SmallBlockTarget" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+			    </td>
+			  </tr>
+			</table>
+		</form>
+	</apex:outputPanel>
+
+</apex:component>

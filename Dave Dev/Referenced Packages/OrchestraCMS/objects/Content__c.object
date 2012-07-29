@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
+    <enableActivities>true</enableActivities>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <fields>
+        <fullName>Access_Level__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Access Level</label>
+        <referenceTo>Access_Level__c</referenceTo>
+        <relationshipLabel>Content</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>All_Shared_With_Guest__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>A checkbox to quickly determine if content and all it&apos;s children have been shared with the sites guest user.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>This checkbox is used in the rendering algorithm to determine whether access controlled content can render it&apos;s cache and whether or not it needs to be dynamically loaded in the case of page caching</inlineHelpText>
+        <label>All Shared With Guest</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>All_Shared_With_Portal__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>A checkbox to quickly determine if content and all it&apos;s children have been shared with all portal users.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>This checkbox is used in the rendering algorithm to determine whether access controlled content can render it&apos;s cache and whether or not it needs to be dynamically loaded in the case of page caching</inlineHelpText>
+        <label>All Shared With Portal</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Am_Latest_Preview__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF(OR(AND(Version_Latest__c == null, Version_Origin__c == null), Version_Origin__r.Version_Latest__c == Id), 1, 0)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Am Latest Preview</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Am_Latest_Published__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF(AND(Published__c, OR(AND(Version_Latest_Published__c == null, Version_Origin__c == null), Version_Origin__r.Version_Latest_Published__c == Id)), 1, 0)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Am Latest Published</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Ancestor1__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor1</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor1)</relationshipLabel>
+        <relationshipName>Descendant1</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Ancestor2__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor2</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor2)</relationshipLabel>
+        <relationshipName>Descendant2</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Ancestor3__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor3</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor3)</relationshipLabel>
+        <relationshipName>Descendant3</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Ancestor4__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor4</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor4)</relationshipLabel>
+        <relationshipName>Descendant4</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Ancestor5__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor5</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor5)</relationshipLabel>
+        <relationshipName>Descendant5</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Ancestor__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Ancestor</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Ancestor0)</relationshipLabel>
+        <relationshipName>Descendant</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Approval__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Approval</label>
+        <referenceTo>Approval__c</referenceTo>
+        <relationshipLabel>Content</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Content_Layout__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Content Layout</label>
+        <referenceTo>Content_Layout__c</referenceTo>
+        <relationshipLabel>Content</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Content_Type__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Content Type</label>
+        <referenceTo>Content_Type__c</referenceTo>
+        <relationshipLabel>Content</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Depth__c</fullName>
+        <defaultValue>0</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Depth</label>
+        <precision>6</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Description__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Description</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>TextArea</type>
+    </fields>
+    <fields>
+        <fullName>Exclude_Search__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Flag that excludes a content item from search.</description>
+        <externalId>false</externalId>
+        <label>Exclude Search</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>External_Id2__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>true</externalId>
+        <label>External Id</label>
+        <length>255</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>External_Id__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>External Id (Deprecated)</label>
+        <length>255</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Language__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Language</label>
+        <length>255</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Last_Order__c</fullName>
+        <defaultValue>-1</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Last Order</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Locked__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>Used by Import/Export to flag an object as being processed.</description>
+        <externalId>false</externalId>
+        <label>Locked</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Name</label>
+        <length>255</length>
+        <required>true</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Object_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>This field is used in conjunction with a trigger on content to make queries more eficient</description>
+        <externalId>false</externalId>
+        <label>Object Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Order__c</fullName>
+        <defaultValue>0</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Order</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Original_Preview_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( Version_Origin__c != null, Version_Origin__r.Preview_Start_Date__c , Preview_Start_Date__c)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Original Preview Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Original_Published_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( Version_Origin__c  != null,  Version_Origin__r.Published_Start_Date__c , Published_Start_Date__c)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Original Published Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Parent_Origin__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Parent Origin</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Descendents</relationshipLabel>
+        <relationshipName>Descendents</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Parent__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Parent</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Children</relationshipLabel>
+        <relationshipName>Children</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Preview_End_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Preview End Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Preview_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Preview Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Preview__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>Visible when previewing.</inlineHelpText>
+        <label>Preview</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Priority_Duration__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Duration in seconds.</description>
+        <externalId>false</externalId>
+        <label>Priority Duration</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Priority_End_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Priority End Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Priority_Preview__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( Published__c ,
+
+IF( Priority_End_Date__c &gt; IF($Setup.OrchestraCMSUser__c.PreviewDate__c != null, DATETIMEVALUE($Setup.OrchestraCMSUser__c.PreviewDate__c), NOW()),
+
+(((Priority_Weight__c-101)*-1) * 10000) + (750-MIN(MAX(( IF($Setup.OrchestraCMSUser__c.PreviewDate__c != null, DATETIMEVALUE($Setup.OrchestraCMSUser__c.PreviewDate__c), NOW())  - Published_Start_Date__c)*11, 0), 750)),
+
+(750-MIN(MAX((IF($Setup.OrchestraCMSUser__c.PreviewDate__c != null, DATETIMEVALUE($Setup.OrchestraCMSUser__c.PreviewDate__c), NOW())  - Published_Start_Date__c)*11, 0), 750))
+
+),
+
+(IF(Priority_Weight__c != null, (Priority_Weight__c-101)*-1, 0) * 10000) + (750-MIN(MAX(( IF($Setup.OrchestraCMSUser__c.PreviewDate__c != null, DATETIMEVALUE($Setup.OrchestraCMSUser__c.PreviewDate__c), NOW())  - Preview_Start_Date__c)*11, 0), 750))
+
+)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Priority Preview</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>8</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Priority_Weight__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Priority Weight</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Priority__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( Priority_End_Date__c &gt; NOW(),
+
+(((Priority_Weight__c-101)*-1) * 10000) + (750-MIN(MAX(( NOW()  - Original_Published_Start_Date__c)*11, 0), 750)),
+
+(750-MIN(MAX((NOW()  - Original_Published_Start_Date__c)*11, 0), 750))
+
+)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Priority</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>8</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Published_End_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Published End Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Published_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Published Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Published__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Published</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Revision_Number__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Revision Number</label>
+        <precision>6</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Revision_Origin__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Revision Origin</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Revisions</relationshipLabel>
+        <relationshipName>Revisions</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Site_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Site Name</label>
+        <length>255</length>
+        <required>true</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Sites__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Sites</label>
+        <referenceTo>Sites__c</referenceTo>
+        <relationshipLabel>Content</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Version_Latest_Published__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Latest Published</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Version Latest Published)</relationshipLabel>
+        <relationshipName>Content1</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Version_Latest__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Latest</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Content (Version Latest)</relationshipLabel>
+        <relationshipName>Content</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Version_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Name</label>
+        <length>255</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Version_Number__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Number</label>
+        <precision>6</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Version_Origin__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Origin</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Versions</relationshipLabel>
+        <relationshipName>Versions</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Version_Original__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Original</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Version_Parent__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Version Parent</label>
+        <referenceTo>Content__c</referenceTo>
+        <relationshipLabel>Child Versions</relationshipLabel>
+        <relationshipName>Child_Versions</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <label>Content</label>
+    <listViews>
+        <fullName>All</fullName>
+        <columns>Name__c</columns>
+        <columns>Site_Name__c</columns>
+        <columns>Content_Type__c</columns>
+        <columns>NAME</columns>
+        <columns>External_Id2__c</columns>
+        <columns>Version_Number__c</columns>
+        <columns>Revision_Number__c</columns>
+        <columns>Approval__c</columns>
+        <columns>Priority__c</columns>
+        <columns>Am_Latest_Published__c</columns>
+        <columns>Am_Latest_Preview__c</columns>
+        <filterScope>Everything</filterScope>
+        <label>All</label>
+        <language>en_US</language>
+    </listViews>
+    <nameField>
+        <displayFormat>C-{000000}</displayFormat>
+        <label>Content Id</label>
+        <trackHistory>false</trackHistory>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Content</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>ReadWrite</sharingModel>
+    <sharingReasons>
+        <fullName>OrchestraCMS_Content_Sharing_Rule__c</fullName>
+        <label>OrchestraCMS Content Sharing Rule</label>
+    </sharingReasons>
+    <sharingReasons>
+        <fullName>OrchestraCMS_Managed_Share__c</fullName>
+        <label>OrchestraCMS Managed Share</label>
+    </sharingReasons>
+    <sharingReasons>
+        <fullName>OrchestraCMS_Manual_Collaborator_Share__c</fullName>
+        <label>OrchestraCMS Manual Collaborator Share</label>
+    </sharingReasons>
+    <sharingReasons>
+        <fullName>OrchestraCMS_Manual_Visitor_Share__c</fullName>
+        <label>OrchestraCMS Manual Visitor Share</label>
+    </sharingReasons>
+</CustomObject>

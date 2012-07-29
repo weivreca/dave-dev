@@ -1,0 +1,324 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.EditRouter,cms.EditPageController" showHeader="false" sidebar="false" cache="false" standardStylesheets="false">
+	<head>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+  <c:CmsScripts debug="false" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TagEditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/EditPage.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/QueueDialogs.js')}" />  
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/content/ContentSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/AccessLevelSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomySelector.js')}" />  
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryFullDialog.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTDynamicLoad.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTTaxonomyLoad.js')}" />
+
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.pageeditor.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.uilayout.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.breadcrumb.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.list.css')}" />
+
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+
+				updateTab("{!JSENCODE(tab)}", "{!page.Name__c+' - v'+TEXT(page.Version_Number__c)+'.0'}", "{!page.Id}");
+
+				$(document).data('cms', {
+					'context' 	: 'orchestracms',
+					'namespace' : '{!namespace}'
+	 			});
+
+				var newVersionId = '{!newVersionId}';
+	      		if(newVersionId != ''){
+	        		openPageTab('{!JSENCODE(newVersionName)}','{!newVersionNumber}', '/apex/EditPageProperties?sname={!router.site_name}&id='+newVersionId, newVersionId);
+	      		}
+
+				if({!close}) {
+					closeTab('{!JSENCODE(tab)}');
+				}
+
+				$(".date").datepicker();
+
+				$('.cacheVals').bind('change', function(){
+
+					var hrs = parseInt($('#cache_expire_hrs').val()) * 3600;
+					var min = parseInt($('#cache_expire_min').val()) * 60;
+					var sec = parseInt($('#cache_expire_sec').val());
+
+					$(jq('{!$Component.f.cache_expire}')).val(hrs+min+sec);
+
+				});
+
+         		$('.ocms-tooltip').tooltip(
+         		{
+            		timeout: 10000
+            		, width: 150
+            		, xOffset: 5
+            		, yOffset: 5
+         		});
+
+	      });
+	    </script>
+
+	</head>
+
+	<body style="font-size: 12px; font-family: arial; padding: 0px; margin: 0px;">
+	  	<apex:form id="f" style="margin: 0px; padding: 0px;">
+
+		  <apex:inputHidden id="tabReference" value="{!tab}" />
+		  <c:EditMenu pageutil="{!pageutil}"
+			latestVersion="{!latestVersion}"
+			save="{!save}"
+			saveAndClose="{!saveAndClose}"
+			publish="{!publish}"
+			newVersion="{!newVersion}"
+			clonePage="{!clonePage}"
+			deletePage="{!deletePage}"
+			togglePreview="{!togglePreview}"
+			properties="{!properties}"
+			layout="{!layout}"
+			content="{!content}"
+			version="{!version}"
+			collaborator="{!collaborator}"
+			visitor="{!visitor}"
+			email="{!email}"
+			site_name="{!router.site_name}"
+			tabId="{!JSENCODE(tab)}"
+			approval_process="{!router.site_info.cms__ApprovalProcess__c}"
+			token="{!API.csrf_token}"
+			showEmail="{!!disableEmail}"
+			showQueueEmail="{!!disableQueueEmail}"
+			/>
+
+		  	<apex:outputPanel layout="block" rendered="{!showMessages}" style="padding: 0px; background-color: rgb(255,235,235); border-bottom: 1px solid rgb(200,200,200);">
+			    <table border="0" cellspacing="0" cellpadding="5">
+			    	<apex:repeat value="{!messages}" var="message">
+			      		<tr>
+			      			<td><img src="{!URLFOR($Resource.CmsImages,'btn_unpublished.png')}" border="0" /></td>
+			      			<td style="font-size: 12px;">{!message.detail}</td>
+			      		</tr>
+			    	</apex:repeat>
+			    </table>
+		  	</apex:outputPanel>
+
+	 		<apex:outputPanel rendered="false" layout="block" id="controlsProperties" style="padding: 0px; padding-bottom: 3px; background-color: rgb(255,255,255); font-family: Arial; font-size: 12px; border-bottom: 1px solid rgb(200,200,200); margin-bottom: 2px;">
+
+			    <div style="float: right; padding-top: 3px; padding-right: 3px;">
+			      <apex:commandButton action="{!publish}" value="Publish" rendered="{!showPublish}" />
+			      <apex:outputPanel rendered="{!showIsPublished}">
+			        <strong>Published</strong>
+			      </apex:outputPanel>
+			    </div>
+
+			    <table border="0" cellspacing="0" cellpadding="5" width="50%">
+			      <tr>
+			        <td width="200" style="font-size: 12px; padding-left: 10px;">
+			          <strong>Properties</strong> &nbsp;&nbsp;<img src="{!URLFOR($Resource.CmsImages, '/arrow.png')}" alt=">" />&nbsp;&nbsp;<apex:commandLink action="{!version}" value="Version" style="color: rgb(0,0,0)" />&nbsp;&nbsp;<img src="{!URLFOR($Resource.CmsImages, '/arrow.png')}" alt=">" />&nbsp;&nbsp;<apex:commandLink action="{!layout}" value="Layout" style="color: rgb(0,0,0)" />&nbsp;&nbsp;<img src="{!URLFOR($Resource.CmsImages, '/arrow.png')}" alt=">" />&nbsp;&nbsp;<apex:commandLink action="{!content}" value="Content" style="color: rgb(0,0,0)" />
+			        </td>
+			      </tr>
+			    </table>
+
+	    	</apex:outputPanel>
+
+
+			<apex:outputPanel layout="block" style="padding: 15px; padding-bottom: 3px; background-color: rgb(255,255,255); font-family: Arial; font-size: 12px;">
+
+    		<div style="font-size: 14px; padding: 10px 0px 5px 0px;"><strong><span style="color: #336600">Page Properties</span></strong></div>
+	        	<div style="font-size: 12px;"><span style="font-weight: bold;">*</span> Required</div><br />
+	    		<div style="font-size: 14px; font-weight: bold;">General</div>
+				<table border="0" cellspacing="0" cellpadding="10">
+					<tr>
+						<td style="width: 100px; font-size: 12px;">Name: &nbsp; <span style="font-weight: bold;">*</span></td>
+						<td style="width: 15px; font-size: 12px;">&nbsp;</td>
+						<td style="width: 175px; font-size: 12px;"><apex:inputText value="{!router.page.cms__Name__c}" disabled="{!disableName}" size="70"/></td>
+					</tr>
+					<tr>
+						<td style="font-size: 12px">Title:</td>
+						<td>&nbsp;</td>
+						<td><apex:inputText value="{!router.page.cms__Title__c}" disabled="{!disableAll}" size="70"/></td>
+					</tr>
+    				<tr>
+      					<td style="vertical-align: text-top; width: 100px; font-size: 12px;">Description:</td>
+      					<td style="width: 15px; font-size: 12px;">&nbsp;</td>
+      					<td style="width: 275px; font-size: 12px;"><apex:inputTextarea style="font-family: arial; font-size: 12px;" id="description" value="{!router.page.cms__Description__c}" disabled="{!disableAll}" cols="70" rows="13" /></td>
+    				</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px;">Start Date:</td>
+						<td style="width: 15px; font-size: 12px;">&nbsp;</td>
+						<td style="width: 275px; font-size: 12px;">
+							<apex:inputHidden id="publishedStart" value="{!publishedStartDateText}"/>
+							<c:DateTimeSelector cDisable="{!disableAll}" cName="publishedStart" cPassthroughId="{!$Component.publishedStart}" cDateTime="{!publishedStartDateText}"  />
+						</td>
+					</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px;">End Date:</td>
+						<td style="width: 15px; font-size: 12px;">&nbsp;</td>
+						<td style="width: 275px; font-size: 12px;">
+							<apex:inputHidden id="publishedEnd" value="{!publishedEndDateText}"/>
+							<c:DateTimeSelector cDisable="{!disableAll}" cName="publishedEnd" cPassthroughId="{!$Component.publishedEnd}" cDateTime="{!publishedEndDateText}"  />
+						</td>
+					</tr>
+				    <apex:outputText rendered="{!showShare}">
+				    <tr>
+				      <td style="width: 80px; font-size: 12px;">Access Level:</td>
+				      <td style="width: 15px; font-size: 12px;">&nbsp;</td>
+				      <td style="width: 370px; font-size: 12px;">
+				      	<apex:inputHidden id="accessLevel" value="{!accessLevel}" />
+				      	<c:AccessLevelSelector disable="{!disableAll}" cPassthroughId="{!$Component.accessLevel}" level="{!accessLevel}" sname="{!router.site_name}" />
+				      </td>
+				    </tr>
+				    </apex:outputText>				    					
+				</table>
+
+				<br /><div style="font-size: 14px; font-weight: bold;">Search Engine Friendly</div>
+
+				<table border="0" cellspacing="0" cellpadding="10">
+					<tr>
+						<td style="width: 100px; font-size: 12px" valign="top">URL Name: &nbsp; <span style="font-weight: bold;">*</span></td>
+						<td style="width: 15px;" valign="top">
+							<div class="ocms-tooltip">
+								<div class="ocms-tooltipText" style="display: none;">The way the page name appears in the browsers location bar.</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}"/>
+							</div>
+						</td>
+	 					<td style="width: 300px;" valign="top"><apex:inputText value="{!router.page.cms__Search_Optimized_Name__c}" disabled="{!disableSEO}" size="70" /><br /><span style="font-size: 11px; color: #777777;">Allowed Characters: A-Z a-z _ -</span></td>
+	   				</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px" valign="top">URLs:</td>
+						<td style="width: 15px;" valign="top">
+							<div class="ocms-tooltip">
+								<div class="ocms-tooltipText" style="display: none;">Relative urls from which this page can be accessed.</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}" />
+							</div>
+						</td>
+	 					<td valign="top">
+	 						<div style="font-size: 12px; color: 999999;">
+	 							<div style="height: 18px; line-height: 18px; display: {!IF(router.page.Front_Page__c, 'block', 'none')};">/</div>
+	 							<div style="height: 18px; line-height: 18px; padding: 3px;">/{!router.page.cms__Search_Optimized_Name__c}</div>
+	 						</div>
+	 						<c:PageUrl cDisable="{!disableAll}" cPage="{!router.page}" />
+	 					</td>
+	   				</tr>
+					<tr>
+						<td style="font-size: 12px">Keywords:</td>
+						<td>
+							<div class="ocms-tooltip">
+								<div class="ocms-tooltipText" style="display: none;">Keywords used by search engines like Google to index this page.</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}" />
+							</div>
+						</td>
+						<td><apex:inputText value="{!router.page.cms__Keywords__c}" disabled="{!disableAll}" size="70" /></td>
+					</tr>
+				</table>
+
+				<br /><div style="font-size: 14px; font-weight: bold;">Advanced</div>
+
+				<table border="0" cellspacing="0" cellpadding="10">
+					<tr>
+						<td style="width: 100px; font-size: 12px">Cache Refresh:</td>
+						<td style="width: 15px;">
+							<div class="ocms-tooltip">
+								<div class="ocms-tooltipText" style="display: none;">Salesforce provides world wide caching. This number represents the time between cache refreshes.</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}" />
+							</div>
+						</td>
+     					<td style="width: 275px;">
+     						<apex:inputHidden id="cache_expire" value="{!cache_expire}" />
+	      					<div style="float: left; padding-right: 5px;">Hrs:
+	  	      					<apex:outputText escape="false" rendered="{!disableAll}">
+	      							<input id="cache_expire_hrs" class="cacheVals" value="{!cacheExpireHrs}"  style="width: 25px;" disabled="disabled" />
+	      						</apex:outputText>
+	      						<apex:outputText escape="false" rendered="{!!disableAll}">
+	      							<input id="cache_expire_hrs" class="cacheVals" value="{!cacheExpireHrs}"  style="width: 25px;" />
+	      						</apex:outputText>
+	      					</div>
+	      					<div style="float: left; padding-right: 5px;">Min:
+	  	      					<apex:outputText escape="false" rendered="{!disableAll}">
+	      							<input id="cache_expire_min" class="cacheVals" value="{!cacheExpireMin}"  style="width: 25px;" disabled="disabled" />
+	      						</apex:outputText>
+	      						<apex:outputText escape="false" rendered="{!!disableAll}">
+	      							<input id="cache_expire_min" class="cacheVals" value="{!cacheExpireMin}"  style="width: 25px;" />
+	      						</apex:outputText>
+	      					</div>
+	      					<div style="float: left; padding-right: 5px;">Sec:
+	      			  	      	<apex:outputText escape="false" rendered="{!disableAll}">
+	      							<input id="cache_expire_sec" class="cacheVals" value="{!cacheExpireSec}"  style="width: 25px;" disabled="disabled" />
+	      						</apex:outputText>
+	      						<apex:outputText escape="false" rendered="{!!disableAll}">
+	      							<input id="cache_expire_sec" class="cacheVals" value="{!cacheExpireSec}"  style="width: 25px;" />
+	      						</apex:outputText>
+	      					</div>
+							<div style="clear: both;"></div>
+	      				</td>
+	    			</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px">Force SSL:</td>
+						<td style="width: 15px;">
+							<div class="ocms-tooltip">
+							<div class="ocms-tooltipText" style="display: none;">This will cause the page to always be viewed via a secure connection.</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}"/>
+							</div>
+						</td>
+	      				<td style="width: 275px;"><apex:inputCheckbox value="{!router.page.cms__Force_SSL__c}" disabled="{!disableAll}" /></td>
+	    			</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px">Force Login:</td>
+						<td style="width: 15px;">
+							<div class="ocms-tooltip">
+							<div class="ocms-tooltipText" style="display: none;">This will require a user to login to view this page</div>
+								<img width="18px" height="18px" align="bottom" src="{!URLFOR($Resource.jqueryui, '/css/images/Toolbar/IconToolbarHelp48.png')}"/>
+							</div>
+						</td>
+	      				<td style="width: 275px;"><apex:inputCheckbox value="{!router.page.cms__Force_Login__c}" disabled="{!disableAll}" /></td>
+	    			</tr>
+					<tr>
+						<td style="width: 100px; font-size: 12px">Language:</td>
+						<td style="width: 15px;">
+						</td>
+	      				<td style="width: 275px;"><apex:selectList value="{!router.page.cms__Language__c}" disabled="{!disableAll}" size="1"><apex:selectOptions value="{!languages}" /></apex:selectList></td>
+	    			</tr>
+				</table>
+
+				<apex:outputText rendered="{!!disableEmail}">
+				
+					<br /><div style="font-size: 14px; font-weight: bold;">Email</div>
+	
+					<table border="0" cellspacing="0" cellpadding="10">
+					    <tr>
+					      <td style="width: 80px; font-size: 12px;">Email Link:</td>
+					      <td style="width: 15px; font-size: 12px;">&nbsp;</td>
+					      <td style="width: 370px; font-size: 12px;">
+
+                            <apex:inputHidden id="EmailLink" value="{!router.page.cms__Email_Default_Target__c}"/>
+							<div id="EmailLinkDlg"></div>
+							<script type="text/javascript">
+								$('#EmailLinkDlg').page_selector_input({
+					 				input_field: $.orchestracmsUtil.convertComponentId('{!$Component.EmailLink}'),
+					 				input_id: 'EmailLinkDlg_selector_input',
+									dialog_id: 'EmailLinkDlg_selector_dialog',
+									selected: {!IF(OR(emailLink.LinkJSON == null, emailLink.LinkJSON == ''), 'null', emailLink.LinkJSON)},
+									selected_name: '{!emailLink.LinkName}',
+									disabled: {!disableAll},				
+					 				sname: '{!router.site_name}',
+					 				token: '{!token}'
+					 			});
+							</script>
+														
+					      </td>
+					    </tr>						    					
+					</table>
+				
+				</apex:outputText>
+	 			
+	 			<br /><br />
+
+	    	</apex:outputPanel>
+
+		</apex:form>
+	</body>
+</apex:page>

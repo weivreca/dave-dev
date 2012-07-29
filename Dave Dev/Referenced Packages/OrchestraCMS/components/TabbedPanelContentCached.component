@@ -1,0 +1,106 @@
+<apex:component id="pc" controller="cms.PanelController" access="global" >
+
+  <apex:attribute name="panelName" type="String" description="The panel unique identifier" assignTo="{!name}" access="global" />
+  <apex:attribute name="panelController" type="cms.CoreController" description="The executing page controller" assignTo="{!pController}" access="global" />
+  <apex:attribute name="panelHeight" type="String" description="The panel unique identifier" assignTo="{!height}" access="global" />
+  <apex:attribute name="panelWidth" type="String" description="The panel unique identifier" assignTo="{!width}" access="global" />
+
+  <apex:attribute name="panelContentLayouts" type="String" description="comma seperated list of acceptable templates" assignTo="{!contentLayouts}" default="PlainText,ClassStyledMenu,CustomHtml,DocumentStyle1,Flash,HorizontalImageBar,Image,ListLayout1,SFObject,SimpleHorizontalMenu,SmallBlock,SmallBlockWithImage,Spacer,TextBlock,RecordList,PortalChangePasswordForm,PortalForgotPasswordForm,PortalLoginForm,PortalLoginStatus,PortalRegisterForm,SearchBasicForm,SearchBasicResults" access="global" />
+  <apex:attribute name="panelLimit" type="Integer" description="max number of content items that can be dropped on the panel" assignTo="{!sizeLimit}" default="-1" access="global" />
+
+    <apex:outputText escape="false" rendered="{!showEdit}">
+        <apex:outputText escape="false" rendered="{!renderEnabledEdit}">
+            <div class="ocms-reset sortable" id="sort-{!name}" style="min-height: {!height}; {!IF(ISNULL(width), '', 'min-width:'+width+';')}">
+                <div class="valuePanelId" style="display: none;"><apex:outputText value="{!name}" /></div>
+                <div class="validContentTemplateIds" style="display: none;"><apex:outputText value="{!AcceptedTemplateIds}"/></div>
+                <div class="validContentTemplateLabels" style="display: none;"><apex:outputText value="{!AcceptedTemplateLabels}"/></div>
+                <div class="sizeLimit" style="display: none;"><apex:outputText value="{!sizeLimit}" /></div>
+                <div class="cachePanel" style="display: none;">true</div>
+				<div class="ocms-tooltipText"><apex:outputText escape="false" value="{!tooltipText}" /></div>
+                <apex:repeat value="{!panelContent}" var="pc">
+                    <div class="draggable" id="{!pc.page_content_layout_instance.Id}" style="text-align: left; height: 22px;">
+                      <div class="valueContent" style="display: none;">{!pc.content.Id}</div>
+                      <div class="valueContentLayout" style="display: none;">{!pc.content_layout.Id}</div>
+                      <div class="valuePageContentLayoutInstance" style="display: none;">{!pc.page_content_layout_instance.Id}</div>
+                      <div class="ocms-actions"><span style="{!IF(pc.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span>&nbsp;<span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(singlePanelContent.content.Approval__c != null && singlePanelContent.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span>&nbsp;<span style="{!IF(ISNULL(pc.content_layout.Page_Properties_Definition__c),'display:none;', '')}"> <a href="#" class="ocms-page-properties-btn"><img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" /></a></span> <a href="#" onclick="openTab('{!JSENCODE(pc.editLabel)}', '{!pc.editUrl}', '{!pc.content_layout_instance.Id}', 'PageProperties'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" border="0" /></a> <a href="#" class="ocms-remove-btn"><img src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" border="0" /></a></div>
+                      <div class="ocms-handle handle"><img src="{!URLFOR($Resource.CmsImages,'/handle.png')}" border="0" /></div>
+                      <div class="ocms-content-name" title="{!pc.content.Name__c}">&nbsp;&nbsp;{!pc.content.Name__c} <em class="version-number">v<apex:outputText value="{0,number,#}"><apex:param value="{!pc.content.cms__Version_Number__c}" /></apex:outputText>.<apex:outputText value="{0,number,#}"><apex:param value="{!pc.content.cms__Revision_Number__c}" /></apex:outputText></em></div>
+                    </div>
+                </apex:repeat>
+            </div>
+        </apex:outputText>
+        <apex:outputText escape="false" rendered="{!renderDisabledEdit}">
+            <div class="ocms-reset sortable" id="sort-{!name}" style="min-height: {!height}; {!IF(ISNULL(width), '', 'min-width:'+width+';')}">
+                <div class="valuePanelId" style="display: none;"><apex:outputText value="{!name}" /></div>
+                <div class="validContentTemplateIds" style="display: none;"><apex:outputText value="{!AcceptedTemplateIds}"/></div>
+                <div class="validContentTemplateLabels" style="display: none;"><apex:outputText value="{!AcceptedTemplateLabels}"/></div>
+                <div class="sizeLimit" style="display: none;"><apex:outputText value="{!sizeLimit}" /></div>
+                <div class="cachePanel" style="display: none;">true</div>
+				<div class="ocms-tooltipText"><apex:outputText escape="false" value="{!tooltipText}" /></div>
+                <apex:repeat value="{!panelContent}" var="pc">
+                    <div class="draggable" id="{!pc.page_content_layout_instance.Id}" style="text-align: left; height: 22px;">
+                        <div class="valuePageContentLayoutInstance" style="display: none;">{!pc.page_content_layout_instance.Id}</div>
+                        <div class="valueContentLayout" style="display: none;">{!pc.content_layout.Id}</div>
+                        <div class="ocms-actions"><span style="{!IF(pc.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span>&nbsp;<span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(singlePanelContent.content.Approval__c != null && singlePanelContent.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span>&nbsp;<a href="#" onclick="openPageTab('{!JSENCODE(pc.editLabel)}','{!pc.version}', '{!pc.editUrl}&sname={!pcontroller.router.site_name}', '{!pc.content_layout_instance.Id}'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" border="0" /></a></div>
+                        <div class="ocms-content-name" title="{!pc.content.Name__c}">&nbsp;&nbsp;{!pc.content.Name__c} <em class="version-number">v<apex:outputText value="{0,number,#}"><apex:param value="{!pc.content.cms__Version_Number__c}" /></apex:outputText>.<apex:outputText value="{0,number,#}"><apex:param value="{!pc.content.cms__Revision_Number__c}" /></apex:outputText></em></div>
+                    </div>
+                </apex:repeat>
+            </div>
+        </apex:outputText>
+    </apex:outputText>
+
+
+    <apex:outputText escape="false" rendered="{!showView}">
+        <ul class="tabset">
+            <apex:repeat value="{!panelContent}" var="pc">
+                <li>
+                    <a class="tab {!IF(pc.page_content_layout_instance.Layout_Panel_Order__c == 0, 'active', '')}" title="{!pc.tab_name}" href="#tab-{!pc.page_content_layout_instance.Id}">
+                        <span>
+                            <strong><apex:outputText value="{!pc.tab_name}" /></strong>
+                        </span>
+                    </a>
+                </li>
+            </apex:repeat>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-content-holder">
+                <div class="tab-content-inner">
+                    <apex:repeat value="{!panelContent}" var="pc">
+                        <div id="tab-{!pc.page_content_layout_instance.Id}" class="tab_{!FLOOR(pc.page_content_layout_instance.Layout_Panel_Order__c)}">
+                            <apex:outputText escape="false" rendered="{!propertiesVisible}">
+                                <div style="position: relative; top: 0px; left: 0px;">
+                                    <div class="debugProperties" style="position: relative;">
+                                        <div style="position: absolute; top: 0px; left: 0px; z-index: 499;">
+                                            <img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" />
+                                        </div>
+                                        <div class="debugPropertiesDetails" style="position: absolute; top: 25px; left: 0px; text-align: left; padding: 10px; display: none; width: 350px; background-color: rgb(200,200,200); z-index: 500;">
+                                            <strong>Version:</strong> {!pc.version}<br />
+                                            <strong>Properties Count:</strong> {!pc.properties_size}<br />
+                                            <strong>Properties:</strong> <br />
+                                            <apex:repeat value="{!pc.properties}" var="property" >
+                                                <div>
+                                                    <apex:outputText value="{!property.cms__Name__c}" /> : <apex:outputText value="{!property.cms__Value__c}" /><br />
+                                                </div>
+                                            </apex:repeat>
+                                        </div>
+                                    </div>
+                                </div>
+                            </apex:outputText>
+
+                            <apex:outputText rendered="{!pController.router.page_show_controls}" >
+                                <div class="previewControls">
+                                    <div class="previewControlButtons">
+                                        <span style="{!IF(pc.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span> <span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(pc.content.Approval__c != null && pc.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span><a href="#" onclick="openPageTab('{!pc.editLabel}', '{!pc.version}', '{!pc.editUrl}&sname={!pcontroller.router.site_name}', '{!pc.content_layout_instance.Id}'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" title="Edit" border="0" /></a>
+                                    </div>
+                                </div>
+                              </apex:outputText>
+                              <apex:outputText escape="false" value="{!pc.Data}" />
+                        </div>
+                    </apex:repeat>
+                </div>
+            </div>
+        </div>
+    </apex:outputText>
+
+</apex:component>

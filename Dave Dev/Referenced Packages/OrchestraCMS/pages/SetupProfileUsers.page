@@ -1,0 +1,266 @@
+<apex:page controller="cms.SetupProfileUsersController" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+    <title>Manage Licenses</title>
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+	<c:CmsScripts />
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    			var allCheckbox = $('#allUsers').ocmsCheckbox({'active':false, 'disabled':false});
+    			var subcheckboxes = new Array();
+    			var rowList = new Array();
+    			var selectedUsers = new Array();
+
+    			$('.list-row').each(function(){
+    				var row = $(this);
+
+    				var checkbox = row.find('.ocms-checkbox').ocmsCheckbox({
+    					'active' : false,
+    					'disabled' : false,
+    					'onUpdateState' : function(){
+    						var self = $(this);
+    						if(row.find('.ocms-checkbox').ocmsCheckbox('getState') == 'blank'){
+    							row.removeClass('ocms-list-selected');
+    						}else{
+    							row.addClass('ocms-list-selected');
+    						}
+    					}
+    				});
+
+    				rowList[rowList.length] = {
+    					'row' 		: row,
+    					'checkbox' 	: checkbox,
+    					'userid' 	: row.find('.ocms-checkbox').attr('id')
+    				}
+
+    				subcheckboxes[subcheckboxes.length] = { 'checkbox' : checkbox }
+
+    			});
+
+    			$('<div id="ocmsCheckboxTree"></div>').ocmsCheckboxTree({
+    				'top' : [
+    					{
+    						'checkbox': allCheckbox,
+    						'subcheckboxes' : subcheckboxes
+    					}
+    				]
+    			});
+
+    			$('#findUserDialog').dialog({
+    				'autoOpen': false,
+    				'width': 500,
+    				'height': 300,
+    				'buttons': {
+    					'Save': function(){
+    						var self = $(this);
+    						var rowList = self.data('rowList');
+    						for(var i = 0; i < rowList.length; i++){
+    							if(rowList[i].checkbox.ocmsCheckbox('getState') != 'blank'){
+    								selectedUsers[selectedUsers.length] = rowList[i].userid;
+    							}
+    						}
+    						if(selectedUsers.length > 0){
+    							var userlist = '';
+    							for(var i = 0; i < selectedUsers.length; i++){
+    								userlist = userlist + selectedUsers[i];
+    								if(i < selectedUsers.length-1)
+    									userlist = userlist + ',';
+    							}
+								addUsers(userlist);
+    						}
+    						$(this).dialog('close');
+    					},
+    					'Cancel': function(){
+    						$(this).dialog('close');
+    					}
+    				}
+    			});
+
+    			$('#findUserDialog').data('rowList', rowList);
+
+    			$('#addUserButton').button().click(function(){
+    				$('#findUserDialog').dialog('open');
+    				allCheckbox.ocmsCheckbox('setState','blank');
+    				for(var i = 0; i < subcheckboxes.length; i++){
+    					subcheckboxes[i].checkbox.ocmsCheckbox('setState', 'blank');
+    				}
+    			});
+    			$('#doneButton').button().click(function(){
+    				done();
+    			});
+    			$('#filterButton').button().click(function(){
+    				var filterText = $('#filterText').val();
+    				$('#loading').show();
+    				filterUser(filterText);
+
+    			});
+
+    		});
+
+	    	function refreshList(){
+
+				$('#loading').hide();
+
+    			var allCheckbox = $('#allUsers').ocmsCheckbox({'active':false, 'disabled':false});
+    			var subcheckboxes = new Array();
+    			var rowList = new Array();
+    			var selectedUsers = new Array();
+
+    			$('.list-row').each(function(){
+    				var row = $(this);
+
+    				var checkbox = row.find('.ocms-checkbox').ocmsCheckbox({
+    					'active' : false,
+    					'disabled' : false,
+    					'onUpdateState' : function(){
+    						var self = $(this);
+    						if(row.find('.ocms-checkbox').ocmsCheckbox('getState') == 'blank'){
+    							row.removeClass('ocms-list-selected');
+    						}else{
+    							row.addClass('ocms-list-selected');
+    						}
+    					}
+    				});
+
+    				rowList[rowList.length] = {
+    					'row' 		: row,
+    					'checkbox' 	: checkbox,
+    					'userid' 	: row.find('.ocms-checkbox').attr('id')
+    				}
+
+    				subcheckboxes[subcheckboxes.length] = { 'checkbox' : checkbox }
+
+    			});
+
+    			$('<div id="ocmsCheckboxTree"></div>').ocmsCheckboxTree({
+    				'top' : [
+    					{
+    						'checkbox': allCheckbox,
+    						'subcheckboxes' : subcheckboxes
+    					}
+    				]
+    			});
+
+    			$('#findUserDialog').data('rowList', rowList);
+
+	    	}
+
+    </script>
+  </head>
+
+  <body>
+
+  	<c:SetupMenu sname="{!site_name}" activeitem="profiles" />
+
+  	<div style="margin-left: 210px; padding: 10px;">
+
+  		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator"></div>
+		  <div class="ocms-setup-breadcrumb-item">Manage Profiles</div>
+		  <div class="ocms-setup-breadcrumb-separator"></div>
+		  <div class="ocms-setup-breadcrumb-item">Edit OrchestraCMS Profile</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>
+		  <div class="ocms-setup-breadcrumb-item-active">Manage Users</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+
+  		<br />
+
+		<apex:outputPanel id="messages" style="color: #990000">
+  			<apex:outputText escape="false" value="{!message + '<br /><br />'}" rendered="{!IF(message != '', true, false)}" />
+		</apex:outputPanel>
+
+		<apex:form >
+
+			<apex:actionFunction action="{!done}" name="done" />
+			<apex:actionFunction action="{!filterUser}" name="filterUser" rerender="listContainer" oncomplete="refreshList()">
+				<apex:param name="filter" value="" />
+			</apex:actionFunction>
+			<apex:actionFunction action="{!addUsers}" name="addUsers" rerender="selectedUsersContainer,listContainer, messages" oncomplete="refreshList()">
+				<apex:param name="userlist" value="" />
+			</apex:actionFunction>
+			<apex:actionFunction action="{!deleteUsers}" name="removeUsers" rerender="selectedUsersContainer,listContainer, messages" oncomplete="refreshList()">
+				<apex:param name="userlist" value="" />
+			</apex:actionFunction>
+
+			<div id="findUserDialog" style="display: none;">
+				<div style="padding-top: 5px; width: 325px;">
+			    	Filter <input type="text" id="filterText" />&nbsp;&nbsp;<div id="filterButton" style="height: 17px;">Go</div><div id="loading" style="display: none; float: right;"><img src="{!$Resource.ajaxLoader}" height="20" width="20" /></div><br /><br />
+			    </div>
+				<apex:outputPanel id="listContainer" layout="block" style="padding-top: 5px;">
+			      <table border="0" cellspacing="0" cellpadding="0" class="ocms-list" style="margin: 0px;">
+			      <tr class="list-header">
+			        <td width="25"><div id="allUsers" class="ocms-checkbox"></div></td>
+			        <td width="150">Full Name</td>
+			        <td class="last" width="250">User Name</td>
+			      </tr>
+			      <apex:repeat value="{!availableUsers}" var="availableUser">
+					<tr class="list-row">
+					  <td><div class="ocms-checkbox" id="{!availableUser.Id}"></div></td>
+					  <td>{!availableUser.Name}</td>
+					  <td class="last">{!availableUser.Username}</td>
+					</tr>
+			      </apex:repeat>
+			      <tr class="list-footer">
+			        <td colspan="3"></td>
+			      </tr>
+			      </table>
+			    </apex:outputPanel>
+
+			</div>
+
+			<table border="0" cellspacing="0" cellpadding="0">
+			  <tr>
+			    <td>
+			    	<div id="addUserButton" style="float: left">Add User</div>
+			    	<div id="doneButton" style="margin-left: 10px; float: left">Done</div>
+			    </td>
+			  </tr>
+			</table>
+
+			<br />
+			<apex:outputPanel id="selectedUsersContainer">
+
+				<apex:outputPanel id="selectedUsers" rendered="{!hasUsers}">
+
+					<table border="0" cellspacing="0" cellpadding="3" class="ocms-list" style="margin: 0px;">
+					  <tr class="list-header">
+					    <td width="25"></td>
+					    <td width="150">Full Name</td>
+					    <td class="last" width="250">Username</td>
+					  </tr>
+					  <apex:repeat value="{!profileUsersInfo}" var="profileUser">
+					  <tr class="list-row">
+					    <td><apex:outputText rendered="{!allowRemove}"><a href="#" onclick="removeUsers('{!profileUser.User__r.Id}'); return false;">Remove</a></apex:outputText></td>
+					    <td>{!profileUser.User__r.Name}</td>
+					    <td class="last">{!profileUser.User__r.Username}</td>
+					  </tr>
+					  </apex:repeat>
+					  <tr class="list-footer">
+			        	<td colspan="3"></td>
+			     	  </tr>
+					</table>
+
+				</apex:outputPanel>
+
+				<apex:outputPanel rendered="{!!hasUsers}">
+
+					This OrchestraCMS Profile currently has no selected users.
+
+				</apex:outputPanel>
+
+			</apex:outputPanel>
+
+		</apex:form>
+
+  	</div>
+
+  </body>
+
+</html>
+</apex:page>

@@ -1,0 +1,107 @@
+<apex:component id="c44" controller="cms.SmallBlockWithImage" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	  <apex:outputPanel id="o1" rendered="{!layout_rendered}">
+		  <script type="text/javascript" language="javascript">
+
+			function saveLookAndFeel(cb) {
+				var attributes = new Array();
+				attributes.push({"name":"ImageId", "value":$('#ImageIdInput').val(), "type":"Text"});
+				attributes.push({"name":"ContentSummary", "value":CKEDITOR.instances.ContentSummary.getData(), "type":"Text"});
+				attributes.push({"name":"ContentTitle", "value":$('#ContentTitle').val(), "type":"Text"});
+				attributes.push({"name":"TargetPageLink", "value":$('#TargetPageLink').val(), "type":"Text"});
+				attributes.push({"name":"MoreLink", "value":$('#MoreLink').val(), "type":"Text"});
+
+				$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+					attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}'
+				);
+	 		}
+
+	 		function saveLookAndFeelClose(cb) {
+	 			saveLookAndFeel(cb);
+	 			closeTab('{!JSENCODE(tab)}');
+	 		}
+
+
+		 	$(document).ready(function(){
+
+			    if({!close_tab} && '{!JSENCODE(tab)}' != '')
+			 	  closeTab('{!JSENCODE(tab)}');
+
+		 		$(document).data('sname', '{!SiteName}');
+		 		if(!{!published}) {
+			 		$(function() {
+						CKEDITOR.replace('ContentSummary',
+						{
+							enterMode : CKEDITOR.ENTER_BR
+						});
+					});
+				}
+			});
+		  </script>
+	  </apex:outputPanel>
+
+
+    <apex:outputPanel >
+        <form>
+            <table>
+              <tr>
+                <td>Image</td>
+                <td>
+                    <input type="hidden" name="ImageIdInput" id="ImageIdInput" value="{!ImageId}" />
+                    <c:ImageSelector sname="{!content.cms__Site_Name__c}" cPassThroughId="ImageIdInput" cImage="{!ImageId}" type="Image" disabled="{!layout_disabled}" />
+                </td>
+              </tr>
+              <tr>
+                <td>Title</td>
+           		<td>
+                	<apex:outputText escape="false" rendered="{!layout_disabled}">
+                    	<input type="text" name="ContentTitle" id="ContentTitle" value="{!ContentTitle}" disabled="disabled" size="70" />
+                	</apex:outputText>
+                	<apex:outputText escape="false" rendered="{!!layout_disabled}">
+                    	<input type="text" name="ContentTitle" id="ContentTitle" value="{!ContentTitle}" size="70"/>
+                	</apex:outputText>
+                </td>
+              </tr>
+              <tr>
+                <td>Content Summary</td>
+                <td>
+                	<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<textarea name="ContentSummary" id="ContentSummary" rows="12" cols="50"><apex:outputText value="{!ContentSummary}" /></textarea>
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!content.cms__Published__c}" value="{!ContentSummary}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>Target Page</td>
+                <td>
+                    <input type="hidden" name="TargetPageLink" id="TargetPageLink" value="{!TargetPageLink}" />
+                    <c:PageSelector cPassThroughId="TargetPageLink" value="{!TargetPageLink}" dialogId="SmallBlockWithImageTarget" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+                </td>
+              </tr>
+              <tr>
+                <td>More Link</td>
+                <td>
+                	<apex:outputText escape="false" rendered="{!layout_disabled}">
+                    	<input type="text" name="MoreLink" id="MoreLink" value="{!MoreLink}" disabled="disabled" size="70" />
+                	</apex:outputText>
+                	<apex:outputText escape="false" rendered="{!!layout_disabled}">
+                    	<input type="text" name="MoreLink" id="MoreLink" value="{!MoreLink}" size="70" />
+                	</apex:outputText>
+                </td>
+              </tr>
+            </table>
+    	</form>
+    </apex:outputPanel>
+
+	<br /><br /><br />
+
+</apex:component>

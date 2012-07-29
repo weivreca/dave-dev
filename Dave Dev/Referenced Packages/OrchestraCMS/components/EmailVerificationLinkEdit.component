@@ -1,0 +1,60 @@
+<apex:component controller="cms.EmailVerificationLinkController">
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier"
+                    assignTo="{!layout_disabled}"/>
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}"/>
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_properties}"/>
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance}"/>
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance_properties}"/>
+
+   	<script type="text/javascript" language="javascript">
+
+        function saveLookAndFeel(cb) {
+             var attributes = new Array();
+             attributes.push({"name":"EmailSubscriptionServerVerificationPageLink", "value":$('#EmailSubscriptionServerVerificationPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+
+             $.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+                     attributes,
+                     "{!JSENCODE(Content.Site_Name__c)}",
+                     cb,
+                     '{!token}'
+             );
+             cb({});
+         }
+
+         function saveLookAndFeelClose(cb) {
+             saveLookAndFeel(cb);
+             closeTab('{!JSENCODE(tab)}');
+         }
+     </script>
+     <style>
+         .ocms-property-viewer {
+             height:inherit !important;
+         }
+     </style>
+
+     <div class="ocms-property-viewer">
+         <div class="ocms-property-viewer-header">Component Properties</div>
+         <div class="ocms-property-viewer-body ocms-property-form" >
+             <div class="ocms-property-form-panel-col" >
+                     <table cellspacing="1" class="ocms-property-table">
+                         <tbody>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Email Verification Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="EmailSubscriptionServerVerificationPageLink" id="EmailSubscriptionServerVerificationPageLink" value="{!EmailSubscriptionServerVerificationPageLink}"/>
+                                 <c:PageSelector cPassThroughId="EmailSubscriptionServerVerificationPageLink" value="{!EmailSubscriptionServerVerificationPageLink}" dialogId="EmailSubscriptionServerVerificationPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that will accept the client subscription confirmation request from the confirmation email.<br/> This page MUST contain content of the type "Portal" with the content template "Email Verification" </div>
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         </tbody>
+                     </table>
+             </div>
+             <div style="clear:both"></div>
+         </div>
+     </div>
+</apex:component>

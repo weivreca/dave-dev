@@ -1,0 +1,88 @@
+<apex:component controller="cms.EditMenuController">
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/EditMenu.js')}" />
+    <apex:attribute name="pageutil" type="cms.PageUtil" description="The pageutil" assignTo="{!putil}" required="true" />
+    <apex:attribute name="latestVersion" type="cms__Page__c" description="The latest version of the page" assignTo="{!latestVersion}" required="true" />
+    <apex:attribute name="save" type="ApexPages.Action" description="The save action" required="true" />
+    <apex:attribute name="saveAndClose" type="ApexPages.Action" description="The save and close action" required="true" />
+    <apex:attribute name="publish" type="ApexPages.Action" description="The publish action" required="true" />
+    <apex:attribute name="newVersion" type="ApexPages.Action" description="The new version action" required="true" />
+    <apex:attribute name="clonePage" type="ApexPages.Action" description="The clone action" required="true" />
+    <apex:attribute name="deletePage" type="ApexPages.Action" description="The delete action" required="true" />
+    <apex:attribute name="togglePreview" type="ApexPages.Action" description="The toggle preview action" required="true" />
+    <apex:attribute name="properties" type="ApexPages.Action" description="The properties action" required="true" />
+    <apex:attribute name="layout" type="ApexPages.Action" description="The layout action" required="true" />
+    <apex:attribute name="content" type="ApexPages.Action" description="The content action" required="true" />
+    <apex:attribute name="version" type="ApexPages.Action" description="The version action" required="true"/>
+    <apex:attribute name="collaborator" type="ApexPages.Action" description="The collaborator action" required="true"/>
+    <apex:attribute name="visitor" type="ApexPages.Action" description="The visitor action" required="true"/>
+    <apex:attribute name="email" type="ApexPages.Action" description="The email action" required="true"/>
+    <apex:attribute name="site_name" type="String" description="The current site context" />
+    <apex:attribute name="approval_process" type="String" description="Is Approval process Enabled" assignTo="{!workflowEnabled}" required="true" />
+	<apex:attribute name="tabId" type="String" description="The current tab id" />
+	<apex:attribute name="token" type="String" description="The csrf token for ajax calls" />
+	<apex:attribute name="showEmail" type="Boolean" description="Disable the email options." />
+	<apex:attribute name="showQueueEmail" type="Boolean" description="Disable the queue email options." />	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			pageToolbar = $('#pageEditToolbar').ocmsPageEditToolbar({
+				pageId: '{!pageutil.page.Id}',
+				pageName: '{!JSENCODE(pageutil.pageName)}',
+				pageVersion: '{!pageutil.page.Version_Number__c}',
+				previewURL: '{!previewUrl}',
+				pageStatus: '{!page_status}',
+				pageExpires: '{!page_expiry_date}',
+				published: {!pageutil.page.Published__c},
+				shownPreview: {!showInPreviewEnabled},
+				allowPublishedDelete: {!allowPublishedDelete},
+				allowTags: {!allowTags},
+				allowSave: {!saveEnabled},
+				allowClone: {!cloneEnabled},
+				allowPublish: {!publishEnabled},
+				allowNewVersion: {!newVersionEnabled},
+				allowDelete: {!deleteEnabled},
+				showPersonalTags: {!showPersonalTags},
+				showPublicTags: {!showPublicTags},
+				sname: '{!site_name}',
+				tabId: '{!tabId}',
+				uname:  '{!$User.FirstName}' + ' '	+ '{!$User.LastName}',
+				showShare: {!showShare},
+				showSendForApproval:{!showSendForApproval},
+				showEmail : {!showEmail},
+				showQueueEmail : {!showQueueEmail},
+				sentForApproval: {!sentForApproval},
+				allowSentForApprovalEdit:{!allowSentForApprovalEdit},
+				workflowEnabled			:  {!workflowEnabled},
+				token : '{!token}',
+				onTaxonomyAdd : function(taxonomy){
+					pageContextMenu.ocmsContentSelector('addTaxonomy', taxonomy);
+				},
+				onTaxonomyRemove : function(taxonomy){
+					pageContextMenu.ocmsContentSelector('removeTaxonomy', taxonomy);
+				}				 
+			});
+
+        setTabStatus('{!tabId}', '{!pageutil.published}');
+		});
+
+
+	</script>
+
+	<div id="pageEditToolbar" style="height: 42px;"></div>
+
+    <apex:actionFunction action="{!save}" name="actionSave" />
+    <apex:actionFunction action="{!saveAndClose}" name="actionSaveAndClose"/>
+    <apex:actionFunction action="{!publish}" name="actionPublish" />
+    <apex:actionFunction action="{!newVersion}" name="actionNewVersion" />
+    <apex:actionFunction action="{!clonePage}" name="actionClone" />
+    <apex:actionFunction action="{!deletePage}" name="actionDelete" />
+    <apex:actionFunction action="{!togglePreview}" name="actionTogglePreview" />
+    <apex:actionFunction action="{!properties}" name="gotoProperties" />
+    <apex:actionFunction action="{!layout}" name="gotoLayout" />
+    <apex:actionFunction action="{!content}" name="gotoContent" />
+    <apex:actionFunction action="{!version}" name="gotoVersion" />
+    <apex:actionFunction action="{!email}" name="gotoEmail" />    
+    <apex:actionFunction action="{!collaborator}" name="shareCollaborator" />
+    <apex:actionFunction action="{!visitor}" name="shareVisitor" />
+
+</apex:component>

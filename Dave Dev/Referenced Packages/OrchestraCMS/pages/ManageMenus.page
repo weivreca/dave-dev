@@ -1,0 +1,394 @@
+<apex:page controller="cms.ManageMenus" sidebar="false" showHeader="false" standardStylesheets="false" cache="false">
+
+	<head>
+		<!--  test -->
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+		<c:CmsScripts />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/ManageContentToolbar.js')}" />
+		<style type="text/css">
+			td{
+				padding-left: 30px;
+			}
+			.startFilterSelected, .startFilter{
+				cursor: pointer;
+				float: right;
+				padding: 4px;
+			}
+		</style>
+
+        <script type="text/javascript" language="javascript">
+
+			$(document).data("cms", {
+				"context" : "orchestracms",
+				"namespace": "{!namespace}"
+			});
+
+			$(document).ready(function(){
+
+				$('#manage_content_toolbar').manage_content_toolbar({
+					"sname" 			: "{!JSENCODE(sname)}",
+					"token" 			: "{!token}",
+					"passthroughList"	: $(jq('{!$Component.f.selectedView}')),
+	   				"passthroughTerm"	: $(jq('{!$Component.f.searchTerm}')),
+	   				"types"				: {!menuType}
+				});
+
+				$('.contentTagContainer').each(function(){
+
+					if($(this).find('.contentTag').size() > 0)
+				  		$(this).show();
+				});
+
+				$('.removeContentTag').bind('mouseover', function(){
+					$(this).find('.tagEditorDelete').attr('src', '{!URLFOR($Resource.CmsImages,'/btnCloseActive.png')}');
+				});
+
+				$('.removeContentTag').bind('mouseout', function(){
+					$(this).find('.tagEditorDelete').attr('src', '{!URLFOR($Resource.CmsImages,'/btnCloseInactive.png')}');
+				});
+
+				$('.contentTagExpand').bind('click', function(){
+					var container = $(this).parent();
+					if(container.css('overflow') == 'hidden'){
+
+						$('.contentTagExpand').each(function(){
+							var allContainers = $(this).parent();
+							allContainers.css('overflow', 'hidden');
+							allContainers.css('background-color', 'inherit');
+							allContainers.css('height', '25px');
+							allContainers.css('z-index', 'auto');
+							$(this).find('img').attr('src','{!URLFOR($Resource.CmsImages,'expand-closed.gif')}');
+						});
+
+						container.css('overflow', 'visible');
+						container.css('background-color', '#FFFFFF');
+						container.css('height', 'auto');
+						container.css('z-index', '100');
+						$(this).find('img').attr('src','{!URLFOR($Resource.CmsImages,'expand-open.gif')}');
+					}else{
+						container.css('overflow', 'hidden');
+						container.css('background-color', 'inherit');
+						container.css('height', '25px');
+						$(this).find('img').attr('src','{!URLFOR($Resource.CmsImages,'expand-closed.gif')}');
+					}
+
+				});
+
+				$('.contentTag').bind('click', function(){
+					// Add filter to page
+					$(jq('{!$Component.f.newTagFilter}')).val($(this).find('.contentTagId').html());
+					addTagFilter();
+				});
+
+				$('.removeContentTag').bind('click', function(){
+					// Add filter to page
+			 		$(jq('{!$Component.f.removeTagFilter}')).val($(this).find('.contentTagId').html());
+			 		removeTagFilter();
+				});
+
+			 	$('.showVersions').bind('click', function(){
+
+			 		versionClass = $(this).find('.valueShowVersions').html();
+					if($(this).data('visible') == true){
+						$(this).data('visible', false);
+						$(this).find('img').attr('src','{!URLFOR($Resource.CmsImages,'expand-closed.gif')}');
+				 		$('.' + versionClass).hide();
+					}else{
+						$(this).data('visible', true);
+						$(this).find('img').attr('src','{!URLFOR($Resource.CmsImages,'expand-open.gif')}');
+				 		$('.' + versionClass).show();
+					}
+
+			 	});
+
+			 	$('.sort').bind('click', function(){
+
+					$(jq('{!$Component.f.sortColumn}')).val($(this).find('.valueSortColumn').html());
+					changeSort();
+
+			 	});
+
+			 	$('.startFilter').bind('mouseover', function(){
+			 		$(this).css('background-color','#DBE8AD');
+			 		$(this).css('text-decoration','underline');
+			 	});
+
+			 	$('.startFilter').bind('mouseout', function(){
+			 		$(this).css('background-color','#f5f5f3');
+			 		$(this).css('text-decoration','none');
+			 	});
+
+			 	$('.startFilter').bind('click', function(){
+			 		$(jq('{!$Component.f.startFilter}')).val($(this).html());
+			 		startFilter($(this).html());
+			 	});
+
+			 	$('#refresh-button').button().click(function(){
+			 		refresh();
+			 	});
+
+			 	$('#new-menu-button').button().click(function(){
+					$('<div></div>').createContentWizard({
+						  sname: '{!JSENCODE(sname)}'
+						 , allowPublicTags: false
+						 , allowPersonalTags: false
+						 , content_type: '{!menu_type.Id}'
+						 , content_type_name: 'Menu'
+						 , afterFinish: function(data, dialog, oid){
+						     refreshTab();
+						   }
+						 , afterFinishAndEdit: function(data, dialog, oId){
+						     turnOnDebug();
+						     $.logInfo('Data {0}', data);
+						     // break out execution into asynchronous anonymous window context
+						     window.setTimeout(function(){
+						     	openContentTab(data.name,'1.0','/apex/CreateContent?sname={!JSENCODE(sname)}&instance=' + oId, oId, 'Menu');
+						     }, 0);
+						   	 // refresh source tab
+						   	 refreshTab();
+						   }
+					});
+			 	});
+			 	var buttons = $('input.ui-button');
+			    buttons.hover(
+                    function() {
+                        $(this).addClass('ui-state-hover');
+                    },
+                    function() {
+                        $(this).removeClass('ui-state-hover');
+                    }
+                );
+            	buttons.mousedown(function(){
+                        $(this).addClass('ui-state-active');
+	            	}
+	            ).mouseup(function(){
+                        $(this).removeClass('ui-state-active');
+        	    	}
+        	  	);
+
+                addTabListener( $.orchestracmsUtil.getParameter('tabid'), function(bSelected) {
+                    if (bSelected) {
+                        $.orchestracmsUtil.runIn(function() {
+                            refresh();
+                        }, 20);
+                    }
+                });
+
+			});
+
+  			function jq(myid){
+				return '#'+myid.replace(/:/g,"\\:").replace(/\./g,"\\.");
+			}
+			function convertEntity(encoded){
+				return $("<div/>").html(encoded).text();
+			}
+        </script>
+
+	</head>
+
+	<body>
+
+	  <apex:outputPanel rendered="{!showMenu}">
+
+		<div id="manage_content_toolbar"></div>
+
+		<apex:pageMessages />
+
+        <apex:form id="f" style="padding: 0px; margin: 0px;">
+
+		<apex:actionFunction action="{!reload}" 			name="refresh" 			rerender="ManagePageList"></apex:actionFunction>
+		<apex:actionFunction action="{!jumpToPage}" 		name="jumpToPage" 		rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!reload}" 			name="startFilter" 		rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!first}" 				name="first" 			rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!last}" 				name="last" 			rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!changeSort}" 		name="changeSort" 		rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!changeSort}" 		name="search" 			rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!addTagFilter}" 		name="addTagFilter" 	rerender="ManagePageList"></apex:actionFunction>
+	    <apex:actionFunction action="{!removeTagFilter}" 	name="removeTagFilter" 	rerender="ManagePageList"></apex:actionFunction>
+		<apex:actionFunction action="{!clearSearch}" 		name="clear" 			rerender="ManagePageList"></apex:actionFunction>
+
+		<apex:inputHidden id="newTagFilter" value="{!newTagFilter}" />
+		<apex:inputHidden id="removeTagFilter" value="{!removeTagFilter}" />
+		<apex:inputHidden id="startFilter" value="{!startFilter}" />
+		<apex:inputHidden id="sortColumn" value="{!newSortColumn}" />
+		<apex:inputHidden id="selectedView" value="{!selectedView}" />
+		<apex:inputHidden id="searchTerm" value="{!searchTerm}" />
+
+        <apex:outputPanel id="ManagePageList">
+
+			<div style="padding-left: 10px;">
+			<table cellspacing="0" cellpadding="5" border="0" width="950">
+			  <tr>
+			    <td colspan="8">
+				  <div style="{!IF(allowTags, '', 'display: none;')} float: right; padding-left: 10px;">
+					<apex:repeat value="{!tagFilters}" var="tag">
+					  <div class="removeContentTag" style="background-color: {!IF(tag.Type__c == 'Personal', '#C8E096','#98ADDE')}; cursor: pointer; border: 1px solid #999999; float: right; padding: 2px; margin-right: 3px;"><div class="contentTagId" style="display: none;">{!tag.Id}</div><img class="tagEditorDelete" src="{!URLFOR($Resource.CmsImages,'/btnCloseInactive.png')}" style="padding-left: 5px; float: right;" />{!tag.Name__c}</div>
+					</apex:repeat>
+				  </div>
+			    </td>
+			  </tr>
+			  <tr>
+			    <td colspan="8">
+					<div style="float: left; padding-left: 10px; display: none;">
+					  <strong>Action:</strong>
+					  <select>
+					    <option>- Select -</option>
+					  </select>
+					</div>
+					<div style="background-color: #f5f5f3; float: right;">
+					  <div class="{!IF(startFilter == 'All','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'All','#DBE8AD','#f5f5f3')};">All</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'Other','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'Other','#DBE8AD','#f5f5f3')};">Other</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'Z','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'Z','#DBE8AD','#f5f5f3')};">Z</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'Y','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'Y','#DBE8AD','#f5f5f3')};">Y</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'X','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'X','#DBE8AD','#f5f5f3')};">X</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'W','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'W','#DBE8AD','#f5f5f3')};">W</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'V','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'V','#DBE8AD','#f5f5f3')};">V</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'U','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'U','#DBE8AD','#f5f5f3')};">U</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'T','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'T','#DBE8AD','#f5f5f3')};">T</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'S','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'S','#DBE8AD','#f5f5f3')};">S</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'R','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'R','#DBE8AD','#f5f5f3')};">R</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'Q','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'Q','#DBE8AD','#f5f5f3')};">Q</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'P','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'P','#DBE8AD','#f5f5f3')};">P</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'O','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'O','#DBE8AD','#f5f5f3')};">O</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'N','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'N','#DBE8AD','#f5f5f3')};">N</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'M','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'M','#DBE8AD','#f5f5f3')};">M</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'L','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'L','#DBE8AD','#f5f5f3')};">L</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'K','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'K','#DBE8AD','#f5f5f3')};">K</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'J','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'J','#DBE8AD','#f5f5f3')};">J</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'I','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'I','#DBE8AD','#f5f5f3')};">I</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'H','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'H','#DBE8AD','#f5f5f3')};">H</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'G','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'G','#DBE8AD','#f5f5f3')};">G</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'F','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'F','#DBE8AD','#f5f5f3')};">F</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'E','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'E','#DBE8AD','#f5f5f3')};">E</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'D','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'D','#DBE8AD','#f5f5f3')};">D</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'C','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'C','#DBE8AD','#f5f5f3')};">C</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'B','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'B','#DBE8AD','#f5f5f3')};">B</div><div style="float: right; padding: 4px 0px 4px 0px;">|</div>
+					  <div class="{!IF(startFilter == 'A','startFilterSelected','startFilter')}" style="background-color: {!IF(startFilter == 'A','#DBE8AD','#f5f5f3')};">A</div>
+					</div>
+					<div style="clear: both;"></div>
+			    </td>
+			  </tr>
+			  <tr>
+			    <td style="width: 15px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;"></td>
+			    <td style="width: 75px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">Version</td>
+			    <td class="sort" style="cursor: pointer; width: 200px; background-color: {!IF(sortColumn == 'Name__c','#DBE8AD','#F4F8E6')}; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">
+			    	Name
+			    	<div style="float: right; padding-top: 2px;"><img src="{!URLFOR($Resource.CmsImages,'order-desc.gif')}" style="{!IF(sortColumn == 'Name__c' && sortDirection == 'DESC', 'display: inline;', 'display: none;')}" /><img src="{!URLFOR($Resource.CmsImages,'order-asc.gif')}" style="{!IF(sortColumn == 'Name__c' && sortDirection == 'ASC', 'display: inline;', 'display: none;')}" /></div>
+					<div style="display: none;" class="valueSortColumn">Name__c</div>
+			    </td>
+			    <td style="width: 80px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">Status</td>
+			    <td style="width: 90px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">Start Date</td>
+			    <td style="width: 90px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">Expiry Date</td>
+			    <td style="{!IF(allowTags, '', 'display: none;')} width: 200px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-right: 0px; border-bottom: 0px;">Tags</td>
+			    <td style="{!IF(allowTags, 'width: 200px;', 'width: 400px;')} width: 200px; background-color: #F4F8E6; border: 1px solid #C7D6CB ; font-weight: bold; padding: 4px; padding-left: 7px; border-bottom: 0px;">Description</td>
+			  </tr>
+              <apex:repeat value="{!ContentList}" var="contentutil">
+                  <tr>
+					  <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px;">&nbsp;</td>
+					  <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;"><div class="{!IF(contentutil.showVersionLink, 'showVersions', 'showVersionsNone')}" style="{!IF(contentutil.showVersionLink, 'cursor: pointer; ', '')}"><div class="valueShowVersions" style="display: none;">{!contentutil.latestVersion.content.Id}</div><apex:outputPanel layout="block" rendered="{!contentutil.showVersionLink}" style="float: right; padding-top: 4px;"><img src="{!URLFOR($Resource.CmsImages, 'expand-closed.gif')}" /></apex:outputPanel>{!contentutil.latestVersion.version}</div></td>
+					  <td class="ocms-clickable" style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;" onclick="openContentTab(convertEntity('{!contentutil.latestVersion.contentName}'),'{!contentutil.latestVersion.version}','/apex/CreateContent?sname={!sname}&content={!JSENCODE(contentutil.latestVersion.content.Id)}', '{!contentutil.latestVersion.content.Id}', 'Menu'); return false;">
+                      	<span class="ocms-icon-marker ocms-overlay-icon ocms-inline-block">
+							<apex:outputText rendered="{!contentutil.latestVersion.published =='Pending Approval'}">
+							<img class="ocms-icon-16 ocms-icon-16-pendingapproval" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/>
+							</apex:outputText>
+							 <apex:outputText rendered="{!contentutil.latestVersion.published !='Pending Approval'}">
+							<img class="ocms-icon-16 ocms-icon-16-menu" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/>
+							</apex:outputText>
+
+							 <apex:outputText rendered="{!contentutil.latestVersion.published =='Expired' && contentutil.latestVersion.content.cms__Published__c ==false}">
+							 	<img class="ocms-overlay-icon-marker ocms-icon-overlay-tr ocms-icon-overlay-unpublished-expired" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/>
+							</apex:outputText>
+							 <apex:outputText rendered="{!contentutil.latestVersion.published =='Expired' && contentutil.latestVersion.content.cms__Published__c ==true}">
+							 	<img class="ocms-overlay-icon-marker ocms-icon-overlay-tr ocms-icon-overlay-expired" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/>
+							</apex:outputText>
+							 <apex:outputText rendered="{!contentutil.latestVersion.published =='Unpublished'}">
+							 	<img class="ocms-overlay-icon-marker ocms-icon-overlay-tr ocms-icon-overlay-unpublished" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/>
+							</apex:outputText>
+
+						</span>
+
+                       		<span style="padding-left: 10px;"><apex:outputtext escape="false" value="{!JSENCODE(contentutil.latestversion.content.cms__Name__c)}"/></span>
+                    	</td>
+                      <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!contentutil.latestVersion.published}</td>
+                      <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!contentutil.latestVersion.publishedStartDate}</td>
+                      <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!contentutil.latestVersion.publishedEndDate}</td>
+                      <td style="{!IF(allowTags, '', 'display: none;')} background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 0px;" valign="top">
+						<div style="position: relative;">
+						<div class="contentTagContainer" style="display: none; position: absolute; left: 0px; top: 0px; width: 175px; height: 25px; overflow: hidden;">
+						<div class="contentTagExpand" style="padding: 5px 3px 3px 3px; margin: 3px 0px 0px 3px; float: left;"><img src="{!URLFOR($Resource.CmsImages, 'expand-closed.gif')}" /></div>
+                        <apex:repeat value="{!contentutil.latestVersion.tags}" var="tag">
+                          <div class="contentTag" style="cursor: pointer; background-color: {!IF(tag.Tag_Definition__r.cms__Type__c == 'Personal', '#C8E096','#98ADDE')}; float: left; padding: 2px; border: 1px solid #999999; margin: 3px 0px 0px 3px;"><div class="contentTagId" style="display: none;">{!tag.Tag_Definition__r.Id}</div>{!tag.Tag_Definition__r.cms__Name__c}</div>
+                        </apex:repeat>
+                        </div>
+                        </div>
+                      </td>
+                      <td style="background-color: {!IF(contentutil.even, '#FFFFFF', '#F4F8E6')}; border: 1px solid #C7D6CB ; border-bottom: 0px; padding: 4px; padding-left: 7px;"><div style="{!IF(allowTags, 'width: 200px;', 'width: 400px;')} line-height: 18px; height: 18px; overflow: hidden;">{!contentutil.latestVersion.content.Description__c}</div></td>
+                  </tr>
+                  <apex:repeat value="{!contentutil.versions}" var="version">
+                    <tr class="{!contentutil.latestVersion.content.Id}" style="background-color: #EAF1CF; display: none;">
+   					  <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px;">&nbsp;</td>
+					  <td class="ocms-clickable" style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;" onclick="openContentTab('{!version.contentName}','{!JSENCODE(version.version)}', '/apex/CreateContent?sname={!sname}&content={!JSENCODE(version.content.Id)}', '{!version.content.Id}', 'Menu'); return false;">{!version.version}</td>
+                      <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">&nbsp;</td>
+                      <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!version.published}</td>
+                      <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!version.publishedStartDate}</td>
+                      <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;">{!version.publishedEndDate}</td>
+                      <td style="{!IF(allowTags, '', 'display: none;')} background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; border-right: 0px; padding: 4px; padding-left: 7px;"></td>
+                      <td style="background-color: #EAF1CF; border: 1px solid #C7D6CB ; border-bottom: 0px; padding: 4px; padding-left: 7px;"><div style="{!IF(allowTags, 'width: 200px;', 'width: 400px;')} line-height: 18px; height: 18px; overflow: hidden;">{!contentutil.content.Description__c}</div></td>
+                    </tr>
+                  </apex:repeat>
+              </apex:repeat>
+			  <tr>
+			    <td colspan="8" style="padding: 4px; padding-left: 7px; border-top: 1px solid #C4CECF; text-align: center; padding-top: 8px;">
+				  <div style="float: left;">
+				    {!startRecord}-{!endRecord} of {!setCon.resultSize}
+
+				   <actionRegion>
+					   <apex:selectList value="{!pageSize}" multiselect="false" size="1" style="width:40px;" id="pageSizeSelector">
+					   		<apex:selectOptions value="{!PageSizeOptions}" />
+					   		<apex:actionSupport action="{!changePageSize}" event="onchange" />
+					   </apex:selectList>
+				   </actionRegion>
+
+				  </div>
+				  <div style="float: right;">
+					Page <apex:inputText size="3" value="{!pageNumber}" onchange="jumpToPage(); return false;" /> of {!totalPages}
+				  </div>
+				  <div style="margin: auto; text-align: center; width: 150px;">
+					<div onclick="last();" style="cursor: pointer; float: right; padding-top: 2px; padding-left: 5px; {!IF(showLast, '', 'display: none;')}">
+					  <img src="{!URLFOR($Resource.CmsImages, 'last.gif')}" style="{!IF(setCon.HasNext,'display:inline;','display:none;')}" />
+					</div>
+					<div style="float: right;">
+					  <apex:commandLink action="{!setCon.next}" rendered="{!setCon.HasNext}">Next</apex:commandlink>&nbsp;<img src="{!URLFOR($Resource.CmsImages, 'next.gif')}" style="{!IF(setCon.HasNext,'display:inline;','display:none;')}" />
+					</div>
+					<div onclick="first();" style="cursor: pointer; float: left; padding-top: 2px; padding-right: 5px; {!IF(showFirst, '', 'display: none;')}">
+					  <img src="{!URLFOR($Resource.CmsImages, 'first.gif')}" style="{!IF(setCon.HasPrevious,'display:inline;','display:none;')}" />
+					</div>
+					<div style="float: left;">
+					  <img src="{!URLFOR($Resource.CmsImages, 'previous.gif')}" style="{!IF(setCon.HasPrevious,'display:inline;','display:none;')}" />&nbsp;<apex:commandLink action="{!setCon.previous}" rendered="{!setCon.HasPrevious}">Previous</apex:commandlink>
+					</div>
+				  </div>
+				  <div style="clear: both;"></div>
+			    </td>
+			  </tr>
+			</table>
+
+			</div>
+			<br /><br />
+
+        </apex:outputPanel>
+
+  		</apex:form>
+	  </apex:outputPanel>
+
+      <apex:outputPanel rendered="{!!showMenu}">
+    	<div style="padding: 10px;">
+    		You do not have Manage Menu permission
+    	</div>
+      </apex:outputPanel>
+
+	</body>
+
+
+</apex:page>

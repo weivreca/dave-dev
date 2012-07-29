@@ -1,0 +1,110 @@
+<apex:page id="installer" controller="cms.SetUpWorkflowController" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS" standardStyleSheets="false">
+
+<html style="padding: 0px; margin: 0px;">
+
+    <head>
+
+        <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+         <!-- This is the jquery cookie extension only -->
+        <apex:includeScript value="{!$Resource.cms__jquery}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+        <c:CmsScripts />
+        <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#checkButton').button().click(function(){
+                    checkApproval();
+                });
+
+                if({!showApprovalError}){
+                $('#messagePanel').ocmsShowErrorPopup({
+                    title : $('Approval Error').html(),
+                    message : $('#messagePanel .message').html(),
+                    width: 400
+                });
+            }
+            });
+         </script>
+
+    </head>
+
+    <body>
+
+    <apex:outputPanel rendered="{!hasAccess}">
+
+        <c:SetupMenu sname="{!sname}" activeitem="approval-process" />
+
+        <div style="margin-left: 210px; padding: 10px;">
+          <div class="ocms-setup-breadcrumb">
+             <div class="ocms-setup-breadcrumb-start"></div>
+             <div class="ocms-setup-breadcrumb-item">Setup</div>
+             <div class="ocms-setup-breadcrumb-separator-active"></div>
+             <div class="ocms-setup-breadcrumb-item-active">Workflow</div>
+             <div class="ocms-setup-breadcrumb-end"></div>
+             <div class="ocms-clear"></div>
+          </div>
+        </div>
+        <div style="margin-left:220px;">
+        	<p style="font-size: 1.4em;">Activation </p>
+        	<p>Use the Check Now button to determine if the approval process has been set up and activated for this site</p>
+		</div>
+        <apex:outputPanel id="status">
+            <div id="messagePanel" style="display: none;">
+                <span class="message"><apex:outputText escape="false" value="{!message}" /></span>
+            </div>
+        </apex:outputPanel>
+
+        <apex:form >
+            <div style="margin-left: 20px;float: left;padding-right: 20px;">Last Checked: {!IF(LastCheckedDate != null,LastCheckedDate,'None')}</div>
+            <apex:actionFunction action="{!updateSetting}" name="checkApproval"  />
+            <div style="float: left;" id="checkButton">Check Now</div>
+
+            <apex:outputPanel rendered="{!showApproval}" >
+                <br/><br/>
+                <div style="margin-left: 220px;">
+                <p>Enabling the approval process intercepts the Publish action with "Submit for Approval", depending on the user's permissions.</p>
+                <p>Disabling the approval process restores the OrchestraCMS interface, but does not deactivate the approval process in Force.com.  Go to
+                    Force.com Setup to modify the approval process.
+                </p>
+
+                </div>
+                <apex:actionFunction action="{!EnableDisableApprovalProcess}" name="enableDisableApprovalProcess" rerender="status">
+                    <apex:param name="action" value="" />
+                </apex:actionFunction>
+                <div style="margin-left:20px;padding-right:70px;float:left;">Approval Process</div>
+                <div style="float: left;" id="ocmsToggleSwitch" ></div>
+
+                <script type="text/javascript">
+                    $(document).ready(function(){
+
+                    $('#ocmsToggleSwitch').ocmsToggleSwitch({
+                        'state'     : {!IF(site.ApprovalProcess__c == true, 'true', 'false')},
+                        'onText'    : 'Enabled',
+                        'offText'   : 'Disabled',
+                        'width'     : 90,
+                        'onChange'  : function(newvalue){
+                        if(newvalue){
+                            enableDisableApprovalProcess('Enable');
+                        }else{
+                            enableDisableApprovalProcess('Disable');
+                            }
+                        }
+                        });
+                    });
+                </script>
+                <br/><br/><br/>
+                 <div style="margin-left:220px;">
+                 <p style="font-size: 1.4em;">Reporting </p>
+                 <a href="http://orchestracmsaddons-developer-edition.na12.force.com/apex/OrchestraCMSApprovalReports" target="_blank"><span style="color: #788E1E;font-size: 1.1em;">Click here to install sample set of Salesforce dashboards and reports.  These reports provide a basic overview of your OrchestraCMS approval process</span></a>
+                </div>
+            </apex:outputPanel>
+        </apex:form>
+    </apex:outputPanel>
+  <apex:outputPanel rendered="{!!hasAccess}">
+    <div style="margin-left: 10px;padding: 10px;">You do not have Setup > Workflow permission   </div>
+  </apex:outputPanel>
+</body>
+</html>
+</apex:page>

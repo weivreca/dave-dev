@@ -1,0 +1,136 @@
+<apex:component id="c11" controller="cms.DynamicListEditor" allowDml="true">
+
+	<apex:attribute name="disabled" type="Boolean" description="Whether or not the component input should be disabled." assignTo="{!disabled}" />
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />    
+    <head>
+    	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui,  '/css/ocms.controls.css')}" />
+        <script type="text/javascript">
+             
+			$(document).ready(function(){
+				
+				ce.content_editor('registerSaveFunction', function() {
+				
+					var types = $('.selected-type'); 
+					var types_list = '';
+					
+					for( var i=0; i < types.length; ++i) {
+						types_list += $(types[i]).attr('id'); 
+						if(i+1 < types.length) {
+							types_list += ';';
+						}
+					}
+				
+					var data = {};
+					data['action'] = 'saveProperties';
+					data['content_id'] = '{!content.Id}';
+				
+					data['SelectedContentTypes'] = types_list;
+					data['DynamicListMaxItems'] = $(jq('{!$Component.de.i2}')).val();
+					data['ListType'] = 'Dynamic'; 
+					data['DynamicListDefaultLayout'] = $(jq('{!$Component.de.i3}')).val();
+				
+					$.ajax({
+						url: '/apex/ListEditorAjaxResponse',
+						data: data,
+						async: false,
+						type: 'POST'
+	        		});  
+				
+				});	
+				
+			
+				$('#addContentType').button({disabled:{!disabled}});	
+				if(!{!disabled}) {
+			
+					$('#addContentType').click(function(){
+					
+						var selected = $(jq('{!$Component.de.i1}')+' option:selected');
+						
+						for(i=0; i < selected.length; ++i) {
+							
+							var option = $(selected[i]);	 
+							newSelected = $('<div class="selected-type" id="'+option.attr('value')+'"><div class="ocms-actions"><a class="delete" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" /></a></div><div class="label">'+option.html()+'</div></div>');
+							setupDeleteButton($(newSelected.find('.delete')));
+							$('#SelectedTypes').append(newSelected); 
+							option.remove(); 
+						}
+					
+						return false; 
+					
+					}); 
+					
+					$.each($('.delete'), function(){
+						setupDeleteButton($(this));
+					});
+				} else {
+					$('#addContentType').click(function(){
+						return false; 
+					}); 
+				}
+
+
+				function setupDeleteButton(button) {
+					button.click(function(){				
+						var element = button.parent().parent();
+						var name = element.find('.label').html(); 
+						var id = element.attr('id');
+						var option = $('<option value="'+id+'">'+name+'</option>'); 
+						$(jq('{!$Component.de.i1}')).append(option);
+						element.remove();  
+					}); 
+				}			
+				
+			}); 
+     
+        </script>
+    </head>
+    
+            
+    <apex:outputPanel layout="block" style="padding: 5px;">
+       	<apex:form id="de">
+            <table>
+              <tr>
+                <td>List Content Type</td>
+                <td>
+                    <apex:selectList id="i1" value="{!ContentType}" size="1" multiselect="false" disabled="{!disabled}" >
+                        <apex:selectOptions value="{!ContentTypeOptions}" />
+                    </apex:selectList>
+                    &nbsp;&nbsp;<button id="addContentType">Add</button>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+              	<td colspan="2">
+              		<div id="SelectedTypes">
+              			<apex:repeat value="{!SelectedTypes}" var="type">
+              				<div class="selected-type" id="{!type.Value}">
+              					<div class="ocms-actions"><apex:outputText escape="false" rendered="{!!disabled}" ><a class="delete" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" /></a></apex:outputText></div>
+              					<div class="label">{!type.Label}</div>
+              				</div>
+              			</apex:repeat>		
+              		</div>
+              		<apex:inputHidden id="i4" value="{!SelectedContentTypes}" />
+              	</td>
+              </tr>
+              <tr>
+                <td>Maximum Items</td>
+                <td><apex:inputText id="i2" value="{!MaxItems}" disabled="{!disabled}" size="6" /></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Listable Template</td>
+                <td>
+                	<apex:selectList id="i3" value="{!DefaultLayout}" size="1" multiselect="false" disabled="{!disabled}">
+                		<apex:selectOptions value="{!LayoutOptions}" />
+                	</apex:selectList>
+                </td>
+                <td></td>
+              </tr>
+                 
+            </table>
+        </apex:form>
+    </apex:outputPanel>
+
+
+</apex:component>

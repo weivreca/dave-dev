@@ -1,0 +1,44 @@
+<apex:component controller="cms.TaxonomyEditorController" >
+
+        <apex:attribute name="content" type="cms__Content__c" description="The taxonomy" assignTo="{!taxonomy}" />
+        <apex:attribute name="disabled" type="Boolean" description="Current Disabled State" assignTo="{!disabled}" />
+        <apex:attribute name="token" type="String" description="Session Security Token" />
+
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomyManager.js')}" />
+        <!--<apex:includeScript value="{!URLFOR($Resource.OrchestraCMSUI, '/taxonomy/TaxonomyManagerDlgs.js')}" />-->
+        <style>
+
+            .ocms-content-editor-panel {
+                padding:0;
+            }
+
+        </style>
+        <script type="text/javascript">
+              var taxonomyMgr;
+              $(document).ready(function() {
+                   taxonomyMgr = $('#taxonomyMgr').ocmsTaxonomyManager({
+                       token : '{!token}'
+                       ,sname: '{!JSENCODE(taxonomy.Site_Name__c)}'
+                       ,taxonomy : '{!JSENCODE(taxonomy.Id)}'
+                       ,isPublished: {!content.Published__c}
+                       ,isDisabled: {!disabled}
+                   });
+
+                   $(window).bind('resize', function() {
+                       // Calculate the ocms-content area height, based on the header/footer heights.
+                       reSizeTaxonomyContent();
+                   });
+
+            });
+
+               /**
+             * When a layout content is closed or open, this method can be called to resize the content within the taxonomy manager.
+             */
+               function reSizeTaxonomyContent() {
+                taxonomyMgr.ocmsTaxonomyManager('resize');
+               }
+        </script>
+
+    <div id="taxonomyMgr" style="height:100%;border-top: 1px solid rgb(226,235,187);border-bottom: 1px solid rgb(226,235,187);"></div>
+
+</apex:component>

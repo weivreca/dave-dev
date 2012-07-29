@@ -1,0 +1,57 @@
+<apex:component controller="cms.FormController" allowDml="true">
+
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="contentController" type="cms.CoreController" description="The executing page controller" assignTo="{!layout_controller}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<apex:attribute name="content_children" type="cms.ContentTreeNode" description="The panel unique identifier"  assignTo="{!content_children}" />
+	<apex:attribute name="content_children_attributes" type="cms.AttributeWrapper" description="The panel unique identifier" assignTo="{!content_children_attributes}" />
+	
+	<apex:attribute name="site_name" type="String" description="the name of the site the content is being rendered in" assignTo="{!site_name}" />
+	<apex:attribute name="page_mode" type="String" description="the mode the page is being rendered in" assignTo="{!page_mode}" />
+	
+	<!-- Title -->
+	<apex:outputText id="o" escape="false" rendered="{!AND(FormTitle != null, FormTitle != '')}">
+		<span class="simple-form-title"><apex:outputText value="{!FormTitle}"/></span>
+	</apex:outputText>
+	
+	<apex:outputPanel id="rerenderPanel">
+	
+		<apex:outputText rendered="{!error_messages.size > 0}">
+			<ul class="required">
+				<apex:repeat value="{!error_messages}" var="msg">
+					<li><apex:outputText value="{!msg}" /></li>
+				</apex:repeat>
+			</ul>
+		</apex:outputText> 
+		
+		<table class="ui-superform" style="{!formTable.tableStyles}">
+			<tbody>
+				<apex:repeat value="{!FormRows}" var="frow">
+					<tr>
+						<apex:repeat value="{!frow.columns}" var="fcolumn">										
+							<td class="row_{!fcolumn.column.row} column_{!fcolumn.column.column}" style="{!fcolumn.column.Style}" rowspan="{!fcolumn.column.Rowspan}" colspan="{!fcolumn.column.Colspan}" >
+								<apex:repeat value="{!fcolumn.fields}" var="field">
+									<c:InputFormField prefix="{!package_prefix}" field="{!field}" submitAction="{!saveMultiObject}" />
+								</apex:repeat>
+							</td>																								
+						</apex:repeat>
+					</tr>
+				</apex:repeat>
+			</tbody>
+			<apex:outputText escape="false" rendered="{!!ISNULL(SaveButtonText)}">
+				<tfoot>
+					<tr>
+						<td colspan="{!Columns*2}" >
+							<apex:commandButton value="{!SaveButtonText}" action="{!saveMultiObject}" styleClass="simple-form-submit-btn" />
+						</td>
+					</tr>
+				</tfoot>
+			</apex:outputText>
+		</table>
+		</apex:outputPanel>
+
+</apex:component>

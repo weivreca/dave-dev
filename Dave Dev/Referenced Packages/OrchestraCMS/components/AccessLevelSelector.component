@@ -1,0 +1,30 @@
+<apex:component controller="cms.AccessLevelSelector" access="global">
+
+  <apex:attribute name="cPassThroughId" type="String" 	description="Field identifier" 										 access="global" />
+  <apex:attribute name="disable" 	 	type="Boolean" 	description="Disable Control" 				assignTo="{!isDisabled}" access="global" />  
+  <apex:attribute name="level" 			type="Id" 		description="The panel unique identifier" 	assignTo="{!level}" 	 access="global" />
+  <apex:attribute name="widgetId" 	 	type="String" 	description="The id of the containing div" 							 access="global" />
+  <apex:attribute name="sname" 		 	type="String" 	description="Site Name" 					assignTo="{!sname}" 	 access="global" />
+  <apex:attribute name="token" 		 	type="String" 	description="Token" 												 access="global" />
+
+  <script type="text/javascript" language="javascript">   
+   
+   	$(document).ready(function(){
+   
+	 	$('#{!widgetId}access_level_selector').access_level_selector({
+				input_field: '{!cPassThroughId}',
+				widget_id: '{!widgetId}access_level_selector',
+				selected: '{!level}',
+				disabled: {!isDisabled},				
+				sname: '{!sname}',
+				token: '{!token}',
+				levels: {!levelsJSON}
+				
+			});
+			
+		}); 
+  </script> 	
+
+  <div id="{!widgetId}access_level_selector"></div>
+
+</apex:component>

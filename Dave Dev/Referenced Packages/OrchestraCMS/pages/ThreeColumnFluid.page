@@ -1,0 +1,167 @@
+<apex:page controller="cms.CoreController" id="t" showHeader="false" sidebar="false" standardStylesheets="false">
+	<apex:composition template="{!page_template}">
+		<apex:define name="header">
+			<apex:includeScript value="{!URLFOR($Resource.OrchestraCMSPublic, 'subscriptions/OCMSSubscription.js')}"/>		
+			<style media="screen" type="text/css">			
+				body {
+					margin:0;
+					padding:0;
+					border:0;			
+					width:100%;
+					background:#fff;
+					min-width:600px;		
+					font-size:90%;
+				}
+
+				.ocms-dynamicload {
+					background-image: url('{!URLFOR($Resource.jqueryui, '/css/images/General/16px_AnimatedIndeterminateProgress.gif')}');
+				    background-repeat: no-repeat;
+				    display: block;
+				    position: relative;
+				    margin: 2px;
+				    padding: 0px; 
+				    width: 16px; 
+				    height: 16px;
+				}
+
+				.ocms-taxonomyload {
+					background-image: url('{!URLFOR($Resource.jqueryui, '/css/images/General/16px_AnimatedIndeterminateProgress.gif')}');
+				    background-repeat: no-repeat;
+				    display: block;
+				    position: relative;
+				    margin: 2px;
+				    padding: 0px; 
+				    width: 16px; 
+				    height: 16px;
+				}
+				
+				.ocms-dynamicload {
+					background-image: url('{!URLFOR($Resource.jqueryui, '/css/images/General/16px_AnimatedIndeterminateProgress.gif')}');
+				    display: block;
+				    width: 16px: 
+				    height: 16px;
+				}
+				
+				#header {
+					clear:both;
+					float:left;
+					width:100%;
+				}
+				
+				#header {
+					border-bottom:1px solid #000;
+				}
+				
+				#layoutdims {
+					clear:both;
+					background:#eee;
+					border-top:4px solid #000;
+					margin:0;
+					padding:6px 15px !important;
+					text-align:right;
+				}
+
+				.colmask {
+					position:relative;	
+					clear:both;
+					float:left;
+					width:100%;			
+					overflow:hidden;		
+				}
+
+				.colright,
+				.colmid,
+				.colleft {
+					float:left;
+					width:100%;			
+					position:relative;
+				}
+				.col1,
+				.col2,
+				.col3 {
+					float:left;
+					position:relative;
+					padding:0 0 1em 0;	
+					overflow:hidden;
+				}
+
+				.threecol {
+					background:#eee;		
+				}
+				.threecol .colmid {
+					right:25%;			
+					background:#fff;		
+				}
+				.threecol .colleft {
+					right:50%;			
+					background:#f4f4f4;	
+				}
+				.threecol .col1 {
+					width:46%;			 
+					left:102%;			
+				}
+				.threecol .col2 {
+					width:21%;			
+					left:31%;			
+				}
+				.threecol .col3 {
+					width:21%;		
+					left:85%;			
+									
+				}
+
+				#footer {
+					clear:both;
+					width:100%;
+					border-top:1px solid #000;
+				}
+				
+				div {
+					padding: 0;
+					margin: 0;
+				}
+				.ocms-taxonomy-load-root-container .ocms-taxonomy-load-list.ocms-taxonomy-column-count-4 {
+					display:inline-block;
+					width:25%;
+				}
+				.ocms-taxonomy-load-root-container .ocms-taxonomy-load-list.ocms-taxonomy-column-count-3 {
+					display:inline-block;
+					width:33%;
+				}
+				.ocms-taxonomy-load-root-container .ocms-taxonomy-load-list.ocms-taxonomy-column-count-2 {
+					display:inline-block;
+					width:50%;
+				}
+				.ocms-taxonomy-load-root-container .ocms-taxonomy-load-list.ocms-taxonomy-column-count-1 {
+					display:inline-block;
+					width:100%;
+				}
+			</style>
+		</apex:define>
+
+		<apex:define name="body">
+
+			<div id="header">
+				<c:Panel id="p" panelName="header" panelController="{!controller}" panelHeight="100px" />
+			</div>
+			<div class="colmask threecol">
+				<div class="colmid">
+					<div class="colleft">
+						<div class="col1">
+							<c:Panel id="p1" panelName="column1" panelController="{!controller}" panelHeight="300px" />
+						</div>
+						<div class="col2">
+							<c:Panel id="p2" panelName="column2" panelController="{!controller}" panelHeight="300px" />
+						</div>
+						<div class="col3">
+							<c:Panel id="p3" panelName="column3" panelController="{!controller}" panelHeight="300px" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="footer">
+				<c:Panel id="p4" panelName="footer" panelController="{!controller}" panelHeight="100px" />
+			</div>
+		</apex:define>
+	</apex:composition>
+</apex:page>

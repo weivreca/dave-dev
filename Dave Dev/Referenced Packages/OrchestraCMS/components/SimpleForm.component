@@ -1,0 +1,52 @@
+<apex:component controller="cms.FormController" allowDml="true">
+
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="contentController" type="cms.CoreController" description="The executing page controller" assignTo="{!layout_controller}" />
+
+	<apex:attribute name="content_children" type="cms.ContentTreeNode" description="The panel unique identifier"  assignTo="{!content_children}" />
+	<apex:attribute name="content_children_attributes" type="cms.AttributeWrapper" description="The panel unique identifier" assignTo="{!content_children_attributes}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+
+		
+		<!-- Title -->
+		<apex:outputText id="o" escape="false" rendered="{!AND(FormTitle != null, FormTitle != '')}">
+			<span class="simple-form-title"><apex:outputText value="{!FormTitle}"/></span>
+			<br/>
+				<!-- Validation Messages -->
+				<apex:messages styleClass="required"/>
+			<br/>
+		</apex:outputText>
+	
+		<!-- Start of the form fields -->
+		<table class="simple-form-table">
+			<apex:repeat id="r" value="{!visible_fields}" var="f">
+				<apex:outputText id="o" escape="false" rendered="{!(f.field_type == 'CUSTOMTEXT') && (f.field_type!= null)}">
+					<tr><td colspan="2">{!f.label}</td></tr>
+				</apex:outputText>
+				<apex:outputText id="o1" escape="false" rendered="{!(f.field_type == 'CUSTOMTEXT') && (f.field_type == null)}">
+					<tr><td colspan="2"><br/></td></tr>
+				</apex:outputText>
+				<apex:outputText id="o2" escape="false" rendered="{!f.field_type != 'CUSTOMTEXT'}">
+					<tr>
+						<td class="simple-form-label-cell"><span class="form-input-text">{!f.label}</span></td>
+						<td class="simple-form-input-cell">
+							<c:InputFormField prefix="{!package_prefix}" field="{!f}"/>
+							<apex:outputLabel id="o3" value=" *" rendered="{!f.required}" styleClass="required"/>
+						</td>
+					</tr>
+				</apex:outputText>
+			</apex:repeat>
+			<tr>
+			  <td class="simple-form-action-cell" colspan="2">
+				<!-- Again, but now the hidden fields, we create them here to avoid empty TD cells -->
+			    <apex:commandButton value="{!SaveButtonText}" action="{!saveObject}" styleClass="simple-form-submit-btn"/>
+			  </td>
+			</tr>			
+		</table>
+	
+
+</apex:component>

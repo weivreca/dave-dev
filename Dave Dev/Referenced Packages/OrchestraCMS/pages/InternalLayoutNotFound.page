@@ -1,0 +1,76 @@
+<apex:page controller="cms.CoreController" extensions="cms.LayoutNotFoundController" id="l">
+
+<apex:composition template="{!page_template}">
+
+  <apex:define name="header">
+  	<script type="text/javascript" language="javascript">
+
+            function openTab(tabbar, label, url, object_id){
+                  if(parent != window){
+                    parent.addTab(tabbar,label,url, object_id);
+                 }
+             }
+             function openPageTab(label, version, url, object_id){
+                openTab('Page',label + ' - <em>v' + version + '</em>', url, object_id);
+             }
+
+  			 function refresh(){
+				$(window).attr('location',$(window).attr('location'));
+  			 }
+
+     </script>
+  </apex:define>
+
+  <apex:define name="body">
+
+	<apex:outputPanel layout="block" rendered="{!showRunWizard}" style="font-size: 12px; font-family: arial; padding: 20px;">
+
+	  <strong style="font-size: 18px;">Page Not Configured</strong><br /><br />
+
+	  This page has not yet been configured. Run the Page Wizard now to set the pages properties and to select a page Layout.<br /><br />
+
+	  <a href="#" onclick="openPageTab('{!JSENCODE(controller.router.page_util.page.Name__c)}','{!controller.router.page_util.version}','{!controller.router.page_util.editUrl}', '{!controller.router.page_util.page.Id}'); return false;">Launch Page Wizard</a>
+
+	</apex:outputPanel>
+
+	<apex:outputPanel layout="block" rendered="{!showSelectPageLayout}" style="font-size: 12px; font-family: arial; padding: 20px;">
+
+	  <strong style="font-size: 18px;">Page Layout Not Selected</strong><br /><br />
+
+	  A Page Layout has not yet been selected for this page.
+
+	</apex:outputPanel>
+
+	<apex:outputPanel layout="block" rendered="{!showReAssociate}" style="font-size: 12px; font-family: arial; padding: 20px">
+
+	  <strong style="font-size: 18px;">Page Layout Not Found</strong><br /><br />
+
+	  The selected page layout for this page could not be found. OrchestraCMS is looking
+	  for the Visualforce Page:
+
+	  <br /><br />
+
+	  <table border="0" cellspacing="0" cellpadding="5" style="width: 250px; background-color: #DEDEDE;">
+	    <tr>
+	      <td style="font-size: 12px; font-family: arial;">Name:</td>
+   	      <td style="font-size: 12px; font-family: arial;"><strong>{!layout.Visualforce_View__c}</strong></td>
+	    </tr>
+	    <tr>
+	      <td style="font-size: 12px; font-family: arial;">Namespace:</td>
+   	      <td style="font-size: 12px; font-family: arial;"><strong>{!layout.Namespace__c}</strong></td>
+	    </tr>
+	  </table>
+
+	  <br /><br />
+
+	  If the above information was changed in the Salesforce setup, you can:<br /><br />
+
+	  Change the above information for the appropriate Visualforce page in the Salesforce setup.<br /><br />
+
+	</apex:outputPanel>
+
+  </apex:define>
+
+</apex:composition>
+
+</apex:page>

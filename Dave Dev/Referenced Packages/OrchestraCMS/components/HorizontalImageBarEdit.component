@@ -1,0 +1,320 @@
+<apex:component controller="cms.HorizontalImageBar" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<style type="text/css">
+		#images { list-style-type: none; margin: 0; padding: 0;}
+		#images li { margin: 3px 3px 3px 0; padding: 1px; float: left; font-size: 4em; text-align: center; border: 1px solid #CCCCCC; }
+	</style>
+
+	<c:CmsScripts />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryBrowser.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/link/LinkSelector.js')}" />
+
+  	<script type="text/javascript">
+
+   		$(document).data('sname', '{!JSENCODE(content.Site_Name__c)}');
+ 		var	ImageAltText = {!ImageAltText};
+ 		var	ImageTitleText = {!ImageTitleText};
+		var ItemIdMap = {};
+
+		$(document).ready(function() {
+
+				var isPublished = {!published};
+				var isDisabled = {!layout_disabled};
+
+				if(!isPublished && !isDisabled) {
+					$('#images').sortable({
+						tolerance: 'pointer',
+						stop: function() {
+							SetValues();
+						}
+					});
+				}
+
+				var ImageLinks 		= {!ImageLinksJSON};
+				var ImageLinkNames 	= {!ImageLinkNamesJSON};
+				var ImageIdsStr 	= '{!ImageIds}';
+				var ImageIds 		= ImageIdsStr.split(',');
+				var ImageDialogs 	= [];
+
+ 				ImageAltText 		= {!ImageAltText};
+ 				ImageTitleText 		= {!ImageTitleText};
+
+				var site_name 		= '{!content.Site_Name__c}';
+				<apex:repeat id="r1" value="{!ImageLinks}" var="image">
+						$('#images').append(CreateImage({!image.Index}, "{!image.ImageId}", ImageAltText["{!image.Index}"]));
+				</apex:repeat>
+
+				SetValues();
+
+				var libBrowser = $('#AddImage').ocmsLibraryBrowser({
+	                pageHelpText: 'Lib.Browser.Help'.localize()
+				});
+			   	//Add Image
+				var AddImageDlg = $("#AddImage").dialog({
+	            	bgiframe: true,
+	            	title: 'Select Image',
+	                autoOpen: false,
+	                height: 400,
+	                width: 800,
+	                modal: true,
+			        open: function() {
+			            libBrowser.ocmsLibraryBrowser('resize');
+			        },
+			        focus: function() {
+			            libBrowser.ocmsLibraryBrowser('resize');
+			        },
+			        close: function() {
+			        },
+			        resize: function(){
+			            libBrowser.ocmsLibraryBrowser('resize');
+			        }
+				});
+
+				AddImageDlg.dialog('addButton', 'cancel'.localize(), function (event) {
+	                $(this).dialog('close');
+	            });
+	            AddImageDlg.dialog('addButton', 'select'.localize(), function (event) {
+	                var img = libBrowser.ocmsLibraryBrowser('getSelected');
+	                if(img != null)
+	                {
+						$('#images').append(CreateImage(ImageLinks.length,img.url, img.name));
+						$('#images').sortable('refresh');
+						$(this).dialog('close');
+						SetValues();
+					}
+	            });
+
+				function editProperties(index) {
+
+					var item_id = 'img-'+index;
+
+					if(ImageDialogs[index] == null){
+
+						ImageDialogs[index] = $('<div id="#editDialog-' + index + '" style="display: none;"></div>');
+
+						ImageDialogs[index].ocmsShowMultiInputDlg({
+		              			input_form: '<div><table class="ocms-input-table">'+
+											'<tr><td><label for="image-alt-text">Alternative Text</label></td><td><input name="image-alt-text" id="image-alt-text" type="text" value="'+((ImageAltText[index] == undefined || ImageAltText[index] == null || ImageAltText[index] == 'null') ? $('#'+item_id).find('.bar-image').attr('title') : ImageAltText[index])+'" size="60" /></td>'+
+											'<tr><td><label for="image-title-text">Title Text</label></td><td><input name="image-title-text" id="image-title-text" type="text" value="'+((ImageTitleText[index] == undefined || ImageTitleText[index] == null || ImageTitleText[index] == 'null') ? '' : ImageTitleText[index])+'" size="60" /></div>'+
+											'<tr><td><label for="target_url">Link</label></td><td><div id="target_url"></div></div>'+
+											'<table></div>',
+								title: 'Edit Properties',
+								minWidth: 600,
+								onOK: function(dialog, form) {
+									ImageLinks[index] = dialog.dlg.find('#target_url').page_selector_input('getSelected');
+									ImageAltText[index] = dialog.dlg.find('#image-alt-text').val();
+									ImageTitleText[index] = dialog.dlg.find('#image-title-text').val();
+
+									SetValues();
+									dialog.closeDialog();
+								},
+
+								setup: function(dialog, form) {
+
+										dialog.find('#image-alt-text').ocmsInput({instructionalText:'Necessary for accessibility compliance'});
+										dialog.find('#image-title-text').ocmsInput({instructionalText:'Text that appears when the mouse pointer hovers over the image'});
+
+										dialog.find('#target_url').page_selector_input({
+											sname: site_name,
+											input_id: 'image_link',
+											selected_name: (ImageLinkNames[index] === undefined || ImageLinkNames[index] == null || ImageLinkNames[index] == 'null' || ImageLinkNames[index] == 'undefined') ? null : ImageLinkNames[index],
+											selected: ImageLinks[index]
+										});
+
+								},
+
+								onCANCEL: null
+						});
+
+					}else{
+
+						ImageDialogs[index].ocmsShowMultiInputDlg('openDialog');
+
+					}
+
+				}
+
+
+				if(!isPublished && !isDisabled) {
+					$('#addImageButton').bind('click', function(event) {
+						$('#AddImage').dialog('open');
+						return false;
+					});
+					$('#addImageButton').button();
+				} else {
+					$('#addImageButton').button({disabled: true});
+				}
+
+				function CreateImage(index, id, name) {
+
+					var item_id = 'img-'+index;
+					ItemIdMap[index] = id;
+
+					var image = $('<li ui-widget-content ui-corner-tr ui-draggable id="'+item_id+'"></li>');
+					var container = $('<div><img class="bar-image" title="'+((name == 'null' || name == null) ? '' : name)+'" src="'+id+'" /></div>');
+
+					if(!isPublished && !isDisabled){
+
+						controls = $('<div style="position: relative"></div>');
+						edit = $('<a style="float:left;" title="Edit Properties" href="#"><img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" /></a>');
+
+						edit.bind('click', function() {
+							editProperties(index);
+							return false
+						});
+
+						remove = $('<a style="float:right;" title="Remove" href="#"><img src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" border="0" /></a>');
+						clear = $('<div style="clear:both;"></div>');
+
+						remove.bind('click', function() {
+							image.remove();
+							SetValues();
+							return false;
+						});
+
+						controls.append(edit);
+						controls.append(remove);
+						controls.append(clear);
+						container.append(controls);
+
+					}
+
+					image.append(container);
+					return image;
+				}
+
+				function SetValues() {
+					if(!isPublished) {
+						$('#images').sortable('refresh');
+						var ordered = $('#images').sortable('toArray');
+
+						var image_ids = '';
+						var links = '';
+
+						for(i=0; i < ordered.length; ++i) {
+
+							var id = ItemIdMap[i];
+							image_ids += id;
+
+							if(ImageLinks[i] !== undefined && ImageLinks[i] !== null && ImageLinks[i] != '') {
+								link = ImageLinks[i];
+								links += link['type']+','+link['id']+','+link['targetType']+','+link['pageName']+','+link['width']+','+link['height']+','+link['url'];
+							} else {
+								ImageLinks[i] = '';
+								links += ',,,,,';
+							}
+
+							if(i < ordered.length - 1 ) {
+								image_ids += ',';
+								links += ';';
+							}
+						}
+					}
+					$('#ImageIds').val(image_ids);
+					$('#Links').val(links);
+
+				}
+
+			});
+
+			function saveLookAndFeel(cb) {
+				var attributes = new Array();
+				attributes.push({"name":"ImageIds", "value":$('#ImageIds').val(), "type":"Text"});
+				attributes.push({"name":"Links", "value":$('#Links').val(), "type":"Text"});
+				attributes.push({"name":"Alignment", "value":$('#Alignment').val(), "type":"Text"});
+
+				var ordered = $('#images').sortable('toArray');
+				for(var i=0; i<ordered.length; ++i) {
+					var id = ItemIdMap[i];
+
+					attributes.push({"name":"AltText"+i, "value":((ImageAltText[i] == undefined || ImageAltText[i] == null || ImageAltText[i] == 'null') ? '' : ImageAltText[i]), "type":"Text"});
+					attributes.push({"name":"TitleText"+i, "value":((ImageTitleText[i] == undefined || ImageTitleText[i] == null || ImageTitleText[i] == 'null') ? '' : ImageTitleText[i]), "type":"Text"});
+				}
+
+				$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+					attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}'
+				);
+ 			}
+
+ 			function saveLookAndFeelClose(cb) {
+ 				saveLookAndFeel(cb);
+ 				closeTab('{!JSENCODE(tab)}');
+ 			}
+
+	</script>
+
+
+	<apex:outputPanel id="o" >
+		<form>
+
+			<input type="hidden" name="ImageIds" id="ImageIds"  value="{!ImageIds}" />
+			<input type="hidden" name="Links" id="Links" value="{!Links}" />
+			<input type="hidden" name="Properties" id="Properties" value="{!Properties}" />
+
+			<table>
+				<tr>
+					<td><strong>Align</strong></td>
+					<td>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+
+							<select id="Alignment" name="Alignment">
+								<apex:repeat value="{!AlignmentOptions}" var="a" >
+									<apex:outputText escape="false" rendered="{!a.selected}">
+										<option value="{!a.so.Value}" selected="selected"><apex:outputText value="{!a.so.Label}" /></option>
+									</apex:outputText>
+									<apex:outputText escape="false" rendered="{!!a.selected}">
+										<option value="{!a.so.Value}"><apex:outputText value="{!a.so.Label}" /></option>
+									</apex:outputText>
+								</apex:repeat>
+							</select>
+
+						</apex:outputText>
+						<apex:outputText rendered="{!layout_disabled}">
+
+							<select id="Alignment" name="Alignment" disabled="disabled">
+								<apex:repeat value="{!AlignmentOptions}" var="a" >
+									<apex:outputText escape="false" rendered="{!a.selected}">
+										<option value="{!a.so.Value}" selected="selected"><apex:outputText value="{!a.so.Label}" /></option>
+									</apex:outputText>
+									<apex:outputText escape="false" rendered="{!!a.selected}">
+										<option value="{!a.so.Value}"><apex:outputText value="{!a.so.Label}" /></option>
+									</apex:outputText>
+								</apex:repeat>
+							</select>
+
+						</apex:outputText>
+
+					</td>
+				</tr>
+			</table>
+
+		</form>
+	</apex:outputPanel>
+
+	<br />
+
+	<div style="position: relative;" id="addImageContainer">
+		<a href="#" id="addImageButton"><strong><span style="color: #336600;">Add</span> Image</strong></a>
+	</div>
+
+	<br />
+
+	<div id="AddImage">
+    </div>
+
+
+	<ul id="images">
+	</ul>
+
+
+</apex:component>

@@ -1,0 +1,70 @@
+<apex:component controller="cms.Listable" allowDml="true">
+
+<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+<apex:outputPanel layout="block" style="padding: 5px;">
+
+ 	<script type="text/javascript" language="javascript">
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"ListSummary", "value":$('#ListSummary').val(), "type":"Text"});
+			attributes.push({"name":"TargetLink", "value":$('#TargetLink').val(), "type":"Text"});
+			attributes.push({"name":"ListableMoreLink", "value":$('#MoreLink').val(), "type":"Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	</script>
+
+	<form>
+
+		<table>
+			<tr>
+				<td>List Summary</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<textarea id="ListSummary" name="ListSummary" disabled="disabled"><apex:outputText value="{!ListSummary}" /></textarea>
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<textarea id="ListSummary" name="ListSummary"><apex:outputText value="{!ListSummary}" /></textarea>
+					</apex:outputText>
+				</td>
+			</tr>
+			<tr>
+				<td>Target Link</td>
+				<td>
+					<input type="hidden" id="TargetLink" name="TargetLink" value="{!TargetLink}" />
+				    <c:PageSelector cPassThroughId="TargetLink" value="{!TargetLink}" dialogId="TargetLinkDlg" disabled="{!layout_disabled}" sname="{!content.cms__Site_Name__c}" token="{!token}" />
+				</td>
+			</tr>
+	        <tr>
+	        	<td>More Link</td>
+	            <td>
+	            	<apex:outputText escape="false" rendered="{!layout_disabled}">
+	            		<input type="text" id="MoreLink" name="MoreLink" value="{!ListableMoreLink}" disabled="disabled" />
+	            	</apex:outputText>
+	            	<apex:outputText escape="false" rendered="{!!layout_disabled}">
+	            		<input type="text" id="MoreLink" name="MoreLink" value="{!ListableMoreLink}" />
+	            	</apex:outputText>
+	            </td>
+	         </tr>
+		</table>
+	</form>
+</apex:outputPanel>
+
+</apex:component>

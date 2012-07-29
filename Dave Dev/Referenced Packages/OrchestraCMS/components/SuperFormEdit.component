@@ -1,0 +1,347 @@
+<apex:component controller="cms.FormController" allowDml="true" >
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<head>
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui,  '/css/ocms.controls.css')}" />
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.tableeditor.css')}" />
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.fieldselector.css')}" />
+
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TableEditor.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/UniversalLookup.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/DateTimeSelector.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/ToolTip.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/PickList.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/MultiPickList.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/content.utils.js')}" />
+
+		<script type="text/javascript">
+
+			jQuery(document).data('removeBtn', '{!URLFOR($Resource.CmsImages,'/btn_remove.png')}');
+			jQuery(document).data('editBtn', '{!URLFOR($Resource.CmsImages,'/btn_edit.png')}');
+			jQuery(document).data('handleImg', '{!URLFOR($Resource.CmsImages,'/handle.png')}');
+			jQuery(document).data('cleardot', '{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}');
+
+			jQuery(document).data('OjbectFieldsMapJSON', {!ObjectFieldsMapJSON});
+			jQuery(document).data('Content.Published__c', {!published});
+			jQuery(document).data('Content.Id', '{!Content.Id}');
+			jQuery(document).data('Content.Name', '{!Content.Name}');
+			jQuery(document).data('sname', '{!JSENCODE(Content.Site_Name__c)}');
+			jQuery(document).data('InitFieldData', {!SelectedFieldData});
+			jQuery(document).data('tooltipIcon', '{!URLFOR($Resource.CmsImages,'/inline_help.png')}');
+ 			jQuery(document).data('defaultCellWidth', '{!DefaultCellWidth}');
+ 			jQuery(document).data('defaultCellHeight', '{!DefaultCellHeight}');
+ 			jQuery(document).data('defaultCellPadding', '{!DefaultCellPadding}');
+ 			jQuery(document).data('disabled',{!published});
+ 			jQuery(document).data('token', '{!token}');
+
+ 			function saveLookAndFeel(cb) {
+
+				var attributes = new Array();
+
+				attributes.push({"name":"ConfirmationLink", "value":$('#ConfirmationLinkVal').val(), "type":"Text"});
+				attributes.push({"name":"DuplicateLink", "value":$('#DuplicateLinkVal').val(), "type":"Text"});
+				attributes.push({"name":"InvalidURLLink", "value":$('#InvalidURLLinkVal').val(), "type":"Text"});
+				attributes.push({"name":"TableDefinition", "value":$('#tablelayout').table_editor('serialize'), "type":"Text"});
+				attributes.push({"name":"InlineErrors", "value":$('#InlineErrors:checked').length > 0, "type":"Text"});
+
+				if({!!ISNULL(SaveButtonText)}) {
+					attributes.push({"name":"SaveButtonText", "value":$('#saveButtonText').val(), "type":"Text"});
+				}
+
+				$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"Form","parent_id":null},
+					attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}'
+				);
+
+ 			}
+
+ 			function saveLookAndFeelClose(cb) {
+ 				actionSave(cb);
+ 				closeTab('{!JSENCODE(tab)}');
+ 			}
+
+		</script>
+
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/SuperForm.js')}" />
+	</head>
+
+	<body>
+		<table>
+		<tr>
+		  <td>
+			<form>
+		   		<div>
+		       		<table class="inputForm">
+		       			<!-- Legacy Input Submit Buttons can now be dropped onto the form-->
+						<apex:outputText escape="false" rendered="{!!ISNULL(SaveButtonText)}">
+							<tr>
+							  <td>
+							  	Save Button Text
+							  </td>
+							  <td>
+								<apex:outputText rendered="{!layout_disabled}">
+							  		<input type="text" name="saveButtonText" id="saveButtonText" value="{!SaveButtonText}" disabled="disabled" />
+							  	</apex:outputText>
+							  	<apex:outputText rendered="{!!layout_disabled}">
+									<input type="text" name="saveButtonText" id="saveButtonText" value="{!SaveButtonText}" />
+							  	</apex:outputText>
+							  </td>
+							</tr>
+		       			</apex:outputText>
+						<tr>
+						  <td>
+						 	Confirmation Page
+						  </td>
+						  <td>
+						  	<input type="hidden" name="ConfirmationLinkVal" id="ConfirmationLinkVal" value="{!ConfirmationLink}" />
+					    	<c:PageSelector cPassThroughId="ConfirmationLinkVal" value="{!ConfirmationLink}" dialogId="ConfirmationLink" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+						  </td>
+						</tr>
+						<tr>
+						  <td>
+						 	Duplicate Page
+						  </td>
+						  <td>
+						  	<input type="hidden" name="DuplicateLinkVal" id="DuplicateLinkVal" value="{!DuplicateLink}" />
+					    	<c:PageSelector cPassThroughId="DuplicateLinkVal" value="{!DuplicateLink}"  dialogId="DuplicateLink" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+						  </td>
+						</tr>
+						<tr>
+						  <td>
+							Invalid URL Page
+						  </td>
+						  <td>
+						  	<input type="hidden" name="InvalidURLLinkVal" id="InvalidURLLinkVal" value="{!InvalidURLLink}" />
+					    	<c:PageSelector cPassThroughId="InvalidURLLinkVal" value="{!InvalidURLLink}" dialogId="InvalidURLLink" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+						  </td>
+						</tr>
+						<tr>
+						  <td>
+							Show Inline Errors
+						  </td>
+						  <td>
+						  	<apex:outputText escape="false" rendered="{!!content.cms__Published__c}">
+						  		<apex:outputText escape="false" rendered="{!!InlineErrors}">
+						  			<input type="checkbox" name="InlineErrors" id="InlineErrors" value="{!InlineErrors}" />
+						  		</apex:outputText>
+						  		<apex:outputText escape="false" rendered="{!InlineErrors}">
+						  			<input type="checkbox" name="InlineErrors" id="InlineErrors" value="{!InlineErrors}" checked="checked" />
+						  		</apex:outputText>
+						  	</apex:outputText>
+						  	<apex:outputText escape="false" rendered="{!content.cms__Published__c}">
+						  		<apex:outputText escape="false" rendered="{!!InlineErrors}">
+						  			<input type="checkbox" name="InlineErrors" id="InlineErrors" value="{!InlineErrors}" disabled="disabled"/>
+						  		</apex:outputText>
+						  		<apex:outputText escape="false" rendered="{!InlineErrors}">
+						  			<input type="checkbox" name="InlineErrors" id="InlineErrors" value="{!InlineErrors}" checked="checked" disabled="disabled"/>
+						  		</apex:outputText>
+						  	</apex:outputText>
+						  </td>
+						</tr>
+					</table>
+				</div>
+			</form>
+			</td>
+		    <td valign="top" style="width:30% padding: 5px; overflow: auto;" rowspan="2">
+				<div style="margin-bottom: 10px;">
+					Salesforce Object&nbsp;&nbsp;
+					<apex:outputText rendered="{!layout_disabled}">
+						<select id="addObjectSelect" name="addObjectSelect" size="1" disabled="disabled">
+							<apex:repeat value="{!objectSelectOptions}" var="option">
+								<option value="{!option.so.Value}"><apex:outputText value="{!option.so.Label}" /></option>
+							</apex:repeat>
+						</select><button id="addObject">Add</button>
+					</apex:outputText>
+					<apex:outputText rendered="{!!layout_disabled}">
+						<select id="addObjectSelect" name="addObjectSelect" size="1">
+							<apex:repeat value="{!objectSelectOptions}" var="option">
+								<option value="{!option.so.Value}"><apex:outputText value="{!option.so.Label}" /></option>
+							</apex:repeat>
+						</select><button id="addObject">Add</button>
+					</apex:outputText>
+				</div>
+				<div id="elementOptionAccordion" style="width: 397px; padding:0px; float: left; margin-right: 8px;">
+				<h3><a href="#">Form Elements</a></h3>
+				<div>
+					<ul id="form_elements_container" class="available_container ui-sortable" style="width: 100%">
+						<li class="sortitem tableitem" id="field-rich-text">
+							<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+							<span class="draggable-label">Text</span>
+						</li>
+						<li class="sortitem tableitem" id="submit-button">
+							<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+							<span class="draggable-label">Submit Button</span>
+						</li>
+						<apex:outputText escape="false" rendered="{!hasRecaptcha==false}">
+							<li class="sortitem tableitem" id="RECAPTCHA">
+								<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+								<span class="draggable-label">reCAPTCHA</span>
+							</li>
+						</apex:outputText>
+					</ul>
+				</div>
+
+				<apex:repeat value="{!fieldSets}" var="obj">
+					<h3><a href="#"><apex:outputText value="{!obj.ObjectName+' Fields'}" /></a></h3>
+					<div>
+						<ul id="{!obj.ObjectName}_fields" class="available_container ui-sortable" style="width: 100%">
+								<apex:repeat value="{!obj.fields}" var="field">
+									<apex:outputText escape="false" rendered="{!!field.isSelected}">
+									<li class="field-row tableitem" id="{!obj.ObjectName}:{!field.FieldName}">
+										<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+										<span class="draggable-label" style="width: 100px;"><apex:outputText value="{!field.FieldLabel}" /></span>
+										<span class="draggable-label" style="width: 80px;"><apex:outputText value="{!field.FieldType}" /></span>
+										<span class="draggable-label" style="width: 40px;">
+
+											<apex:outputText escape="false" rendered="{!field.isRequired}">
+												<input type="checkbox" value="req"  disabled="true" checked="true" />
+											</apex:outputText>
+											<apex:outputText escape="false" rendered="{!!field.isRequired}">
+												<input type="checkbox" value="req"  disabled="true" />
+											</apex:outputText>
+
+										</span>
+									</li>
+									</apex:outputText>
+								</apex:repeat>
+						</ul>
+
+						<ul class="available_container ui-sortable" style="width: 100%">
+								<li class="sortitem tableitem" id="{!obj.ObjectName}-inputFile">
+									<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+									<span class="draggable-label" >Attachment</span>
+								</li>
+						</ul>
+					</div>
+				</apex:repeat>
+			</div>
+			<div style="width:415px;">&nbsp;</div>
+			</td>
+		  </tr>
+		  <tr>
+			<td valign="top" rowspan="2" style="padding: 5px; width: 70%; overflow: auto;">
+					<div id="hiddenfields" class="ui-widget ui-widget-content ui-helper-clearfix" style="margin-bottom: 10px; border: 1px dashed #ccc;">
+							<div style="background-color: #fff; color: #ccc; padding: 5px;">Drop Hidden Fields Here</div>
+
+							<apex:repeat value="{!hidden_fields}" var="field">
+								<div id="{!field.field.Id}" class="form-item tableitem" style="text-align: inherit;">
+									<!--  Overlay for hovers -->
+									<div class="form-item-hover">
+										<div class="ocms-actions"><apex:outputText escape="false" rendered="{!field.field_type != 'ATTACHMENT'}"><a class="edit" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" /></a></apex:outputText><a class="delete" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" /></a></div>
+										<div class="form-item-handle" style="border: none;"><span class="ui-icon ui-icon-arrow-4"></span></div>
+									</div>
+									<div class="form-item-cell sample" style="text-align: inherit;">
+										<apex:outputText escape="false" rendered="{!OR(field.field_type == 'STRING', field.field_type == 'URL', field.field_type == 'EMAIL', field.field_type == 'CURRENCY', field.field_type == 'DOUBLE', field.field_type == 'PERCENT', field.field_type == 'PHONE', field.field_type == 'INTEGER')}">
+											<input type="text" value="{!field.label}" disabled="true" style="width:{!IF(ISBLANK(field.width), '200', field.width)}px;" />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'DATE'}">
+											<c:DateTimeSelector cDisable="true" cName="sample_{!field.field.Id}" cShowDateLabel="false" cType="date" cDateTime="" cPassthroughId="placeholder_{!field.field.Id}" />
+											<input type="hidden" id="placeholder_{!field.field.Id}" />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'DATETIME'}" >
+											<c:DateTimeSelector cDisable="true" cName="sample_{!field.field.Id}" cShowDateLabel="false" cType="datetime" cDateTime="" cPassthroughId="placeholder_{!field.field.Id}" />
+											<input type="hidden" id="placeholder_{!field.field.Id}" />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'PICKLIST'}">
+											<c:PickList cDisable="false" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="sample_{!field.field.id}" cPassthroughId="sample_{!field.field.id}" cType="{!field.picklistType}" cValue=""  />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'MULTIPICKLIST'}">
+											<c:MultiPicklist cDisable="false" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="sample_{!field.field.id}" cPassthroughId="sample_{!field.field.id}" cType="{!field.picklistType}" cValue=""  />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'BOOLEAN'}">
+											<input type="checkbox" disabled="true" />
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'TEXTAREA'}">
+											<textarea disabled="true" rows="3" width="{!field.width}px"></textarea>
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'REFERENCE'}">
+											<div><span>REFERENCE: {!field.label}</span></div>
+										</apex:outputText>
+										<apex:outputText escape="false" rendered="{!field.field_type == 'ID'}">
+											<div><span>ID: {!field.label}</span></div>
+										</apex:outputText>
+									</div>
+									<div style="clear: both;"></div>
+								</div>
+							</apex:repeat>
+					</div>
+
+					<div id="tablelayout">
+						<table style="{!formTable.tableStyles}">
+							<tbody>
+								<apex:repeat value="{!FormRows}" var="row">
+									<tr>
+										<apex:repeat value="{!row.columns}" var="col">
+											<td style="{!col.column.style}" colspan="{!col.column.colspan}" rowspan="{!col.column.rowspan}">
+												<apex:repeat value="{!col.fields}" var="field">
+													<div id="{!field.field.Id}" class="form-item tableitem" style="{!IF(OR(field.field_type == 'OCMSRICHTEXT', field.field_type == 'OCMSPLAINTEXT'), 'height: auto;', '')} text-align: inherit;" >
+														<!--  Overlay for hovers -->
+														<div class="form-item-hover">
+															<div class="ocms-actions"><apex:outputText escape="false" rendered="{!AND(field.field_type != 'ATTACHMENT', field.field_type != 'RECAPTCHA')}"><a class="edit" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" /></a></apex:outputText><a class="delete" onclick="return false;" href="#"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" /></a></div>
+															<div class="form-item-handle" style="border: none;"><span class="ui-icon ui-icon-arrow-4"></span></div>
+														</div>
+
+														<div class="form-item-cell sample" style="text-align: inherit;">
+															<apex:outputText escape="false" rendered="{!OR(field.field_type == 'STRING', field.field_type == 'URL', field.field_type == 'EMAIL', field.field_type == 'CURRENCY', field.field_type == 'DOUBLE', field.field_type == 'PERCENT', field.field_type == 'PHONE', field.field_type == 'INTEGER')}">
+																<input type="text" value="{!field.label}" disabled="true" style="width:{!IF(ISBLANK(field.width),'200',field.width)}px;" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'DATE'}">
+																<c:DateTimeSelector cDisable="true" cName="sample_{!field.field.Id}" cShowDateLabel="false" cType="date" cDateTime="" cPassthroughId="placeholder_{!field.field.Id}" />
+																<input type="hidden" id="placeholder_{!field.field.Id}" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'DATETIME'}" >
+																<c:DateTimeSelector cDisable="true" cName="sample_{!field.field.Id}" cShowDateLabel="false" cType="datetime" cDateTime="" cPassthroughId="placeholder_{!field.field.Id}" />
+																<input type="hidden" id="placeholder_{!field.field.Id}" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'PICKLIST'}">
+																<c:PickList cDisable="false" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="sample_{!field.field.id}" cPassthroughId="sample_{!field.field.id}" cType="{!field.picklistType}" cValue=""  />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'MULTIPICKLIST'}">
+																<c:MultiPicklist cDisable="false" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="sample_{!field.field.id}" cPassthroughId="sample_{!field.field.id}" cType="{!field.picklistType}" cValue=""  />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'BOOLEAN'}">
+																<input type="checkbox" disabled="true" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'TEXTAREA'}">
+																<textarea disabled="true" rows="3" width="{!field.width}px"></textarea>
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'ATTACHMENT'}">
+																<input type="file" disabled="true" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!OR(field.field_type == 'OCMSPLAINTEXT', field.field_type == 'OCMSRICHTEXT')}">
+																<apex:outputText escape="false" value="{!IF(field.value == '', '&nbsp;', field.value)}" />
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!OR(field.field_type == 'SUBMITBUTTON', field.field_type == 'RESETBUTTON', field.field_type == 'LINKBUTTON')}">
+																<apex:outputText escape="false"><input type="submit" value="{!field.value}" disabled="disabled" /></apex:outputText>
+															</apex:outputText>
+															<apex:outputText escape="false" rendered="{!field.field_type == 'RECAPTCHA'}">
+																<div class="recaptcha">reCAPTCHA</div>
+															</apex:outputText>
+														</div>
+														<div style="clear: both;"></div>
+													</div>
+												</apex:repeat>
+											</td>
+										</apex:repeat>
+									</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+						<br />
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+			</tr>
+		</table>
+	</body>
+
+</apex:component>

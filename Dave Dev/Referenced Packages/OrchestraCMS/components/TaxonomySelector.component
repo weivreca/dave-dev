@@ -1,0 +1,32 @@
+<apex:component controller="cms.TaxonomySelectorController" access="global">
+
+	<apex:attribute name="cPassThroughId"   type="String"   description="Field identifier"                              access="global"/>
+	<apex:attribute name="dialogId"         type="String"   description="dialog identifier ID"                          access="global"/>
+	<apex:attribute name="disabled"         type="Boolean"  description="determines whether or not editing is disabled" access="global"/>
+    <apex:attribute name="sname"            type="String"   description="Site Name"                                     access="global" required="true" assignTo="{!sName}"/>
+    <apex:attribute name="token"            type="String"   description="csrf token"                                    access="global" required="true"/>
+    <apex:attribute name="contentId"        type="String"   description="The record ID of content."                     access="global" required="true"/>
+    <apex:attribute name="taxonomyName"     type="String"   description="The name of the Taxonomy to use."              access="global" required="true" assignTo="{!taxonomyName}" />
+
+    <script type="text/javascript" language="javascript">
+
+    	$(document).ready(function(){
+
+		 	$('#{!dialogId}_tsi').taxonomySelectorInput({
+ 				 input_field: '{!cPassThroughId}',
+				 dialog_id: '{!dialogId}_selector_dialog',
+                 contentId: '{!contentId}',
+                 taxonomyId : '{!taxonomyId}',
+                 taxonomyName : '{!taxonomyName}',
+				 disabled: {!disabled},
+ 				 sname: '{!sname}',
+ 				 token: '{!token}'
+ 			});
+
+ 		});
+	</script>
+
+
+	<div id="{!dialogId}_tsi"></div>
+
+</apex:component>

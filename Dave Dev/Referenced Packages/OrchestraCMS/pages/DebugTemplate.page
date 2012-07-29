@@ -1,0 +1,267 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.DebugController" standardStylesheets="false">
+
+<head>
+  <title>{!router.page_title}</title>
+  <meta name="description" content="{!router.page_description}"/>
+  <meta name="keywords" content="{!router.page_keywords}"/>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+  <!-- This is the jquery cookie extension only -->
+  <apex:includeScript value="{!$Resource.cms__jquery}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+
+  <script type="text/javascript">
+    function jq(myid){
+       return '#'+myid.replace(/:/g,"\\:").replace(/\./g,"\\.");
+    }
+
+    function hide(){
+      $('#debugInfo').hide();
+    }
+
+	var scrollTimer;
+
+	function shiftControls(){
+		window.clearTimeout(scrollTimer);
+		window.setTimeout(function(){
+       		$('#topControls').css('top', $(window).scrollTop()+"px");
+			$('#bottomControls').css('bottom', -$(window).scrollTop()+"px");
+			$(jq('{!$Component.f.ss}')).attr('value',$(window).scrollTop());
+		},500);
+	}
+
+    $('document').ready(function(){
+
+    	$('.debugProperties').click(function(){
+    	  details = $(this).find('.debugPropertiesDetails');
+    	  if(details.css('display') != 'none'){
+    	    details.fadeOut(250);
+    	  }else{
+    	    details.fadeIn(250);
+    	  }
+    	});
+
+    });
+
+    $(document).ready(function(e) {
+       $(".date").datepicker();
+
+       $(window).scroll(function(){
+			shiftControls();
+       });
+
+       var upTimeout;
+       var topControls = $('#dropControl');
+
+       topControls.bind('mouseover', function(){
+         $(this).css('background-color', '#E1E1E1');
+       });
+
+       topControls.bind('mouseout', function(){
+         $(this).css('background-color', '#F5F5F5');
+       });
+
+       topControls.bind('click', function(){
+
+			clearTimeout(upTimeout);
+
+			if($(this).data('open') == false) {
+	       		$(jq('{!$Component.o1}')).slideDown('normal', function(){topControls.data('open', true);});
+		  		$('#bottomVersion').slideDown('normal');
+				$('#downarrow').hide();
+				$('#uparrow').show();
+				$(jq('{!$Component.f.sk}')).attr('value','true');
+		  	} else {
+		  		$(jq('{!$Component.o1}')).slideUp('normal', function(){topControls.data('open', false);});
+				$('#bottomVersion').slideUp('normal');
+				$('#uparrow').hide();
+				$('#downarrow').show();
+				$(jq('{!$Component.f.sk}')).attr('value','false');
+		  	}
+
+       	});
+
+        topControls.data('open', true);
+
+		$(window).scrollTop($(jq('{!$Component.f.ss}')).attr('value'));
+
+        if($(jq('{!$Component.f.sk}')).attr('value') != 'true'){
+
+	        upTimeout = setTimeout(function() {
+				$(jq('{!$Component.o1}')).slideUp('normal', function(){
+					topControls.data('open', false);
+					$('#uparrow').hide();
+					$('#downarrow').show();
+				});
+				$('#bottomVersion').slideUp('normal');
+		   	}, 1000);
+
+		}
+
+    });
+
+    function showDateTime(){
+        $('#jumpto').show();
+        $('#jumptopresentoptions').hide();
+        $('#jumptogeneraloptions').hide();
+    }
+
+  </script>
+
+  <style type="text/css">
+
+  	.timetravelControls{
+		padding: 0px;
+		background-color: #F5F5F5;
+		font-family: Arial;
+		font-size: 12px;
+  		position: absolute;
+  		top: 0;
+  		left: 0;
+  		width: 100%;
+  		filter:alpha(opacity=85);
+		-moz-opacity:0.85;
+		-khtml-opacity:0.85;
+		opacity:0.85;
+  		z-index: 999;
+  	}
+
+  	.timetravelFooter{
+
+		text-align: right;
+		background: none;
+		font-family: Arial;
+		font-size: 12px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+  		filter:alpha(opacity=85);
+		-moz-opacity:0.85;
+		-khtml-opacity:0.85;
+		opacity:0.85;
+  		z-index: 999;
+  		text-align: left;
+  		margin: 0;
+  		padding: 0;
+  		width: 100%;
+
+  	}
+
+  	.dropControl {
+		width: 100%;
+		text-align: center;
+		height: 10px;
+		position: relative;
+  	}
+
+    #ui-datepicker-div{
+    	z-index: 9999;
+    }
+
+    #bottomVersion{
+    	padding: 5px;
+    	border-top: 1px solid rgb(200,200,200);
+    	background-color: #ffffff;
+    }
+
+  </style>
+
+  <apex:insert name="header" />
+
+</head>
+
+<body style="padding: 0px; margin: 0px;">
+
+  <div id="debugInfo" onclick="hide(); return false;" style="z-index: 1500; padding: 10px; background-color: rgb(200,200,200); position:absolute; top: 0px; right: 0px; width: 300;">
+    <strong>Name:</strong> <a href="#" onclick="openPageTab('{!router.page.Name__c}', '{!router.page_util.version}', '/apex/Edit?sname={!router.site_name}&id={!router.page.Id}', '{!router.page.Id}'); return false;">{!router.page.Name__c}</a><br />
+    <strong>Version:</strong> {!router.page_util.version}<br /><br />
+
+    <strong>Run Time:</strong><br />
+    <apex:outputText escape="false" value="{!debug}" />
+  </div>
+
+  <div id="topControls" class="timetravelControls">
+	  <apex:outputPanel id="o1" layout="block" style="position: relative; background-color: #ffffff; border-bottom: 1px solid rgb(200,200,200);">
+
+	    <apex:form id="f" style="margin: 0px; padding: 0px;">
+
+	      <apex:inputHidden id="tl" value="{!timelineText}" />
+   	      <apex:inputHidden id="sk" value="{!settingKeepOpen}" />
+   	      <apex:inputHidden id="ss" value="{!settingScrollPosition}" />
+
+	      <apex:actionFunction action="{!pageReload}" name="reloadPage" />
+	      <apex:actionFunction action="{!jumpToPresent}" name="jumpToPresent" />
+
+	      <div style="height: 40px; float: left; width: 250px; text-align: center; background-color: {!TimelineBackgroundColor} border-right: 1px solid #000000; ">
+	        <table border="0" cellspacing="0" cellpadding="0">
+	        <tr>
+	          <td width="150" valign="middle" style="font-size: 12px; text-align: center; padding: 2px;"><div style="border-right: 1px solid #000000;">In:  <strong>{!TimelineContext}</strong></div></td>
+	          <td width="100" valign="middle" style="font-size: 12px; text-align: center; padding: 5px;">{!TimelineDate}<br />{!TimelineTime}</td>
+	        </tr>
+	        </table>
+	      </div>
+
+	      <div id="jumptopresentoptions" style="height: 40px; float: left; width: 200px; border-right: 1px solid #000000; display: {!ShowPresentOptions};">
+	        <table border="0" cellspacing="0" cellpadding="5" height="40">
+	        <tr>
+	          <td width="120" valign="middle" style="text-align: center; font-size: 12px;">Time Travel To: </td>
+	          <td width="80" valign="middle" style="text-align: center; font-size: 12px;"><div onclick="showDateTime();" style="cursor: pointer;"><u><strong>Date/Time</strong></u></div></td>
+	        </tr>
+	        </table>
+	      </div>
+	      <div id="jumptogeneraloptions" style="height: 40px; float: left; width: 350px; border-right: 1px solid #000000; display: {!ShowGeneralOptions};">
+	        <table border="0" cellspacing="0" cellpadding="5" height="40">
+	        <tr>
+	          <td width="120" valign="middle" style="text-align: center; font-size: 12px;">Time Travel To: </td>
+	          <td width="115" valign="middle" style="text-align: center; font-size: 12px;"><div style="border-right: 1px solid #000000;"><div onclick="showDateTime();" style="cursor: pointer;"><u><strong>Date/Time</strong></u></div></div></td>
+	          <td width="115" valign="middle" style="text-align: center; font-size: 12px;"><div onclick="jumpToPresent();" style="cursor: pointer;"><u><strong>The Present</strong></u></div></td>
+	        </tr>
+	        </table>
+	      </div>
+	      <div id="jumpto" style="height: 40px; float: left; width: 375px; border-right: 1px solid #000000; display: none;">
+	        <table border="0" cellspacing="0" cellpadding="5" height="40">
+	        <tr>
+	          <td width="350" valign="middle" style="text-align: center; font-size: 12px;"><c:DateTimeSelector id="dts" cName="preview" cDateTime="{!timelineText}" cPassthroughId="{!$Component.f.tl}" /></td>
+	          <td width="25"><apex:commandButton action="{!jumpToDateTime}" value="Go" /></td>
+	        </tr>
+	        </table>
+	      </div>
+	      <div style="height: 40px; float: right;">
+	        <table border="0" cellspacing="0" cellpadding="5" height="40">
+	        <tr>
+	          <td valign="middle" style="font-size: 12px;">
+	            <apex:commandButton action="{!pageReload}" value="Refresh" />
+	          </td>
+	        </tr>
+	        </table>
+	      </div>
+	      <div style="clear: both;"></div>
+
+	    </apex:form>
+	  </apex:outputPanel>
+
+	  <div id="dropControl" class="dropControl">
+	  		<div id="uparrow"><apex:image value="{!$Resource.cms__uparrow}" /></div>
+	  		<div id="downarrow" style="display: none;"><apex:image value="{!$Resource.cms__droparrow}" /></div>
+	  </div>
+  </div>
+
+  <apex:outputPanel id="o2">
+
+    <apex:insert name="body" />
+
+  </apex:outputPanel>
+
+   	 <div id="bottomControls" class="timetravelFooter">
+     	<div id="bottomVersion">
+     		Name: <a href="#" onclick="openPageTab('{!JSENCODE(router.page.Name__c)}', '{!JSENCODE(router.page_util.version)}', '{!router.page_util.editUrl}', '{!router.page.Id}'); return false;">{!router.page.Name__c}</a> &nbsp;&nbsp; | &nbsp;&nbsp; Version: {!router.page_util.version}
+     	</div>
+
+  	 </div>
+
+</body>
+
+</apex:page>

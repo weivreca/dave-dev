@@ -1,0 +1,7 @@
+<apex:page id="m" controller="cms.CoreController" extensions="cms.DebugRouter" showHeader="false" sidebar="false" cache="{!router.page_cache}" expires="{!router.page_expires}" title="{!router.page_title}" standardStylesheets="false">
+  <html>
+    
+    <apex:include id="i" pageName="{!page_layout_reference}" />
+          
+  </html>
+</apex:page>

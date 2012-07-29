@@ -1,0 +1,32 @@
+<apex:component controller="cms.PageSelectorController" access="global">
+
+	<apex:attribute name="cPassThroughId" type="String" description="Field identifier" access="global" />
+	<apex:attribute name="value" type="String" description="The CSV string of the selected url" assignTo="{!internalValue}" access="global" />
+	<apex:attribute name="dialogId" type="String" description="dialog identifier ID" access="global"  />
+	<apex:attribute name="sname" type="String" description="Site Name" required="true" access="global"  />
+	<apex:attribute name="disabled" type="Boolean" description="determines whether or not editing is disabled" access="global" />
+	<apex:attribute name="token" type="String" description="csrf token" access="global" />
+			
+    <script type="text/javascript" language="javascript">   
+    
+    	$(document).ready(function(){
+    
+		 	$('#{!dialogId}').page_selector_input({
+ 				input_field: '{!cPassThroughId}',
+ 				input_id: '{!dialogId}_selector_input',
+				dialog_id: '{!dialogId}_selector_dialog',
+				selected: {!IF(OR(link.LinkJSON == null, link.LinkJSON == ''), 'null', link.LinkJSON)},
+				selected_name: '{!JSENCODE(link.LinkName)}',
+				disabled: {!disabled},		
+ 				sname: '{!sname}',
+ 				ajaxLoaderImage: '{!$Resource.ajaxLoader}',
+ 				token: '{!token}'
+ 			});
+ 			
+ 		}); 
+	</script>
+
+
+	<div id="{!dialogId}"></div>
+
+</apex:component>

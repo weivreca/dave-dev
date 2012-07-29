@@ -1,0 +1,45 @@
+<apex:component controller="cms.ImageSelectorController" access="global">
+
+    <apex:attribute name="cPassThroughId" type="String" description="Field identifier"  access="global" />
+    <apex:attribute name="cImage" type="String" description="The currently selected image" assignTo="{!selected_image}" access="global" />
+    <apex:attribute name="type" type="String" description="The currently selected image" access="global" />
+    <apex:attribute name="Height" type="String" description="the id of the field that controls the height" access="global" />
+    <apex:attribute name="Width" type="String" description="the ide of the field that controls the width" access="global" />
+    <apex:attribute name="DialogId" type="String" description="Unique id for the dialog" access="global" />
+    <apex:attribute name="disabled" type="Boolean" description="disable the selector" access="global" />
+    <apex:attribute name="sname" type="String" description="Site Name" access="global" />
+	<apex:attribute name="mode" type="String" description="Whether to return the url or the Library_Content__c id on select" default="url" />
+
+
+
+	<c:CmsScripts />
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryBrowser.js')}" />
+
+    <script type="text/javascript" language="javascript">
+
+   		$(document).ready(function(){
+
+			$('#imageInput{!DialogId}').image_selector_input({
+				field_id: $.orchestracmsUtil.convertComponentId('{!cPassThroughId}'),
+				dialog_id: '{!DialogId}',
+				type: '{!type}',
+				height: '{!Height}',
+				width: '{!Width}',
+				disabled: {!disabled},
+				sname: '{!JSENCODE(sname)}',
+				ajaxLoader: '{!$Resource.ajaxLoader}',
+				onSelect : function() {
+					//alert('selected');
+				},
+				url: '{!cImage}',
+				mode: '{!mode}'
+			});
+
+		});
+
+    </script>
+
+    <div id="imageInput{!DialogId}"></div>
+
+</apex:component>

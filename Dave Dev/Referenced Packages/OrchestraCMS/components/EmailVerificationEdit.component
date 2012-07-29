@@ -1,0 +1,80 @@
+<apex:component controller="cms.EmailVerificationController">
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier"
+                    assignTo="{!layout_disabled}"/>
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}"/>
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_properties}"/>
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance}"/>
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance_properties}"/>
+
+    <script type="text/javascript" language="javascript">
+
+         function saveLookAndFeel(cb) {
+             var attributes = new Array();
+             attributes.push({"name":"EmailVerificationConfirmationSuccessPageLink", "value":$('#EmailVerificationConfirmationSuccessPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+			attributes.push({"name":"EmailVerificationConfirmationFormPageLink", "value":$('#EmailVerificationConfirmationFormPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+
+             $.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+                     attributes,
+                     "{!JSENCODE(Content.Site_Name__c)}",
+                     cb,
+                     '{!token}'
+             );
+             cb({});
+         }
+
+         function saveLookAndFeelClose(cb) {
+             saveLookAndFeel(cb);
+             closeTab('{!JSENCODE(tab)}');
+         }
+     </script>
+     <style>
+         .ocms-property-viewer {
+             height:inherit !important;
+         }
+     </style>
+
+     <div class="ocms-property-viewer">
+         <div class="ocms-property-viewer-header">Component Properties</div>
+         <div class="ocms-property-viewer-body ocms-property-form" >
+             <div class="ocms-property-form-panel-col" >
+                     <table cellspacing="1" class="ocms-property-table">
+                         <tbody>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Email Verification Confirmation Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="EmailVerificationConfirmationSuccessPageLink" id="EmailVerificationConfirmationSuccessPageLink" value="{!EmailVerificationConfirmationSuccessPage}"/>
+                                 <c:PageSelector cPassThroughId="EmailVerificationConfirmationSuccessPageLink" value="{!EmailVerificationConfirmationSuccessPage}" dialogId="EmailVerificationConfirmationSuccessPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that will be shown on successful confirmation.<br/> This page may contain content with a success message. </div>
+
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Email Verification Form Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="EmailVerificationConfirmationFormPageLink" id="EmailVerificationConfirmationFormPageLink" value="{!EmailVerificationConfirmationFormPage}"/>
+                                 <c:PageSelector cPassThroughId="EmailVerificationConfirmationFormPageLink" value="{!EmailVerificationConfirmationFormPage}" dialogId="EmailVerificationConfirmationFormPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that will display registration form for first time subscribing clients.<br/> This page MUST contain content of the type "Form" as follows:
+                                 <ol>
+                                 	<li>The form must be for the Lead Object</li>
+                                 	<li>The Lead ID field must be added as a hidden field and set as an Output Parameter Field</li>
+                                 	<li>The Lead EMail field must be added to the form as a Query Field, with a parameter name of "email"</li>
+                                 	<li>The Lead EMail field must be set to Auto DeDuplicate</li>
+                                 	<li>The Form Confirmation Page must be set to a page with this "Email Verification" content on it.</li>
+                                 </ol>
+
+                                  </div>
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         </tbody>
+                     </table>
+             </div>
+             <div style="clear:both"></div>
+         </div>
+     </div>
+</apex:component>

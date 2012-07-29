@@ -1,0 +1,46 @@
+<apex:component controller="cms.PlainText" allowDml="true">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"PlainText", "value":$('#PlainText').val(), "type":"Text"});
+
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	</script>
+
+  	<apex:form id="e">
+
+		Text: <br />
+
+		<apex:outputText escape="false" rendered="{!layout_disabled}">
+			<textarea name="PlainText" id="PlainText" cols="100" rows="25" disabled="disabled"><apex:outputText value="{!PlainText}" /></textarea>
+		</apex:outputText>
+		<apex:outputText escape="false" rendered="{!!layout_disabled}">
+			<textarea name="PlainText" id="PlainText" cols="100" rows="25"><apex:outputText value="{!PlainText}" /></textarea>
+		</apex:outputText>
+
+	</apex:form>
+
+
+
+</apex:component>

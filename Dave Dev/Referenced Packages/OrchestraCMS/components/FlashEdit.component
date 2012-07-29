@@ -1,0 +1,86 @@
+<apex:component controller="cms.Flash" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+
+		$(document).ready(function(){
+			$('#flash-input').image_selector_input({
+				type: 'Flash',
+				disabled: {!layout_disabled},
+				sname: '{!JSENCODE(content.Site_Name__c)}',
+				ajaxLoader: '{!$Resource.ajaxLoader}',
+				width: '{!Width}',
+				height: '{!Height}',
+				disabled: {!content.Published__c},
+				url: '{!Flash}'
+			});
+		});
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+			attributes.push({"name":"Flash", "value":$('#flash-input').image_selector_input('getSelected'), "type":"Id"});
+			attributes.push({"name":"FlashWidth", "value":$('#Width').val(), "type":"Integer"});
+			attributes.push({"name":"FlashHeight", "value":$('#Height').val(), "type":"Integer"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	</script>
+
+    <apex:outputText escape="false">
+        <form>
+
+            <table class="ocms-editor">
+            	<tr>
+            		<td colspan="2">
+            			<div id="flash-input"></div>
+            		</td>
+            	</tr>
+            	<tr>
+           			<td>Width</td>
+           			<td>
+           				<apex:outputText escape="false" rendered="{!layout_disabled}" >
+           					<input id="Width" name="Width" value="{!Width}" size="3" disabled="disabled" />
+           				</apex:outputText>
+           				<apex:outputText escape="false" rendered="{!!layout_disabled}" >
+           					<input id="Width" name="Width" value="{!Width}" size="3" />
+           				</apex:outputText>
+           				px
+           			</td>
+            	</tr>
+				<tr>
+            		<td>Height</td>
+            		<td>
+            			<apex:outputText escape="false" rendered="{!layout_disabled}" >
+            				<input id="Height" name="Height" value="{!Height}" size="3" disabled="disabled" />
+            			</apex:outputText>
+            			<apex:outputText escape="false" rendered="{!!layout_disabled}" >
+            				<input id="Height" name="Height" value="{!Height}" size="3" />
+            			</apex:outputText>
+            			px
+            		</td>
+            	</tr>
+            </table>
+
+			<br />
+
+
+
+      	</form>
+   	</apex:outputText>
+</apex:component>

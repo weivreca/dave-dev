@@ -1,0 +1,85 @@
+<apex:page contentType="text/javascript" sidebar="false" showHeader="false" standardStylesheets="false" >
+	
+	var orchestracmsimages = "{!URLFOR($Resource.cms__CmsImages,'/layout_Everready.png')}";
+	
+	var image_target = orchestracmsimages.substring(0, orchestracmsimages.indexOf('layout_Everready.png')); 
+	
+	$(document).data('ocms-image-target', image_target); 
+    $(document).data("notfound_icon",               "{!URLFOR($Resource.cms__jqueryui,'/css/images/notfound48.png')}");
+    $(document).data("help_icon",                   "{!URLFOR($Resource.cms__jqueryui,'/css/images/Toolbar/IconToolbarHelp48.png')}");
+	$(document).data("loading_indicator",           "{!URLFOR($Resource.cms__jqueryui, '/css/images/General/32px_AnimatedIndeterminateProgress.gif')}");
+	$(document).data("loading_indicator_text",      "{!URLFOR($Resource.cms__jqueryui, '/css/images/General/80px_AnimatedIndeterminateProgress.gif')}");
+	$(document).data("clear_dot_image",             "{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}");
+	$(document).data("btn_close_active",            "{!URLFOR($Resource.cms__jqueryui, '/css/images/Icons/btnCloseActive.png')}");
+	$(document).data("btn_close_inactive",          "{!URLFOR($Resource.cms__jqueryui, '/css/images/Icons/btnCloseInactive.png')}");
+	$(document).data("layout_selected",				"{!URLFOR($Resource.cms__CmsImages,'/layout_selected.png')}");
+	$(document).data("layout",				        "{!URLFOR($Resource.cms__CmsImages,'/layout.png')}");
+	$(document).data("removeBtn", 					"{!URLFOR($Resource.cms__CmsImages,'/btn_remove.png')}");
+	$(document).data("editBtn", 					"{!URLFOR($Resource.cms__CmsImages,'/btn_edit.png')}");
+	$(document).data("handleImg", 					"{!URLFOR($Resource.cms__CmsImages,'/handle.png')}");
+	$(document).data("cleardot", 					"{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}");
+
+	var templates = {
+		thumbnail: {
+			Everready: image_target+'layout_Everready.png',
+			EverreadyForm: image_target+'layout_EverreadyForm.png',
+			EverreadyThreeColumn: image_target+'layout_Everready.png',
+			Skyward: image_target+'layout_Skyward.png',
+			SkywardForm: image_target+'layout_SkywardForm.png',
+			SkywardTwoColumn: image_target+'layout_SkywardTwoColumn.png',
+			Spotlight: image_target+'layout_Spotlight.png',
+			SpotlightForm: image_target+'layout_SpotlightForm.png',
+			SpotlightThreeColumn: image_target+'layout_SpotlightThreeColumn.png',
+			SpotlightTwoColumn: image_target+'layout_SpotlightTwoColumn.png',
+			SingleColumn: image_target+'layout_SingleColumn.png',
+			ThreeColumnFluid: image_target+'layout_ThreeColumnFluid.png',
+			UrbanSport: image_target+'layout_UrbanSport.png',
+			PortalLogin: image_target+'layout_PortalLogin.png',
+			UrbanSportForm: image_target+'layout_UrbanSportForm.png',
+			UrbanSportThreeColumn: image_target+'layout_UrbanSportThreeColumn.png',
+			UrbanStorefront: image_target+'layout_UrbanStorefront.png',
+			UrbanStorefrontForm: image_target+'layout_UrbanStorefrontForm.png',
+			UrbanStorefrontSingleColumn: image_target+'layout_UrbanStorefrontSingleColumn.png',
+			UrbanStorefrontTwoColumn: image_target+'layout_UrbanStorefrontTwoColumn.png',
+			Zen: image_target+'layout_Zen.png',
+			ZenForm: image_target+'layout_ZenForm.png',
+			ZenThreeColumn: image_target+'layout_ZenThreeColumn.png',
+			ZenTwoColumn: image_target+'layout_ZenTwoColumn.png',
+  			NoImage: image_target+'layout_no_image.png',
+			Breadcrumb: image_target+'layout_Breadcrumb.png',
+			CarouselImage: image_target+'layout_CarouselImage.png',
+			CarouselVideo: image_target+'layout_CarouselVideo.png',
+			ClassStyledMenu: image_target+'layout_ClassStyledMenu.png',
+			CustomHtml: image_target+'layout_CustomHtml.png',
+			DocumentStyle1: image_target+'layout_DocumentStyle1.png',
+			Flash: image_target+'layout_Flash.png',
+  			HorizontalImageBar: image_target+'layout_HorizontalImageBar.png',
+			Image: image_target+'layout_Image.png',
+			Listable: image_target+'layout_Listable.png',
+			ListableWithImage: image_target+'layout_ListableWithImage.png',
+			ListLayout1: image_target+'layout_ListLayout1.png',
+			MegaMenu: image_target+'layout_MegaMenu.png',
+			PlainText: image_target+'layout_PlainText.png',
+			PortalChangePasswordForm: image_target+'layout_PortalChangePasswordForm.png',
+			PortalForgotPasswordForm: image_target+'layout_PortalForgotPasswordForm.png',
+			PortalLoginForm: image_target+'layout_PortalLoginForm.png',
+			PortalLoginStatus: image_target+'layout_PortalLoginStatus.png',
+			PortalRegisterForm: image_target+'layout_PortalRegisterForm.png',
+			SearchBasicForm: image_target+'layout_SearchBasicForm.png',
+			SearchBasicResults: image_target+'layout_SearchBasicResults.png',
+			SFObject: image_target+'layout_SFObject.png',
+			SimpleForm: image_target+'layout_SimpleForm.png',
+			SimpleHorizontalMenu: image_target+'layout_SimpleHorizontalMenu.png',
+			SmallBlock: image_target+'layout_SmallBlock.png',
+  			SmallBlockWithImage: image_target+'layout_SmallBlockWithImage.png',
+			Spacer: image_target+'layout_Spacer.png',
+			Form: image_target+'layout_Form.png',
+			ClassStyledRecordList: image_target+'layout_ClassStyledRecordList.png',
+			ClassStyledRecordDetail: image_target+'layout_ClassStyledRecordDetail.png',
+			TaxonomyMenu: image_target+'layout_TaxonomyMenu.png',
+			MyProfile: image_target+'layout_MyProfile.png',
+			AvailableSubscriptions: image_target+'layout_AvailableSubscriptions.png'
+		}
+	}
+	$(document).data('cms_templates', templates);    
+</apex:page>

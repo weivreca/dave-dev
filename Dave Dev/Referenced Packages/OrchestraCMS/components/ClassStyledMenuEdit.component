@@ -1,0 +1,109 @@
+<apex:component controller="cms.ClassStyledMenu" allowDml="true">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<apex:includeScript value="{!URLFOR($Resource.cms__colorpicker, '/js/colorpicker.js')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__colorpicker, '/css/colorpicker.css')}" />
+
+ 	<script type="text/javascript" language="javascript">
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"SubLabelPosition", "value":$('#sub_label_position').val(), "type":"Text"});
+			attributes.push({"name":"MenuTitle", "value":$('#menu_title').val(), "type":"Text"});
+
+			var dynamic_load = 'false';
+			if($('#dynamic_load:checked').val() == 'on'){
+				dynamic_load = 'true';
+			}
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null, "dynamic_instance_id":"{!content_layout_instance.Id}", "dynamic_load":dynamic_load},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+	</script>
+
+	<apex:outputPanel >
+		<form>
+			<table>
+			  <tr>
+			    <td>Sub Label Position</td>
+				<td>
+					<apex:outputText rendered="{!layout_disabled}">
+					<select name="sub_label_position" id="sub_label_position" size="1" disabled="disabled">
+						<apex:repeat value="{!SubLabelPositionOptions}" var="option">
+							<apex:outputText escape="false" rendered="{!option.selected}">
+								<option value="{!option.so.value}" selected="selected" ><apex:outputText value="{!option.so.label}" /></option>
+							</apex:outputText>
+							<apex:outputText escape="false" rendered="{!!option.selected}">
+								<option value="{!option.so.value}" ><apex:outputText value="{!option.so.label}" /></option>
+							</apex:outputText>
+						</apex:repeat>
+					</select>
+					</apex:outputText>
+					<apex:outputText rendered="{!!layout_disabled}">
+					<select name="sub_label_position" id="sub_label_position" size="1">
+						<apex:repeat value="{!SubLabelPositionOptions}" var="option">
+							<apex:outputText escape="false" rendered="{!option.selected}">
+								<option value="{!option.so.value}" selected="selected" ><apex:outputText value="{!option.so.label}" /></option>
+							</apex:outputText>
+							<apex:outputText escape="false" rendered="{!!option.selected}">
+								<option value="{!option.so.value}" ><apex:outputText value="{!option.so.label}" /></option>
+							</apex:outputText>
+						</apex:repeat>
+					</select>
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+				<td>Menu Title</td>
+				<td>
+					<apex:outputText rendered="{!layout_disabled}">
+						<input type="text" name="menu_title" id="menu_title" size="40" value="{!MenuTitle}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText rendered="{!!layout_disabled}">
+						<input type="text" name="menu_title" id="menu_title" size="40" value="{!MenuTitle}" />
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+				<td>Dynamic Load</td>
+				<td>
+					<apex:outputText rendered="{!layout_disabled}">
+						<apex:outputText rendered="{!dynamicLoad}">
+							<input type="checkbox" name="dynamic_load" id="dynamic_load" checked="checked" disabled="true" />
+						</apex:outputText>
+						<apex:outputText rendered="{!!dynamicLoad}">
+							<input type="checkbox" name="dynamic_load" id="dynamic_load" disabled="true" />
+						</apex:outputText>
+					</apex:outputText>
+					<apex:outputText rendered="{!!layout_disabled}">
+						<apex:outputText rendered="{!dynamicLoad}">
+							<input type="checkbox" name="dynamic_load" id="dynamic_load" checked="checked" />
+						</apex:outputText>
+						<apex:outputText rendered="{!!dynamicLoad}">
+							<input type="checkbox" name="dynamic_load" id="dynamic_load" />
+						</apex:outputText>
+					</apex:outputText>
+				</td>
+			  </tr>
+			</table>
+		</form>
+	</apex:outputPanel>
+
+</apex:component>

@@ -1,0 +1,397 @@
+<apex:component controller="cms.RecordDetailController">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<head>
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.tableeditor.css')}" />
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.fieldselector.css')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TableEditor.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryData.js')}" />
+
+		<style type="text/css">
+			.detail-field{
+				border: 1px solid grey; 
+				background-color: #efefef;
+				padding: 5px;
+			}
+		</style>
+
+		<script type="text/javascript">
+
+			jQuery(document).data('removeBtn', '{!URLFOR($Resource.CmsImages,'/btn_remove.png')}');
+			jQuery(document).data('editBtn', '{!URLFOR($Resource.CmsImages,'/btn_edit.png')}');
+			jQuery(document).data('handle', '{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}');
+
+			$(document).ready(function(){
+		    	//setup the table editor
+
+				$('#tablelayout').table_editor({
+					accept: '.tableitem, .ocms-field-item',
+					defaultCellWidth: 200,
+					defaultCellHeight:  30,
+					defaultCellPadding: 4,
+					received: function(event, ui, cell, te) {
+
+						//check if the cell already has content
+						if(cell.find('.tableitem').length > 0) {
+							$('<div></div>').ocmsPopupMessage({
+								message: 'This cell arelady has content'
+							});
+
+							return;
+						}
+
+						var loading = $('<div id="loading"><img width="32px" height="32px" src="'+($(document).data('loading_indicator'))+'" /></div>');
+
+						cell.append(loading);
+						//add the field to the cell
+						//create the attributes
+						var draggable_id = ui.draggable.attr('Id');
+ 						//launch configuration dialog
+
+ 						var attributes = new Array();
+						attributes.push({"name":"Column", "value":cell.data('col'), "type":"Integer"});
+						attributes.push({"name":"Row", "value":cell.data('row'), "type":"Integer"});
+
+ 						var new_field = $('<div class="tableitem">'+
+		  								  	'<div class="tableitem-hover">'+
+												'<div class="ocms-actions"><a onclick="return false;" href="#" class="delete" ><img border="0" src="'+$(document).data('removeBtn')+'" /></a></div>'+
+												'<div class="tableitem-handle" style="border: none;"><span class="ui-icon ui-icon-arrow-4"></span></div>'+
+											'</div>'+
+											'<div class="tableitem-cell sample"></div>'+
+											'<div style="clear: both;"></div>'+
+		 								'</div>');
+
+
+						if(ui.draggable.hasClass('ocms-field-item')) {
+	 						if(draggable_id == 'Text') {
+	 							new_field.ocmsTextField({
+	 								saveText: function(text) {
+	 									attributes.push({"name":"Type", "value":"Text", "type":"Text"});
+	 									attributes.push({"name":"Content", "value":text, "type":"Rich Text"});
+
+			 							$.ocms.saveContent({"name":"Text", "content_id":null,"content_type":"DetailField","parent_id":"{!content.Id}"},
+											attributes,
+											"{!JSENCODE(Content.Site_Name__c)}",
+											function(json) {
+												loading.remove();
+												new_field.attr('id', json['Id']);
+												new_field.find('.sample').html(text);
+
+												var edit = $('<a onclick="return false;" href="#" class="edit"><img border="0" src="'+$(document).data('editBtn')+'" /></a>');
+
+												edit.click(function(){
+													new_field.ocmsTextField('launchTextEditDialog');
+												});
+
+												new_field.find('.ocms-actions').append(edit);
+												new_field.find('.delete').click(function(){
+													var field_id = $(this).parent().parent().parent().attr('id');
+													$.ocms.deleteContent(field_id, function(){
+														$('#'+field_id).remove();
+													}, '{!token}');
+												});
+
+												te.setupTableDraggables(new_field);
+												cell.append(new_field);
+
+											},
+										'{!token}');
+	 								}
+	 							});
+	 							new_field.ocmsTextField('launchTextEditDialog');
+
+	 						} else if(draggable_id == 'Link') {
+	 							new_field.ocmsLinkField({
+	 								saveLink: function(properties) {
+
+	 								},
+	 								object: $('#SObjectType').val(),
+	 								sname: '{!content.Site_Name__c}',
+	 								token: '{!token}'
+	 							});
+	 							new_field.ocmsLinkField('launchLinkEditDialog');
+	 						} else {
+	 							attributes.push({"name":"Type", "value":'Field', "type":"Text"});
+	 							attributes.push({"name":"Label", "value":ui.draggable.ocmsDetailField('getLabel'), "type":"Text"});
+	 							attributes.push({"name":"RelationshipName", "value":ui.draggable.ocmsDetailField('getRelationshipName'), "type":"Text"});
+								attributes.push({"name":"ReferenceTo", "value":ui.draggable.ocmsDetailField('getReferenceTo'), "type":"Text"});
+
+								$.ocms.saveContent({"name":ui.draggable.attr('id'), "content_id":null,"content_type":"DetailField","parent_id":"{!content.Id}"},
+									attributes,
+									"{!JSENCODE(Content.Site_Name__c)}",
+									function(json) {
+										loading.remove();
+										new_field.attr('id', json['Id']);
+
+										var edit = $('<a onclick="return false;" href="#" class="edit"><img border="0" src="'+$(document).data('editBtn')+'" /></a>');
+										new_field.find('.delete').click(function(){
+											var field_id = $(this).parent().parent().parent().attr('id');
+											$.ocms.deleteContent(field_id, function(){
+												$('#'+field_id).remove();
+											}, '{!token}');
+										});
+
+										new_field.find('.sample').html(ui.draggable.ocmsDetailField('getLabel'));
+										new_field.find('.sample').addClass('detail-field');
+									},
+
+								'{!token}');
+
+								te.setupTableDraggables(new_field);
+								cell.append(new_field);
+	 						}
+	 					} else {
+	 						//this is an existing item we're just moving it
+	 						var content = {"content_id":draggable_id, "content_type":"DetailField", "parent_id": "{!content.Id}"};
+	 						$.ocms.saveContent(content, attributes, $(document).data('sname'), function(response){
+								loading.remove();
+								cell.append(ui.draggable);
+								te.refresh();
+							},
+							'{!token}');
+	 					}
+
+					},
+
+					afterCellsRemoved: function(cells) {
+
+						var ids = new Array();
+						var items = new Array();
+						for (var i = 0; i < cells.length; ++i) {
+							var elements = cells[i].find('.ocms-field-item');
+							for (var j = 0; j < elements.length; ++j) {
+								ids.push(elements[j].id);
+							}
+						}
+
+						if (ids.length > 0) {
+							$.ocms.deleteContentSet(ids, function(json){
+							}, '{!token}');
+						}
+					},
+
+					afterCellsUpdated: function(cells) {
+
+						var items = new Array();
+
+						if (cells.length > 0) {
+							for (var i = 0; i < cells.length; ++i) {
+
+								var row = cells[i].data('row');
+								var col = cells[i].data('col');
+
+								var elements = cells[i].find('.ocms-field-item');
+								for (var j = 0; j < elements.length; ++j) {
+
+									var item = {};
+									item['id'] = elements[j].id;
+									item['attributes'] = new Array();
+									item['attributes'].push({"name":"Row","value":row,"type":"Integer"});
+									item['attributes'].push({"name":"Column","value":col,"type":"Integer"});
+									items.push(item);
+								}
+							}
+						}
+
+						if (items.length > 0) {
+							jQuery.ocms.saveContentGroup(items, null, token);
+						}
+
+					},
+
+					afterCellsCleared: function(items) {
+
+						var ids = new Array();
+
+						for(var i=0 ; i < items.length ; ++i) {
+							ids.push($(items[i]).attr('id'));
+						}
+
+						jQuery.ocms.deleteContentSet(ids, null, '{!token}');
+
+					},
+
+					saveProperties: function(properties) {
+
+						var attributes = new Array()
+
+						attributes.push({"name":"TableDefinition", "value":properties['table'], "type":"Text"});
+
+
+						$.ocms.saveContent({"name":'{!JSENCODE(content.Name__c)}', "content_id":"{!content.Id}","content_type":"Data","parent_id":null},
+							attributes,
+							'{!JSENCODE(Content.Site_Name__c)}',
+							function() {
+							} ,
+							'{!token}'
+						);
+
+					},
+
+					disabled: {!disabled}
+				});
+
+				//setup the SObject Type selector to select fields from
+				if(!{!disabled}) {
+
+					var field_list = $('#elementOptionAccordion').ocmsDraggableFieldList({
+						SObjectType: '{!SObjectType}',
+						token: '{!token}',
+						disabled: {!disabled}
+					});
+
+					$('#SObjectType').change(function(){
+
+						if($('#tablelayout').find('.tableitem').length > 0) {
+							$('<div></div>').ocmsShowConfirmationDlg({
+								message: 'Changing the object type will remove all existing fields from the detail table. Are you sure you want to do this?',
+								onOK: function(dialog, cb) {
+									$('#tablelayout').table_editor('clearCells');
+									field_list.ocmsDraggableFieldList('setSObjectType', $('#SObjectType').val());
+									dialog.closeDialog();
+								},
+								onCANCEL: function(dialog, cb) {
+									$('#SObjectType').val(field_list.ocmsDraggableFieldList('getSObjectType'));
+									dialog.closeDialog();
+								}
+							});
+						} else {
+							field_list.ocmsDraggableFieldList('setSObjectType', $('#SObjectType').val());
+						}
+
+					});
+
+
+					var tablefields = $('#tablelayout').find('.tableitem');
+
+					tablefields.find('.delete').click(function(){
+						var field_id = $(this).parent().parent().parent().attr('id');
+						$.ocms.deleteContent(field_id, function(){
+							$('#'+field_id).remove();
+						}, '{!token}');
+					});
+
+				}
+
+			});
+
+			function saveLookAndFeel(cb) {
+				var attributes = new Array();
+
+				attributes.push({"name":"SObjectType", "value":$('#SObjectType').val(), "type":"Text"});
+				attributes.push({"name":"TableDefinition", "value":$('#tablelayout').table_editor('serialize'), "type":"Text"});
+
+
+				$.ocms.saveContent({"name":"{!content.Name__c}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+					attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}');
+ 			}
+
+ 			function saveLookAndFeelClose(cb) {
+ 				saveLookAndFeel(cb);
+ 				closeTab('{!JSENCODE(tab)}');
+ 			}
+
+
+		</script>
+	</head>
+
+
+	<div class="help-text">
+		Select the Salesforce object and then drag and drop fields onto the record detail layout grid.<br />
+		Right-click the grid to add and remove rows and columns, and merge and split cells.<br /><br />
+	</div>
+
+	<table>
+	  <tr>
+	    <td valign="top">
+		  <div id="tablelayout">
+
+		    <table style="{!detailTable.tableStyles}">
+			  <tbody>
+			    <apex:repeat value="{!DetailRows}" var="row">
+				  <tr>
+				    <apex:repeat value="{!row.columns}" var="column">
+					  <td style="{!column.col.style}" colspan="{!column.col.colspan}" rowspan="{!column.col.rowspan}">
+					  	<apex:outputText rendered="{!!ISNULL(column.field)}">
+							<div id="{!column.field.c.Id}" class="text-item tableitem">
+		  						<div class="tableitem-hover">
+									<div class="ocms-actions"><a onclick="return false;" href="#" class="delete" ><img border="0" alt="Remove" src="{!URLFOR($Resource.CmsImages,'/btn_remove.png')}" /></a></div>
+									<div class="tableitem-handle" style="border: none;"><span class="ui-icon ui-icon-arrow-4"></span></div>
+								</div>
+								<div class="tableitem-cell sample {!IF(column.field.c.Name__c == 'Text', '', 'detail-field')}">
+									<apex:outputText escape="false" value="{!column.field.label}" />
+								</div>
+								<div style="clear: both;"></div>
+		 					</div>
+					  	</apex:outputText>
+					  </td>
+					</apex:repeat>
+			 	  </tr>
+				</apex:repeat>
+			  </tbody>
+			</table>
+
+		  </div>
+	    </td>
+	    <td valign="top">
+	      <div id="objectfields">
+	        <table>
+	      	  <tr>
+	            <td style="width:120px;">Salesforce Object</td>
+			    <td>
+	                <apex:outputText escape="false" rendered="{!content.cms__Published__c}">
+		                <select name="SObjectType" id="SOjbectType" disabled="disabled">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		             </apex:outputText>
+	                 <apex:outputText escape="false" rendered="{!!content.cms__Published__c}">
+		                <select name="SObjectType" id="SObjectType">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		              </apex:outputText>
+				  </td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<div id="elementOptionAccordion" style="width: 397px; padding:0px; float: left; margin-right: 8px; display: none;">
+							<h3 id="detail-elements-hdr"><a href="#">Detail Elements</a></h3>
+							<div id="detail-elements">
+								 <ul class="available_container ui-sortable" style="width: 100%">
+									<li class="sortitem tableitem ocms-field-item" id="Text">
+										<span class="handle ocms-draghandle"><img src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" border="0" /></span>
+										<span class="draggable-label" title="Text">Text</span>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</td>
+				</tr>
+	        </table>
+	      </div>
+	    </td>
+	  </tr>
+	</table>
+
+</apex:component>

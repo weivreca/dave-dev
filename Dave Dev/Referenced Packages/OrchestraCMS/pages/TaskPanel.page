@@ -1,0 +1,34 @@
+<apex:page controller="cms.BasicController"  showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="TaskPanel">
+
+<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+<c:CmsScripts debug="true"/>
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'TaskPanel.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+
+<script type="text/javascript">
+
+    var pgMgr;
+    $(document).ready(function() {
+        pMgr = $('#panelMgr').ocmsTaskPanel({
+            sname:'{!$CurrentPage.parameters.sname}'
+                ,type:      '{!$CurrentPage.parameters.type}'
+                ,name:      '{!$CurrentPage.parameters.name}'
+                ,content:   '{!$CurrentPage.parameters.content}'
+                ,tabid:     '{!JSENCODE(tabid)}'
+                ,timeline:  '{!$CurrentPage.parameters.timeline}'
+                ,targetid:  '{!$CurrentPage.parameters.targetid}'
+        });
+
+
+    });
+
+ 	$(document).data('cms', {
+		'context' 	: 'orchestracms',
+		'namespace' : '{!namespace}'
+	});
+
+</script>
+
+    <div id="panelMgr" style="height:100%;" ></div>
+
+</apex:page>

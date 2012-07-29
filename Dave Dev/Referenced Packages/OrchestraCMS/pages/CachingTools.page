@@ -1,0 +1,65 @@
+<apex:page id="cashing-tools" controller="cms.CachingTools" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS" standardStylesheets="false">
+
+	<html style="padding: 0px; margin: 0px;">
+		<head>
+			<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+			<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+		 	 <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+		 	 <!-- This is the jquery cookie extension only -->
+			 <apex:includeScript value="{!$Resource.cms__jquery}" />
+             <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+			 <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+			 <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/JQueryDialogs')}" />
+			 <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/CachingUtils.js')}" />
+			
+			
+			<script type="text/javascript" >
+
+				$(document).ready(function(){
+					$('#refreshContentCashButton').button().click(function(){
+						$('#cache_generator').ocmsCacheGenerator({
+							type: 'content_batch',
+							sname: '{!sname}',
+							show_status: true,
+							mode: 'all'
+						});
+					});
+				});
+
+			</script>
+
+		</head>
+
+		<body>
+
+			<c:SetupMenu sname="{!sname}" activeitem="cache-content" />
+
+		  	<div style="margin-left: 210px; padding: 10px;">
+
+		  		<div class="ocms-setup-breadcrumb">
+				  <div class="ocms-setup-breadcrumb-start"></div>
+				  <div class="ocms-setup-breadcrumb-item">Setup</div>
+				  <div class="ocms-setup-breadcrumb-separator-active"></div>
+				  <div class="ocms-setup-breadcrumb-item-active">Content Cache</div>
+				  <div class="ocms-setup-breadcrumb-end"></div>
+				  <div class="ocms-clear"></div>
+				</div>
+
+				<div style="margin-top: 20px;">
+
+					<div style="height: 100px;">
+						<div>Perform a refresh of all OrchestraCMS content caches.</div><br />
+						<div>
+							<button id="refreshContentCashButton">Refresh</button>
+						</div>
+						<div id="cache_generator"></div>
+					</div>
+				</div>
+
+			</div>
+
+		</body>
+
+	</html>
+
+</apex:page>

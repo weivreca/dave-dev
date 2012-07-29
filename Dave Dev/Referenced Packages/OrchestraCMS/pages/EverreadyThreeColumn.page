@@ -1,0 +1,80 @@
+<apex:page id="er" controller="cms.CoreController" standardStylesheets="false" showHeader="false" sidebar="false">
+	
+	<apex:composition template="{!page_template}">
+		
+		<apex:define name="header">
+			<link rel="stylesheet" href="{!URLFOR($Resource.everready, 'css/screen.css')}" type="text/css" media="screen" charset="utf-8" />
+			<link rel="stylesheet" href="{!URLFOR($Resource.everready, 'css/print.css')}" type="text/css" media="print" charset="utf-8" />
+
+			<!--[if lt IE 8]><link rel="stylesheet" href="{!URLFOR($Resource.everready, 'css/ie.css')}" type="text/css" media="screen" charset="utf-8" /><![endif]-->
+
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.everready, 'css/superfish.css')}" media="screen" charset="utf-8" />
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.everready, 'css/superfish-vertical.css')}" media="screen" charset="utf-8" />
+
+			<script type="text/javascript" src="{!URLFOR($Resource.everready, 'js/hoverIntent.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.everready, 'js/superfish.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.everready, 'js/global.js')}" charset="utf-8"></script>
+		
+        </apex:define>
+		
+		<apex:define name="body">
+			<div id="site">
+				<div id="header-contain">
+					<div id="header">
+						<div id="mainbanner">
+							<div id="pagetitle-align" style="text-align: right;"><h1><c:SinglePlainTextPanel panelName="slogan" panelController="{!controller}" panelHeight="30px" panelWidth="600px" /></h1></div>
+							<div id="logo-wordmark"><c:SingleImagePanel panelName="logo" panelController="{!controller}" panelHeight="50px" panelWidth="304px" /></div>
+						</div>
+						<div style="position:relative; top: 32px; text-align: left;">
+							<c:SingleClassStyledMenuPanel panelName="top-menu" panelController="{!controller}" panelHeight="30px" panelWidth="878px" />
+						</div>						
+					</div>					
+				</div>
+				
+				<div id="contentArea">
+					<div class="container">
+
+						<div class="threecol-leftcol">
+							<c:Panel panelName="left-column" panelController="{!controller}" panelHeight="500px" panelWidth="100px" />
+						</div>
+
+						<div class="threecol-midcol">
+
+							<c:Panel panelName="top-content" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+
+							<div class="threecol-midcol-2col">
+								<c:Panel panelName="content1" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+							</div>
+
+							<div class="threecol-midcol-2col last">
+								<c:Panel panelName="content2" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+							</div>
+
+							<div class="clear">&nbsp;</div>
+
+							<c:Panel panelName="content3" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+
+						</div>
+
+						<div class="threecol-rightcol last">
+ 							<c:Panel panelName="right-column" panelController="{!controller}" panelHeight="500px" panelWidth="100px" />
+						</div>
+
+					</div>
+				</div>
+
+				<div id="footer_contain">
+
+					<div id="footer">
+						<c:Panel panelName="footer" panelController="{!controller}" panelHeight="30px" panelWidth="100px" />
+					</div>
+
+				</div>
+			</div>
+
+			<site:googleAnalyticsTracking />
+
+		</apex:define>	
+	</apex:composition>
+
+</apex:page>

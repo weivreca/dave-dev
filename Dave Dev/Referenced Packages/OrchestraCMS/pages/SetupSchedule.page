@@ -1,0 +1,248 @@
+<apex:page controller="cms.SetupSchedule" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+    <title>Manage Schedules</title>
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+	<c:CmsScripts debug="true" />
+   	<apex:includeScript value="{!$Resource.cms__JQueryCheckbox}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleList.js')}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleDialogs.js')}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleOptionsDialog.js')}" />   	   	
+  
+  	<style type="text/css">
+	.ocms-list-title {
+		display: none;	
+	}
+	
+	.ocms-list {
+		padding-top: 10px;
+	}
+	</style>
+  
+  	<script type="text/javascript">
+		var list;
+		function refresh(){
+			list.ocmsScheduleList('refresh');
+		}
+
+  		$(document).ready(function(){
+
+			if({!showList}){
+				list = $('#ocmsScheduleList').ocmsScheduleList({
+						'schedules' : {!schedulesJSON},
+						'allFilters' : {!contentTypesJSON},
+						'sname' 	: '{!sname}', 
+						'token' 	: '{!token}',
+						'orgWideEmailList' : '{!JSONOrgWideEmailList}'
+				});
+			}			
+
+			var remoteAccessDialog = $('<div><div style="padding-top: 5px; padding-bottom: 5px;">Ensure that remove access is setup in Salesforce Setup | Develop | Remote Access. Use the Callback URL below.</div>' + 
+	   			'<form><table border="0" cellspacing="0" cellpadding="5"><tr><td>Callback URL</td><td>{!callbackURL}</td></tr><tr><td>Consumer Key</td><td><input id="key" style="width: 250px;" value="{!consumerKey}" /></td></tr><tr><td>Consumer Secret</td><td><input id="secret" value="{!consumerSecret}" style="width: 250px;" /></td></tr></form><br /></div>').dialog({
+		   			title: 'Remote Access',
+		   			width: 400,
+		   			autoOpen: false,
+		   			buttons: {
+		   				'Save' : function(){
+							var self = this;
+							var data = {};
+							data['action'] = 'updateRemoteAccess';
+							data['callbackURL'] = '{!callbackURL}';
+							data['consumerKey'] = $(this).find('#key').val();
+							data['consumerSecret'] = $(this).find('#secret').val();	
+							data['token'] = '{!token}';
+
+			  				$.ajax({
+								async: false,
+								url : '/apex/OrchestraPrivateAjax',
+								data: data,
+								type: 'POST',
+								dataType: 'json',
+								success: function(json, textStatus, xhr){
+				  					if(json != null && json.error != null && json.error != undefined){
+				  						$('<div></div>').ocmsShowErrorPopup({
+				  							title : 'Error Saving Remote Access',
+				  							message : json.error.message
+				  						});				  					
+				  					}else{
+				  						$(self).dialog('close');
+				  					}
+			  					},
+			  					error: function(json, textSTatus, xhr){
+			  						$('<div></div>').ocmsShowErrorPopup({
+			  							title : 'Error Saving Remote Access',
+			  							message : json.error.message
+			  						});
+			  					}
+							});								
+
+		   					
+		   					
+		   				},
+		   				'Cancel': function(){
+		   					$(this).dialog('close');
+		   				}
+
+		   			}
+
+		   		});
+
+		    $('#remoteAccessButton').button();
+		    $('#remoteAccessButton').bind('click',function(){ 			 
+
+		   		remoteAccessDialog.dialog('open');
+			 
+			 });
+	   	
+	   	});
+  	
+  	</script>
+  </head>
+
+  <body>
+
+	<apex:outputPanel rendered="{!hasAccess}">
+
+	  	<c:SetupMenu sname="{!sname}" activeitem="Scheduler" />
+	  	
+	  	<div style="margin-left: 210px; padding: 10px;">
+	
+			<apex:outputPanel >
+	
+		  		<div class="ocms-setup-breadcrumb">
+				  <div class="ocms-setup-breadcrumb-start"></div>
+				  <div class="ocms-setup-breadcrumb-item">Setup</div>
+				  <div class="ocms-setup-breadcrumb-separator-active"></div>
+				  <div class="ocms-setup-breadcrumb-item-active">Manage Schedules</div>
+				  <div class="ocms-setup-breadcrumb-end"></div>
+				  <div class="ocms-clear"></div>
+				</div>
+			
+			</apex:outputPanel>
+	
+			<br />
+	
+			<apex:outputPanel >
+	
+				<apex:form >
+					<apex:actionFunction action="{!startScheduler}" name="startScheduler" oncomplete="refresh()" rerender="scheduleListMessages,scheduleList">
+						<apex:param name="pwd" value="" />
+						<apex:param name="token" value="" />
+					</apex:actionFunction>
+					<apex:actionFunction action="{!stopScheduler}" name="stopScheduler" oncomplete="refresh()" rerender="scheduleListMessages,scheduleList" />				
+				</apex:form>
+				
+				<table border="0" cellspacing="0" cellpadding="5">
+				  <tr>
+				    <td colspan="2"><div style="font-size: 16px; padding-bottom: 8px; padding-right: 25px; float: left;">Scheduler</div></td>
+				  </tr>
+				  <tr>
+				    <td>Remote Access</td>
+				    <td><div id="remoteAccessButton">Edit</div></td>
+				  </tr>
+				  <tr>
+				    <td>Status</td>
+				    <td>
+				    	<apex:outputPanel id="scheduleList">
+				    		<apex:outputPanel id="nextRun" rendered="{!isScheduled}">Running. Next run: {!nextRun}&nbsp;&nbsp;</apex:outputPanel>
+						</apex:outputPanel>
+						
+						<div id="startScheduler" style="display: none;">
+							<div id="startSchedulerButton">Start Scheduler</div>
+						</div>
+						
+						<div id="stopScheduler" style="display: none;">
+							<div id="stopSchedulerButton">Stop Scheduler</div>
+						</div>
+									    
+				    </td>
+				  </tr>
+				  
+				</table>
+				
+				<apex:outputPanel id="scheduleListMessages">
+	
+					<apex:outputPanel layout="block" id="messages" rendered="{!hasMessages}">
+						<apex:repeat value="{!messages}" var="message">
+							{!message}<br />
+						</apex:repeat>
+						<br /><br />
+					</apex:outputPanel>
+					
+				</apex:outputPanel>
+
+				<apex:outputPanel id="schedulerList" rendered="{!showList}">
+
+					<table>
+					  <tr>
+					    <td colspan="2"><div style="font-size: 16px; padding-bottom: 8px; padding-right: 25px; float: left;">Schedules</div></td>
+					  </tr>
+					  <tr>
+					    <td>
+					    
+					      <div id="ocmsScheduleList"></div>
+					    
+					    </td>
+					  </tr>
+					</table>
+				
+				</apex:outputPanel>
+				
+				    <script type="text/javascript">
+				    
+				    	if({!isScheduled}){
+				    		$('#startScheduler').css('display', 'none');
+					    	$('#stopScheduler').css('display', 'inline-block');
+				    	}else{
+				    		$('#startScheduler').css('display', 'inline-block');
+					    	$('#stopScheduler').css('display', 'none');
+				    	}
+					 
+					    $('#startSchedulerButton').button();
+					    $('#startSchedulerButton').bind('click', function() {
+					    		$('<div><div style="padding-top: 5px; padding-bottom: 5px;">Please enter your password and security token in order to start the scheduler. The password is never stored and only used to start the scheduler.</div><form><table border="0" cellspacing="0" cellpadding="5"><tr><td>Password</td><td><input id="pwd" type="password" /></td></tr><tr><td>Security Token</td><td><input id="token" type="password" style="width: 250px;" /></td></tr></form><br /></div>').dialog({
+					    			title: 'Start Scheduler',
+					    			width: 400,
+					    			buttons: {
+					    				'Start Scheduler' : function(){
+											//startScheduler($(this).find('input').val());
+		
+											startScheduler($(this).find('#pwd').val(),$(this).find('#token').val());
+					    					$('#startScheduler').css('display', 'none');
+					    					$('#stopScheduler').css('display', 'inline-block');						
+		
+					    					$(this).dialog('close');
+					    				},
+					    				'Cancel': function(){
+					    					$(this).dialog('close');
+					    				}
+					    			}
+					    		});
+					    	});
+					    $('#stopSchedulerButton').button();
+					    $('#stopSchedulerButton').bind('click', function() {
+					    		stopScheduler();
+					    		$('#startScheduler').css('display', 'inline-block');
+					    		$('#stopScheduler').css('display', 'none');		    		
+					    	});			    
+		
+				    </script>
+
+			</apex:outputPanel>
+	
+	    </div>
+
+	</apex:outputPanel>
+
+	<apex:outputPanel rendered="{!!hasAccess}">
+	  	<div style="padding: 10px;">
+	  		You do not have Setup > Manage Scheduler permission
+	   	</div>
+	</apex:outputPanel>  
+	
+  </body>
+
+</html>
+</apex:page>

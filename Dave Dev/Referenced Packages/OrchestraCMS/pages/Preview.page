@@ -1,0 +1,6 @@
+<apex:page id="m" controller="cms.CoreController" extensions="cms.PreviewController" showHeader="false" sidebar="false" cache="{!router.page_cache}" expires="{!router.page_expires}" standardStylesheets="false" title="{!router.page_title}" language="{!router.page.cms__Language__c}" renderAs="{!render_as}">
+     
+  <html>
+    <apex:include id="i" pageName="{!page_layout_reference}" />  
+  </html>
+</apex:page>

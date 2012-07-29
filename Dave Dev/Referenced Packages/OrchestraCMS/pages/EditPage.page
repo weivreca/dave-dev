@@ -1,0 +1,14 @@
+<apex:page id="ep" controller="cms.CoreController" extensions="cms.EditPageController" showHeader="false" sidebar="false" standardStylesheets="false" cache="false" >
+
+<apex:composition template="{!page_template_reference}">
+
+  <apex:define name="header">
+  </apex:define>
+
+  <apex:define name="body">
+    You must first select a layout
+  </apex:define>
+
+</apex:composition>
+
+</apex:page>

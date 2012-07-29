@@ -1,0 +1,196 @@
+<apex:page id="m" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS - Welcome">
+	
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.welcome.css')}" />
+  	
+  	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+  	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/OCMSScripts.js')}" />
+	 <script type="text/javascript">
+
+	  	var sname = "{!JSENCODE($CurrentPage.parameters.sname)}";
+	    $(document).ready(function() {
+	        // Setup the hover icons for each action item.
+	        var allSections = $('#ocms-welcome-table').find('.ocms-welcome-section');
+	        allSections.each(function(index, section){
+	            var img = $(this).find('img');
+	            var sImg = img.attr('src');
+	            var sImgMO = sImg.replace('.png','_MO.png');
+	            var sImgMD = sImg.replace('.png','_MD.png');
+	            var a1 = $(this).find('.ocms-welcome-section-img');
+	            a1.hover(
+	                    function() {
+	                        img.attr('src', sImgMO);
+	                    },
+	                    function() {
+	                        img.attr('src', sImg);
+	                    }
+	                    );
+	            a1.mousedown(function(){
+	                img.attr('src', sImgMD);
+
+	            }).mouseup(function(){
+	                img.attr('src', sImgMO);
+	            });
+
+	            var a2 = $(this).find('.ocms-welcome-section-title');
+	            a2.hover(
+	                    function() {
+	                        img.attr('src', sImgMO);
+	                    },
+	                    function() {
+	                        img.attr('src', sImg);
+	                    }
+	                    );
+	            a2.mousedown(function(){
+	                img.attr('src', sImgMD);
+
+	            }).mouseup(function(){
+	                img.attr('src', sImgMO);
+	            });
+	        });
+            $('body').css('height', '95%');
+
+	    });
+	    function showReleaseNotes()
+	    {
+	        $.orchestracmsUtil.openNewWindow("http://www.orchestracms.com/docs/releasenotes", "releaseNotes");
+	    }
+	    function showStartUpDocumentation()
+	    {
+	        $.orchestracmsUtil.openNewWindow("http://www.orchestracms.com/docs/startup", "ocmsStartUpDocumentation");
+	    }
+	    function showDevDocumentation()
+	    {
+	        $.orchestracmsUtil.openNewWindow("http://www.orchestracms.com/docs/developer", "ocmsDevDocumentation");
+	    }
+	    function showTutorials()
+	    {
+	        $.orchestracmsUtil.openNewWindow("http://www.youtube.com/user/stantive", "ocmsTutorials");
+	    }
+	    function showCommunity()
+	    {
+	        $.orchestracmsUtil.openNewWindow("https://stantive.secure.force.com/stantive1/portal_home", "ocmsCommunity");
+	    }
+	    function showOnlineSupport()
+	    {
+			openTab('Online Support', 'http://www.orchestracms.com/OrchestraOnlineSupportForm', 'ocms~~Support', 'OnlineSupport');
+	    }
+	</script>
+
+     <div class="ocms-welcome" style="overflow:auto">
+        <div class="ocms-welcome-header">
+            <div class="ocms-welcome-section">
+                <div class="ocms-welcome-section-imgdiv">
+	                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Help.png')}" alt="Help and Advice"/>
+	            </div>
+	            <div>
+	                <h3>Learn about OrchestraCMS</h3>
+
+	                <div class="ocms-welcome-section-text">
+                        <div>Everything you need to know about getting started with and using OrchestraCMS is on this page.</div>
+                        <div>Click <span style="font-weight:bold;padding-bottom:2px;padding-left:20px" class="ocms-icon-16 ocms-icon-16-help"> Help</span> in the top right corner of the application to show this page.</div>
+
+	                </div>
+	            </div>
+            </div>
+        </div>
+        <table id="ocms-welcome-table" cellspacing="1" width="100%">
+            <tbody>
+            <tr>
+                <td width="50%">
+                    <div class="ocms-welcome-section">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showReleaseNotes();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Documentation.png')}" alt="Release Notes"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showReleaseNotes();">OrchestraCMS Release Notes</span></h3>
+
+                            <div class="ocms-welcome-section-text">What's new in OrchestraCMS.</div>
+                        </div>
+                    </div>
+                </td>
+                <td width="50%">
+                    <div class="ocms-welcome-section">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showStartUpDocumentation();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Documentation.png')}" alt="Start-Up Guide"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showStartUpDocumentation();">OrchestraCMS Start-Up Guide</span></h3>
+
+                            <div class="ocms-welcome-section-text">Everything you need to know to get started with OrchestraCMS.
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <div class="ocms-welcome-section">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showTutorials();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Tutorials.png')}" alt="Video Tutorials"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showTutorials();">Video Tutorials</span></h3>
+
+                            <div class="ocms-welcome-section-text">Easy-to-follow tutorials about creating and managing your OrchestraCMS web site.</div>
+                        </div>
+                    </div>
+                </td>
+                <td width="50%">
+                    <div class="ocms-welcome-section">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showOnlineSupport();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Support.png')}" alt="Customer Support"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showOnlineSupport();">Customer Support</span></h3>
+
+                            <div class="ocms-welcome-section-text">Log a case with our support team. We'll get back to you as soon as we can.</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <div class="ocms-welcome-section">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showCommunity();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Community.png')}" alt="Community"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showCommunity();">Join our Portal</span></h3>
+
+                            <div class="ocms-welcome-section-text">Join our Portal. Share feedback, insights and ideas. (Opens in new window)</div>
+                        </div>
+                    </div>
+                </td>
+                <td width="50%">
+                    <div class="ocms-welcome-section" style="display: none;">
+                        <div class="ocms-welcome-section-imgdiv">
+                            <span class="ocms-welcome-section-img" onclick="showDevDocumentation();">
+                                <img src="{!URLFOR($Resource.jqueryui, '/css/images/Headers/80px_Documentation.png')}" alt="Developer Guide"/>
+                            </span>
+                        </div>
+                        <div>
+                            <h3><span class="ocms-welcome-section-title" onclick="showDevDocumentation();">OrchestraCMS Developer Guide</span></h3>
+
+                            <div class="ocms-welcome-section-text">Technical instructions for creating page layouts, droppable panels, styling content, and more.
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+ </apex:page>

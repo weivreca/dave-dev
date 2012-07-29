@@ -1,0 +1,175 @@
+<apex:page controller="cms.SetupScheduleStatus" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+    <title>Manage Schedules</title>
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+	<c:CmsScripts debug="true" />
+   	<apex:includeScript value="{!$Resource.cms__JQueryCheckbox}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleList.js')}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleDialogs.js')}" />
+   	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'ScheduleOptionsDialog.js')}" />   	   	
+  
+  	<style type="text/css">
+	.ocms-list-title {
+		display: none;	
+	}
+	
+	.ocms-list {
+		padding-top: 10px;
+	}
+	</style>
+  
+  </head>
+
+  <body>
+
+  	<c:SetupMenu sname="{!sname}" activeitem="Scheduler" />
+  	
+  	<div style="margin-left: 210px; padding: 10px;">
+
+		<apex:outputPanel >
+
+	  		<div class="ocms-setup-breadcrumb">
+			  <div class="ocms-setup-breadcrumb-start"></div>
+			  <div class="ocms-setup-breadcrumb-item">Setup</div>
+			  <div class="ocms-setup-breadcrumb-separator"></div>
+			  <div class="ocms-setup-breadcrumb-item">Manage Schedules</div>
+			  <div class="ocms-setup-breadcrumb-separator-active"></div>
+			  <div class="ocms-setup-breadcrumb-item-active">Status</div>
+			  <div class="ocms-setup-breadcrumb-end"></div>
+			  <div class="ocms-clear"></div>
+			</div>
+		
+		</apex:outputPanel>
+
+		<br />
+		
+		<apex:form >
+		  <apex:commandLink action="{!refresh}" value="Refresh" />
+		</apex:form>
+
+		<br />
+
+		<apex:outputPanel rendered="{!scheduleMode}">
+		
+		</apex:outputPanel>
+
+		<apex:outputPanel rendered="{!jobMode}">
+			<table border="0" cellspacing="0" cellpadding="5">
+			  <tr>
+			    <td>Job Id</td>
+			    <td>{!jobItem.Id}</td>
+			  </tr>
+			  <apex:outputText rendered="{!IF(jobItem.Subscription__r.Access_Level__r.cms__Name__c != null, true, false)}">
+			  <tr>
+			    <td>Subsription Access Level</td>
+			    <td>{!jobItem.Subscription__r.Access_Level__r.cms__Name__c}</td>
+			  </tr>
+			  </apex:outputText>
+			   <apex:outputText rendered="{!showTags}">
+			  <tr>
+			    <td>Subsription Tags</td>
+			    <td>
+			    	<apex:repeat value="{!subscriptionTags.Tags__r}" var="tag">
+			    	 	{!tag.Tag_Definition__r.Name__c}<br />
+			    	</apex:repeat>
+			    </td>
+			  </tr>
+			  </apex:outputText>
+			   <apex:outputText rendered="{!IF(jobItem.Subscription__r.Schedule__r.cms__Name__c != null, true, false)}">
+			  <tr>
+			    <td>Subsription Schedule</td>
+			    <td>{!jobItem.Subscription__r.Schedule__r.cms__Name__c}</td>
+			  </tr>			  
+			  </apex:outputText>
+			  <apex:outputText rendered="{!IF(JobItemRecipient != null, true, false)}">
+			  <tr>
+			    <td>Recipient</td>
+			    <td>{!jobItemRecipient}</td>
+			  </tr>
+			  </apex:outputText>
+			  <apex:outputText rendered="{!IF(emailId != null, true, false)}">
+			  <tr>
+			    <td colspan="2"><a style="color: #788E1E;" href="/servlet/servlet.FileDownload?file={!emailId}" target="_blank">View Email</a></td>
+			  </tr>
+			  </apex:outputText>			  
+			</table><br /><br />
+			<apex:outputText rendered="{!showSubJobs}"><h1>Sub Jobs</h1><br /><br /></apex:outputText>
+		</apex:outputPanel>
+
+		<apex:outputPanel rendered="{!showPending}">
+		<strong>Pending</strong><br />	
+		<table border="0" cellspacing="0" cellpadding="5" class="ocms-list" style="margin: 0px;">
+		  <tr class="list-header">
+		  	<td>Id</td>
+			<td>Type</td>
+			<td>Sub Jobs</td>
+			<td>Status (Retries)</td>
+			<td>Created By</td>
+			<td>Created</td>
+			<td>Queued</td>
+			<td>Completed</td>
+			<td>Recipient</td>
+			<td>Duration (Hrs)</td>
+			<td class="last">Message</td>
+		  </tr>
+		  <apex:repeat value="{!pendingJobs}" var="job">
+			<tr class="list-row">
+			  <td><a href="/apex/SetupScheduleStatus?sname={!sname}&jobId={!job.jobId}">{!job.jobId}</a></td>
+			  <td>{!job.jobType}</td>
+  			  <td><a href="/apex/SetupScheduleStatus?sname={!sname}&jobId={!job.jobId}" style="text-decoration: underline">{!job.jobSubJobs}</a></td>
+			  <td>{!job.jobStatus}</td>
+			  <td>{!job.jobCreatedBy}</td>
+			  <td>{!job.jobCreatedDate}</td>
+			  <td>{!job.jobQueuedDate}</td>
+			  <td>{!job.jobCompletedDate}</td>
+			  <td>{!job.jobRecipient}</td>
+			  <td>{!job.jobDuration}</td>
+			  <td class="last">{!job.jobMessage}</td>
+			</tr>
+		  </apex:repeat>
+		</table>
+		</apex:outputPanel>
+		
+		<apex:outputPanel rendered="{!showHistory}">
+		<strong>History</strong><br />			
+		<table border="0" cellspacing="0" cellpadding="5" class="ocms-list" style="margin: 0px;">
+		  <tr class="list-header">
+		  	<td>Id</td> 
+			<td>Type</td>
+			<td>Status (Retries)</td>
+			<td>Created By</td>
+			<td>Created</td>
+			<td>Queued</td>
+			<td>Completed</td>
+			<td>Recipient</td>
+			<td>Duration (Hrs)</td>
+			<td>Sub Jobs</td>
+			<td class="last">Message</td>
+		  </tr>
+		  <apex:repeat value="{!completedJobs}" var="job">
+			<tr class="list-row">
+			  <td><a href="/apex/SetupScheduleStatus?sname={!sname}&jobId={!job.jobId}">{!job.jobId}</a></td>
+			  <td>{!job.jobType}</td>
+			  <td>{!job.jobStatus}</td>
+			  <td>{!job.jobCreatedBy}</td>
+			  <td>{!job.jobCreatedDate}</td>
+			  <td>{!job.jobQueuedDate}</td>
+			  <td>{!job.jobCompletedDate}</td>
+			  <td>{!job.jobRecipient}</td>
+			  <td>{!job.jobDuration}</td>
+			  <td style="text-decoration: underline"><a href="/apex/SetupScheduleStatus?sname={!sname}&jobId={!job.jobId}">{!job.jobSubJobs}</a></td>
+			  <td class="last">{!job.jobMessage}</td>
+			</tr>
+		  </apex:repeat>
+		</table>	
+		</apex:outputPanel>		
+
+    </div>
+	
+  </body>
+
+</html>
+</apex:page>

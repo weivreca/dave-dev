@@ -1,0 +1,153 @@
+<apex:component controller="cms.ContentSelectorController">
+
+  <apex:attribute name="disabled" type="Boolean" description="Passthrough Id" assignTo="{!disabled}" />
+  <apex:attribute name="sname" type="String" description="Site Name" assignTo="{!siteName}" />
+
+    <style type="text/css">
+
+      .draggable { height: 25px; padding: 3px; font-size: 12px; font-family: arial; background-color: rgb(235,235,235); border: 1px solid rgb(200,200,200); width: auto; overflow: hidden; line-height: 19px;}
+      .sortable div { height: 25px; }
+
+      .contenttype, .content, .layout { height: 25px; padding: 3px; font-size: 12px; font-family: arial; background-color: rgb(235,235,235); width: auto; overflow: hidden; line-height: 25px;}
+
+    </style>
+
+    <apex:outputPanel id="o" layout="block" rendered="{!renderEnabledSelector}">
+
+    <div style="display: block; clear: both; font-size: 12px; font-family: arial; ">
+
+      <div id="noDefinedPanels" style="position: relative; height: 75px; display: none;">
+
+        <table border="0" cellspacing="0" cellpadding="0" style="width: 100%">
+          <tr>
+            <td style="width: 100%; text-align: center; font-size: 14px; padding: 0px; margin: 0px;">
+                  <div style="height: 75px; padding: 26px;">
+					No droppable areas are available in the page layout below.
+                  </div>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+
+      <div id="selectMode" style="position: relative; height: 75px; display: none;">
+
+        <table border="0" cellspacing="0" cellpadding="0" style="width: 100%">
+          <tr>
+            <td style="width: 49%; text-align: center; font-size: 14px; padding: 0px; margin: 0px;">
+                <div id="existingContent" style="background-color: rgb(255,255,255);">
+                  <div style="width: 350px; margin: auto; height: 75px; text-align: left;">
+                    <div style="padding: 26px 5px 26px 26px; float: left;"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_add.png')}" /></div>
+                    <div style="padding: 28px 5px 28px 5px; margin-left: 50px;"><strong>Add <span style="color: #336600">Existing Content</span> to the page</strong></div>
+                  </div>
+                </div>
+            </td>
+            <td style="width: 2%; padding: 0px; margin: 0px;"><div style="padding: 15px; font-size: 14px;"><strong>OR</strong></div></td>
+            <td style="width: 49%; text-align: center; font-size: 14px; padding: 0px; margin: 0px;">
+                <div id="newContent" style="background-color: rgb(255,255,255);">
+                  <div style="width: 350px; margin: auto; height: 75px; text-align: left;">
+                    <div style="padding: 26px 5px 26px 26px; float: left;"><img border="0" src="{!URLFOR($Resource.CmsImages,'/btn_add.png')}" /></div>
+                    <div style="padding: 28px 5px 28px 5px; margin-left: 50px;"><strong>Add <span style="color: #336600">New Content</span> to the page</strong></div>
+                  </div>
+                </div>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+
+      <div id="addExistingContent" style="height: 35px; display: none; border-bottom: 1px solid #DEDEDE;">
+        <div id="closeExisting" class="menuItem" style="float: right; width: 50px; height: 15px; text-align: center; border-left: 1px solid #DEDEDE; padding: 10px; font-size: 12px;">Done</div>
+        <div style="height: 15px; padding: 10px; font-size: 14px; "><strong>Add <span style="color: #336600">Existing Content</span> to the page</strong></div>
+      </div>
+
+      <div id="addNewContent" style="height: 35px; display: none; border-bottom: 1px solid #DEDEDE;">
+        <div id="closeNew" class="menuItem" style="height: 15px; float: right; width: 50px; text-align: center; border-left: 1px solid #DEDEDE; padding: 10px; font-size: 12px;">Done</div>
+        <div style="height: 15px; padding: 10px; font-size: 14px; "><strong>Add <span style="color: #336600">New Content</span> to the page</strong></div>
+      </div>
+
+      <div id="contentTypeExisting" style="display: none; float: left; width: 225px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 225px; overflow: hidden;">
+        <div style="padding: 10px; padding-left: 10px; font-weight: bold;">1. Select a content type</div>
+        <div id="contentTypeExistingOptions" style="width: auto; overflow: auto; height: 131px;">   
+          <apex:repeat value="{!contentTypesExisting}" var="currType">
+            <div id="existing_{!currType}" class="contenttype" style="border-top: 1px solid rgb(215,215,215);">
+              <div class="valueContentTypeId" style="display: none;">{!currType.Id}</div>
+              <div class="valueContentTypeText" style="display: none;">{!currType.Name__c}</div>
+              <div style="overflow: hidden;" >&nbsp;&nbsp;{!currType.Label__c}</div>
+            </div>
+          </apex:repeat>
+        </div>
+        </div>
+      </div>
+
+      <div id="contentExisting" style="display: none; float: left; width: 350px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 350px; overflow: hidden;">
+        <div style="padding: 10px; font-weight: bold;">2. Select existing content</div>
+        <apex:outputPanel id="o1" layout="block">
+          <div id="contentExistingOptions" style="width: auto; overflow: auto; height: 131px;"></div>
+        </apex:outputPanel>
+        </div>
+      </div>
+
+      <div id="layoutExisting" style="display: none; float: left; width: 220px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 220px; overflow: hidden;">
+        <div style="padding: 10px; font-weight: bold;">3. Select content template</div>
+        <apex:outputPanel id="o2" layout="block">
+          <div id="layoutExistingOptions" style="width: auto; overflow: auto; height: 131px;"></div>
+        </apex:outputPanel>
+        </div>
+      </div>
+
+      <div id="dragndropExisting" style="display: none; width: 270px; float:left; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 270px; overflow: hidden;">
+        <div style="padding: 10px; font-weight: bold;">4. Drag and Drop onto the page.</div>
+        <apex:outputPanel id="o3" layout="block">
+          <div id="dragndropExistingOptions" style="width: auto; overflow: auto; height: 131px;"></div>
+        </apex:outputPanel>
+        </div>
+      </div>
+
+
+
+     <div id="contentTypeNew" style="display: none; float: left; width: 265px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 265px; overflow: hidden;">
+        <div style="padding: 10px; padding-left: 10px; font-weight: bold;">1. Select a content type</div>
+        <div id="contentTypeNewOptions" style="width: auto; overflow: auto; height: 131px;">   
+          <apex:repeat id="r1" value="{!contentTypesNew}" var="currType">
+            <div id="new_{!currType}" class="contenttype" style="border-top: 1px solid rgb(215,215,215);">
+              <div class="valueContentTypeId" style="display: none;">{!currType.Id}</div>
+              <div class="valueContentTypeText" style="display: none;">{!currType.Name__c}</div>
+              <div style="overflow: hidden;" >&nbsp;&nbsp;{!currType.Label__c}</div>
+            </div>
+          </apex:repeat>
+        </div>
+        </div>
+      </div>
+
+      <div id="layoutNew" style="display: none; float: left; width: 220px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 220px; overflow: hidden;">
+        <div style="padding: 10px; font-weight: bold;">2. Select a content template</div>
+        <apex:outputPanel id="o4" layout="block">
+          <div id="layoutNewOptions" style="width: auto; overflow: auto; height: 131px;"></div>
+        </apex:outputPanel>
+        </div>
+      </div>
+
+      <div id="dragndropNew" style="display: none; float: left; width: 270px; padding: 0px; border-right: 3px solid #DEDEDE; background-color: rgb(245,245,245);">
+        <div style="width: 270px; overflow: hidden;">
+        <div style="padding: 10px; font-weight: bold;">3. Enter a name for the new content.</div>
+        <apex:outputPanel id="o5" layout="block">
+          <div id="dragndropNewOptions" style="width: auto; overflow: auto; height: 131px;"></div>
+        </apex:outputPanel>
+        </div>
+      </div>
+
+
+
+      <div style="clear:both;"></div>
+
+    </div>
+    </apex:outputPanel>
+
+</apex:component>

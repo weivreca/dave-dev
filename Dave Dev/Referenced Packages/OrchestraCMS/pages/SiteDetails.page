@@ -1,0 +1,162 @@
+<apex:page id="installer" controller="cms.SiteDetails" showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+
+<head>
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/AccessDialogs.js')}" />		
+ 	
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+ 	<c:CmsScripts />
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+	<script type="text/javascript">
+	
+		function initGuestUserSelector(){
+		
+			$('#guestUserSelector').ocmsGuestUserDialog({
+				"sname" : "{!site.Site_Name__c}",
+				"token" : "{!token}",
+				"userlist" : [{!userList}],
+				"passthroughId" : "{!$Component.installer.DetailForm.siteGuestUser}",
+				"userSelected" : {!userSelected}
+			});
+		
+		}
+	
+	</script>
+
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="site-details" />
+	
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+	
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		  <div class="ocms-setup-breadcrumb-item-active">Site Details</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+		<br />
+		
+		<apex:form id="DetailForm">
+			<table border="0" cellspacing="0" cellpadding="0">
+			
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Name:</td>
+			  <td style="padding: 5px 5px 5px 0px;"><strong>{!site.Site_Name__c}</strong></td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Domain:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  		<apex:outputText escape="false" value="{!site.cms__Site_Domain__c}" rendered="{!!Edit}" />
+			  		<apex:inputField value="{!site.cms__Site_Domain__c}" rendered="{!Edit}"  style="width:400px;" />
+			  </td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Secure Domain:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<apex:outputText escape="false" value="{!site.cms__Site_Secure_Domain__c}" rendered="{!!Edit}" />
+			  	<apex:inputField value="{!site.cms__Site_Secure_Domain__c}" rendered="{!Edit}"  styleClass="ocms-input" style="width:400px;" />
+			  </td>
+			</tr>			
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Prefix:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<apex:outputText escape="false" rendered="{!!Edit}" >
+			  		{!site.cms__Site_Prefix__c}
+			  	</apex:outputText>
+				<apex:outputText escape="false" rendered="{!Edit}" >
+					<apex:inputField value="{!site.cms__Site_Prefix__c}"  style="width:200px;" />
+				</apex:outputText>
+			  </td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site URL:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<apex:outputText escape="false" rendered="{!!Edit}" >
+			  		<a href="{!site.cms__Site_URL__c}" target="_blank">{!site.cms__Site_URL__c}</a>
+			  	</apex:outputText>
+				<apex:outputText escape="false" rendered="{!Edit}" >
+					<apex:inputField value="{!site.cms__Site_URL__c}"  style="width:400px;" />
+				</apex:outputText>
+			  </td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Secure URL:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<apex:outputText escape="false" rendered="{!!Edit}" >
+			  		<a href="{!site.cms__Site_Secure_URL__c}" target="_blank">{!site.cms__Site_Secure_URL__c}</a>
+			  	</apex:outputText>
+			  	<apex:outputText escape="false" rendered="{!Edit}" >
+			  		<apex:inputField value="{!site.cms__Site_Secure_URL__c}" styleClass="ocms-textarea" style="width:400px;" />
+			  	</apex:outputText>
+			  </td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Site Guest User:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<apex:outputText escape="false" rendered="{!!Edit}" >
+			  		{!site.Site_Guest_User__r.Name}
+			  	</apex:outputText>
+			  	<apex:outputText escape="false" rendered="{!Edit}" >
+			  		<apex:inputHidden value="{!site.cms__Site_Guest_User__c}" id="siteGuestUser" />
+			  		<div id="guestUserSelector"></div>
+			  	</apex:outputText>			  
+			  
+			  </td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Package Prefix:</td>
+			  <td style="padding: 5px 5px 5px 0px;"><apex:outputText escape="false" value="{!package_prefix}"/></td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;" colspan="2">
+			  	<apex:actionFunction action="{!EditDetails}" name="edit" oncomplete="initGuestUserSelector();" rerender="DetailForm" />
+			  	<apex:actionFunction action="{!SaveDetails}" name="save" rerender="DetailForm" />
+			  	
+			  	<apex:outputPanel id="editButton" rendered="{!!Edit}">Edit</apex:outputPanel>
+			  	<apex:outputPanel id="saveButton" rendered="{!Edit}">Save</apex:outputPanel>
+
+				<script type="text/javascript">
+					$(document).ready(function(){
+						$($.orchestracmsUtil.convertComponentId('{!$Component.editButton}',true)).button();			
+						$($.orchestracmsUtil.convertComponentId('{!$Component.editButton}',true)).bind('click', function(){
+							edit();
+						});
+						$($.orchestracmsUtil.convertComponentId('{!$Component.saveButton}',true)).button();
+						$($.orchestracmsUtil.convertComponentId('{!$Component.saveButton}',true)).bind('click', function(){
+							save();
+						});
+					});
+				</script>
+
+			  </td>
+			</tr>
+			</table>
+		</apex:form>
+	
+	</apex:outputPanel>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Site Details permission
+   	</div>
+</apex:outputPanel>  
+
+</body>
+
+</html>
+
+</apex:page>

@@ -1,0 +1,266 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.EditRouter,cms.EditPageController" showHeader="false" sidebar="false" cache="false" standardStylesheets="false">
+	<head>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+  <c:CmsScripts debug="false" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TagEditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/EditPage.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/QueueDialogs.js')}" />  
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/AccessDialogs.js')}" />
+
+
+		<script type="text/javascript">
+
+			$(document).ready(function() {
+
+				updateTab("{!JSENCODE(tab)}", "{!page.Name__c+' - v'+TEXT(page.Version_Number__c)+'.0'}", "{!page.Id}");
+			
+			  	$(document).data('cms', {
+					'context' 	: 'orchestracms',
+					'namespace' : '{!namespace}'
+				 });
+
+				var newVersionId = '{!newVersionId}';
+	      		if(newVersionId != ''){
+	        		openPageTab('{!JSENCODE(newVersionName)}','{!newVersionNumber}', '/apex/EditPageProperties?sname={!router.site_name}&id='+newVersionId, newVersionId);
+	      		}
+
+				if({!close}) {
+					closeTab('{!JSENCODE(tab)}');
+				}
+
+				$(".date").datepicker();
+
+				$('.cacheVals').bind('change', function(){
+
+					var hrs = parseInt($('#cache_expire_hrs').val()) * 3600;
+					var min = parseInt($('#cache_expire_min').val()) * 60;
+					var sec = parseInt($('#cache_expire_sec').val());
+
+					$(jq('{!$Component.f.cache_expire}')).val(hrs+min+sec);
+
+				});
+
+         		$('.ocms-tooltip').tooltip(
+         		{
+            		timeout: 10000
+            		, width: 150
+            		, xOffset: 5
+            		, yOffset: 5
+         		});
+
+	      });
+	      
+		  function deleteShare(id){
+				
+				var data = {};
+				data['action'] 	 	= "deleteShare";
+				data['sname'] 	 	= "{!router.site_name}";
+				data['token'] 	 	= "{!token}";
+				data['share_id'] 	= id;
+				data['objecttype'] 	= "page";
+		
+				$.ajax({
+					async: false,
+					url : '/apex/OrchestraPrivateAjax',
+					data: data,
+					type: 'POST',
+					dataType: 'json',
+					success: function(json, textStatus, xhr){
+						if({!collaboratorRendered}){
+							rerenderCollaboratorList();
+						}else if({!visitorRendered}){
+							rerenderVisitorList();
+						}
+					}
+				});	
+		
+		  }
+	      
+	    </script>
+
+	</head>
+
+	<body style="font-size: 12px; font-family: arial; padding: 0px; margin: 0px;">
+	  	<apex:form id="f" style="margin: 0px; padding: 0px;">
+			<apex:inputHidden id="tabReference" value="{!tab}" />
+			<c:EditMenu pageutil="{!pageutil}"
+				latestVersion="{!latestVersion}"
+				save="{!save}"
+				saveAndClose="{!saveAndClose}"
+				publish="{!publish}"
+				newVersion="{!newVersion}"
+				clonePage="{!clonePage}"
+				deletePage="{!deletePage}"
+				togglePreview="{!togglePreview}"
+				properties="{!properties}"
+				layout="{!layout}"
+				content="{!content}"
+				version="{!version}"
+				collaborator="{!collaborator}"
+				visitor="{!visitor}"
+				email="{!email}"
+				site_name="{!router.site_name}"
+				tabId="{!JSENCODE(tab)}"
+				approval_process="{!router.site_info.cms__ApprovalProcess__c}"
+				token="{!API.csrf_token}"
+				showEmail="{!!disableEmail}"
+				showQueueEmail="{!!disableQueueEmail}"
+				/>
+		</apex:form>
+		
+		  	<apex:outputPanel layout="block" rendered="{!showMessages}" style="padding: 0px; background-color: rgb(255,235,235); border-bottom: 1px solid rgb(200,200,200);">
+			    <table border="0" cellspacing="0" cellpadding="5">
+			    	<apex:repeat value="{!messages}" var="message">
+			      		<tr>
+			      			<td><img src="{!URLFOR($Resource.CmsImages,'btn_unpublished.png')}" border="0" /></td>
+			      			<td style="font-size: 12px;">{!message.detail}</td>
+			      		</tr>
+			    	</apex:repeat>
+			    </table>
+		  	</apex:outputPanel>
+
+			<apex:outputPanel layout="block" style="padding: 15px; padding-bottom: 3px; background-color: rgb(255,255,255); font-family: Arial; font-size: 12px;" rendered="{!collaboratorRendered}">
+
+			    <div style="font-size: 14px; padding; 10px;"><strong><span style="color: #336600">Collaborators</span></strong></div><br />
+		
+				<apex:form >
+					<apex:actionFunction action="{!rerender}" name="rerenderCollaboratorList" />	
+				</apex:form>
+		
+				<div id="addCollaborator">Add Collaborator</div>
+				
+				<br /><br />
+				
+				<script type="text/javascript">
+						    
+				    $('#addCollaborator').button({ "disabled": {!disableAll} });
+					
+					if(!{!disableAll}){
+					
+					    $('#addCollaborator').bind('click',function(){ addCollaborator(); });
+		
+				    }
+							    
+					function addCollaborator(){
+					
+				    	$('<div id="addCollaboratorDialog"></div>').ocmsAddCollaborators({
+				    		"sname" 	 : "{!router.site_name}",
+				    		"token" 	 : "{!token}",
+				    		"objectId" 	 : "{!page_origin}",
+				    		"objectType" : "page",
+				    		"onSuccess"  : function(){
+				    			rerenderCollaboratorList();
+				    		}
+				    	});
+					
+					}
+						    
+				</script>		
+				
+				<apex:outputPanel layout="block" id="collaboratorList">
+													
+					<table border="0" cellspacing="0" cellpadding="5" width="750">
+						<apex:repeat value="{!allCollaborators}" var="collaborator">
+							<apex:outputText rendered="{!disableAll}">
+							<tr style="background-color: #E7E7E8;">
+						  	  <td width="250" style="font-size: 11px;"><strong>Type</strong></td>
+						  	  <td width="250" style="font-size: 11px;"><strong>Name</strong></td>
+							</tr>
+							<tr>
+							  <td style="font-size: 11px;">{!collaborator.userGroupType}</td>
+							  <td style="font-size: 11px;">{!collaborator.userGroup}</td>		
+							</tr>
+							</apex:outputText>
+							<apex:outputText rendered="{!!disableAll}">
+							<tr style="background-color: #E7E7E8;">
+							  <td width="50" style="font-size: 11px;"></td>
+							  <td width="250" style="font-size: 11px;"><strong>Type</strong></td>
+							  <td width="250" style="font-size: 11px;"><strong>Name</strong></td>
+							</tr>
+							<tr>
+							  <td style="font-size: 11px;"><a href="#" onclick="deleteShare('{!collaborator.shareId}')" style="text-decoration: underline;">Del</a></td>
+							  <td style="font-size: 11px;">{!collaborator.userGroupType}</td>
+							  <td style="font-size: 11px;">{!collaborator.userGroup}</td>		
+							</tr>
+							</apex:outputText>
+						</apex:repeat>
+					</table>			
+				
+				</apex:outputPanel>
+
+	    	</apex:outputPanel>
+
+			<apex:outputPanel layout="block" style="padding: 15px; padding-bottom: 3px; background-color: rgb(255,255,255); font-family: Arial; font-size: 12px;" rendered="{!visitorRendered}">
+
+				<div style="font-size: 14px; padding; 10px;"><strong><span style="color: #336600">Visitor Access</span></strong></div><br />
+				
+				<apex:form >
+					<apex:actionFunction action="{!rerender}" name="rerenderVisitorList" />	
+				</apex:form>
+				
+				<div id="addVisitor">Add Visitor</div>
+				
+				<br /><br />
+				
+				<script type="text/javascript">
+						    
+				    $('#addVisitor').button({ "disabled": {!disableAll} });
+			
+					if(!{!disableAll}){
+				    	$('#addVisitor').bind('click',function(){ addVisitor(); });
+					}
+						    
+				    function addVisitor(){
+				    	$('<div id="addVisitor"></div>').ocmsAddVisitors({
+				    		"sname" 			: "{!router.site_name}",
+				    		"token" 			: "{!token}",
+				    		"objectId" 			: "{!pageUtil.page.Id}",
+				    		"objectType" 		: "page",		    		
+							"hierarchyOverride" : false,
+							"privateSharing" 	: true,
+				    		"onSuccess" 		: function(){
+				    			rerenderVisitorList();
+				    		}
+				    	});
+				    }
+						    
+				</script>	
+			
+				<apex:outputPanel layout="block" id="visitorList">
+						
+					<table border="0" cellspacing="0" cellpadding="5" width="750">
+						<apex:repeat value="{!allVisitors}" var="visitor">
+							<apex:outputText rendered="{!disableAll}">
+							<tr style="background-color: #E7E7E8;">
+						  	  <td width="250" style="font-size: 11px;"><strong>Type</strong></td>
+						  	  <td width="250" style="font-size: 11px;"><strong>Name</strong></td>
+							</tr>
+							<tr>
+							  <td style="font-size: 11px;">{!visitor.userGroupType}</td>
+							  <td style="font-size: 11px;">{!visitor.userGroup}</td>		
+							</tr>
+							</apex:outputText>
+							<apex:outputText rendered="{!!disableAll}">
+							<tr style="background-color: #E7E7E8;">
+							  <td width="50" style="font-size: 11px;"></td>
+							  <td width="250" style="font-size: 11px;"><strong>Type</strong></td>
+							  <td width="250" style="font-size: 11px;"><strong>Name</strong></td>
+							</tr>
+							<tr>
+							  <td style="font-size: 11px;"><a href="#" onclick="deleteShare('{!visitor.shareId}','{!pageUtil.page.Id}')" style="text-decoration: underline;">Del</a></td>
+							  <td style="font-size: 11px;">{!visitor.userGroupType}</td>
+							  <td style="font-size: 11px;">{!visitor.userGroup}</td>		
+							</tr>
+							</apex:outputText>							
+						</apex:repeat>
+					</table>
+								
+				</apex:outputPanel>
+			
+			</apex:outputPanel>
+
+	</body>
+</apex:page>

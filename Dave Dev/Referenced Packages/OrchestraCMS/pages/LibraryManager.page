@@ -1,0 +1,41 @@
+<apex:page controller="cms.BasicController"  showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="LibraryManager">
+<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+<c:CmsScripts debug="true" />
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryThumbnailer.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryManager.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryManagerDlgs.js')}" />
+<script type="text/javascript">
+  	var libMgr;
+	$(document).data('cms', {
+		"context" : "orchestracms",
+		"namespace" : "{!namespace}",
+		"csrf_token" : "{!token}"
+	});
+  	$(document).ready(function() {
+
+       	libMgr = $('#libMgr').ocmsLibraryManager({
+              tree    : '#treeNav'
+        	, list    : '#navfolderscontent'
+           	, actions : '#navfolderActions'
+           	, pageHelpText : 'Lib.Manager.Help'.localize()
+       	});
+
+       	$(window).bind('resize', function() {
+           	// Calculate the ocms-content area height, based on the header/footer heights.
+           	reSizeContent();
+       	});
+
+	});
+
+   	/**
+     * When a layout content is closed or open, then method can be called to resize the content within the library manager.
+     */
+   	function reSizeContent() {
+    	libMgr.ocmsLibraryManager('resize');
+   	}
+</script>
+
+<div id="libMgr" style="height:100%"></div>
+
+</apex:page>

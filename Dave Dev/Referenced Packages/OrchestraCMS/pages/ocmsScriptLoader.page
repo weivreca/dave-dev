@@ -1,0 +1,36 @@
+<apex:page contentType="text/javascript" sidebar="false" showHeader="false" standardStylesheets="false" >
+	var orchestracmsutil = "{!URLFOR($Resource.cms__OrchestraCMSUtil, '/IEScripts.js')}";
+	var orchestracmspublic = "{!URLFOR($Resource.cms__OrchestraCMSPublic, '/json2.js')}";
+	var orchestracmsui = "{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/ToolTip.js')}";
+	var orchestracmslocalization = "{!URLFOR($Resource.cms__OrchestraCMSUI, '/localization/CmsLocalization_en.js')}";
+	var orchestracmsjqueryui = "{!URLFOR($Resource.cms__OrchestraCMSUI, '/js/jquery.min.js')}";
+
+	  		
+	var ocmsTargets = {
+		util : orchestracmsutil.substring(0,orchestracmsutil.indexOf('IEScripts.js')),
+	  	public : orchestracmspublic.substring(0,orchestracmspublic.indexOf('json2.js')),
+	  	ui : orchestracmsui.substring(0,orchestracmsui.indexOf('widget/ToolTip.js')),
+	  	jqueryui : orchestracmsjqueryui.substring(0,orchestracmsjqueryui.indexOf('js/jquery.min.js')),
+	  	external : ''
+	}
+
+	
+	function ocmsLoadOrchestraScripts(type, scriptNames) {
+		
+		if(scriptNames == undefined)
+			alert(type);
+		
+		
+		if(!$.isArray(scriptNames))
+			scriptNames = [scriptNames];
+			
+		$.each(scriptNames, function(index, jsName) {			
+			if ($(document).data(jsName + '-LOADED') !== true) {
+				var fileref = document.createElement('script');
+				fileref.setAttribute('type', 'text/javascript');
+				fileref.setAttribute('src', ocmsTargets[type]+jsName);
+				$('head').append(fileref);
+			}
+		});
+	}
+</apex:page>

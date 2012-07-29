@@ -1,0 +1,39 @@
+<apex:page showHeader="false" standardStylesheets="false" >
+     
+
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/js/jquery-1.7.2.min.js')}"/> 
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/js/jquery-ui-1.8.21.custom.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/development-bundle/ui/minified/jquery.ui.autocomplete.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/development-bundle/ui/minified/jquery.ui.core.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/development-bundle/ui/minified/jquery.ui.position.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jqueryUI, '/development-bundle/ui/minified/jquery.ui.widget.min.js')}"/>
+    
+    <script type="text/JavaScript">
+    $(function() {
+        function log( message ) {
+            $( "<div/>" ).text( message ).prependTo( "#log" );
+            $( "#log" ).scrollTop( 0 );
+        }
+
+        $( "#Accounts" ).autocomplete({
+            source:  "{!$Page.AjaxResponder}",
+            minLength: 2,
+            select: function( event, ui ) {
+                log( ui.item ?
+                    "Selected: " + ui.item.value + " aka " + ui.item.id :
+                    "Nothing selected, input was " + this.value );
+            }
+        });
+    });
+
+</script>
+<div class="ui-widget">
+    <label for="Accounts">Accounts: </label>
+    <input id="Accounts" />
+</div>
+<div class="ui-widget" style="margin-top:2em; font-family:Arial">
+    Result:
+    <div id="log" style="height: 200px; width: 300px; overflow: auto;" class="ui-widget-content"></div>
+</div>
+
+</apex:page>

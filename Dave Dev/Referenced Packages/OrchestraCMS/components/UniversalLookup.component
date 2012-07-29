@@ -1,0 +1,60 @@
+<apex:component id="ul" controller="cms.UniversalLookup">
+
+	<apex:attribute name="cPassThroughId" type="String" description="Hidden field  used to pass the id of the selected object" required="true" />
+	<apex:attribute name="cPassThroughObjectType" type="String" description="Hidden object used to store the selected object type" required="true" assignTo="{!objectType}"/>
+
+	<apex:attribute name="selectedObjectName" type="String" description="The name of the selected object" />
+
+	<apex:attribute name="lookupObjectType" type="String" description="The type of object to lookup on if all the object select is included"  default="all" />
+
+	<apex:attribute name="showStandardLabel" type="Boolean" description="Whether or not to show the labels"  default="true" />
+
+	<apex:attribute name="disabled" type="Boolean" description="Whether or not the input is disabled" required="true" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/UniversalLookup.js')}" />
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(jq('universal-{!cPassThroughId}')).ocmsUniversalLookup({
+				passThruId : '{!cPassThroughId}',
+				objectTypeSelector: 'oselector',
+				lookupType: '{!lookupObjectType}',
+				selected: {'Id': $(jq('{!cPassThroughId}')).val()},
+				disabled: {!disabled}
+			});
+		});
+	</script>
+
+	<div id="universal-{!cPassThroughId}">
+		<table>
+			<tr>
+				<td style="{!IF(showStandardLabel, '', 'display: none')}">Lookup</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!lookupObjectType == 'all'}">
+						<select id="oselector" name="oselector">
+							<apex:repeat value="{!ObjectOptions}" var="o">
+								<apex:outputText escape="false" rendered="{!o.selected}">
+									<option value="{!o.so.value}" selected="selected" ><apex:outputText value="{!o.so.label}" /></option>
+								</apex:outputText>
+								<apex:outputText escape="false" rendered="{!!o.selected}">
+									<option value="{!o.so.value}"><apex:outputText value="{!o.so.label}" /></option>
+								</apex:outputText>
+							</apex:repeat>
+						</select>
+					</apex:outputText>
+
+					<apex:outputText rendered="{!showStandardLabel}">
+						<apex:outputText value="{!lookupObjectType}" rendered="{!lookupObjectType != 'all'}" />
+					</apex:outputText>
+				</td>
+				<td>
+					<div class="selected-object-name">{!SelectedObjectName}</div>
+				</td>
+				<td>
+					<a href="#" class="lookup-launcher">Select</a>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+
+</apex:component>

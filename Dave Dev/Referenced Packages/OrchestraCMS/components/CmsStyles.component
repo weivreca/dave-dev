@@ -1,0 +1,5 @@
+<apex:component >
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__CmsCss)}" />
+</apex:component>

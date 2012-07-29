@@ -1,0 +1,91 @@
+<apex:component id="c33" controller="cms.SetupMenuController">
+
+	<apex:attribute name="sname" type="String" description="The panel unique identifier" assignTo="{!sname}" />
+	<apex:attribute name="activeitem" type="String" description="The panel unique identifier" assignTo="{!activeitem}" />
+
+	 <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.setupmenu.css')}" />
+	
+	<div style="width: 200px; float: left;">
+
+		<div style="padding: 10px;">
+						
+			<div style="line-height: 20px;">
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-header" rendered="{!showSite}">Site</apex:outputPanel>
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-sublinkcontainer" rendered="{!showSite}">
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'site-details', 'setup-leftnav-active', '')}" rendered="{!showSiteDetails}">
+		  			<apex:outputLink value="/apex/SiteDetails?sname={!sname}">Details</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'site-snapshots', 'setup-leftnav-active', '')}" rendered="{!showSiteSnapshots}">
+		  			<apex:outputLink value="/apex/SiteSnapshots?sname={!sname}">Snapshots</apex:outputLink>			
+				</apex:outputPanel>				
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'site-export', 'setup-leftnav-active', '')}" rendered="{!showSiteExport}">
+  					<apex:outputLink value="/apex/SiteExport?sname={!sname}">Export</apex:outputLink>
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'site-import', 'setup-leftnav-active', '')}" rendered="{!showSiteImport}">
+		  			<apex:outputLink value="/apex/SiteImport?sname={!sname}">Import</apex:outputLink>
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+			<apex:outputPanel layout="block" styleclass="setup-leftnav-header" rendered="{!showManage}">Manage</apex:outputPanel>
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-sublinkcontainer" rendered="{!showManage}">
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'licenses', 'setup-leftnav-active', '')}"  rendered="{!showLicenses}">
+		  			<apex:outputLink value="/apex/ManageLicenses?sname={!sname}">Licenses</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'profiles', 'setup-leftnav-active', '')}" rendered="{!showProfiles}">
+		  			<apex:outputLink value="/apex/ManageProfiles?sname={!sname}">Profiles</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'accessLevels', 'setup-leftnav-active', '')}" rendered="{!showAccessLevels}">
+		  			<apex:outputLink value="/apex/SetupAccessLevel?sname={!sname}">Access Levels</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'scheduler', 'setup-leftnav-active', '')}" rendered="{!showScheduler}">
+		  			<apex:outputLink value="/apex/SetupSchedule?sname={!sname}">Scheduler</apex:outputLink>
+				</apex:outputPanel>	
+			</apex:outputPanel>
+
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header" rendered="{!showTemplates}">Templates</apex:outputPanel>
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-sublinkcontainer" rendered="{!showTemplates}">
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'manage-page-layouts', 'setup-leftnav-active', '')}" rendered="{!showPageLayouts}">
+		  			<apex:outputLink value="/apex/PageLayoutInstaller?sname={!sname}">Page Templates</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'manage-content-layouts', 'setup-leftnav-active', '')}" rendered="{!showContentTemplates}">
+		  			<apex:outputLink value="/apex/ContentLayoutInstaller?sname={!sname}">Content Templates</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'manage-content-type', 'setup-leftnav-active', '')}" rendered="{!showContentType}">
+		  			<apex:outputLink value="/apex/ManageContentType?sname={!sname}">Content Types</apex:outputLink>			
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header" rendered="{!showCache}">Cache</apex:outputPanel>
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-sublinkcontainer" rendered="{!showCache}">
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'cache-page', 'setup-leftnav-active', '')}" rendered="{!showCachePage}">
+		  			<apex:outputLink value="/apex/CachePage?sname={!sname}">Page</apex:outputLink>			
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="setup-leftnav-sublink {!IF(activeitem == 'cache-content', 'setup-leftnav-active', '')}" rendered="{!showCacheContent}">
+		  			<apex:outputLink value="/apex/CachingTools?sname={!sname}">Content</apex:outputLink>			
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header {!IF(activeitem == 'manage-customer-portal', 'setup-leftnav-header-active', '')}" rendered="{!showCustomerPortal}">
+  				<apex:outputLink value="/apex/CustomerPortalInstaller?sname={!sname}">Customer Portal</apex:outputLink>
+  			</apex:outputPanel>
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header {!IF(activeitem == 'error-pages', 'setup-leftnav-header-active', '')}" rendered="{!showErrorPages}">
+  				<apex:outputLink value="/apex/SiteErrors?sname={!sname}">Error pages</apex:outputLink>
+  			</apex:outputPanel>
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header {!IF(activeitem == 'libraries', 'setup-leftnav-header-active', '')}" rendered="{!showLibraries}">
+  				<apex:outputLink value="/apex/Libraries?sname={!sname}">Manage Libraries</apex:outputLink>
+  			</apex:outputPanel>
+  			<apex:outputPanel layout="block" styleClass="setup-leftnav-header {!IF(activeitem == 'site-tags', 'setup-leftnav-header-active', '')}" rendered="{!showTags}">
+  				<apex:outputLink value="/apex/SiteTags?sname={!sname}">Tags</apex:outputLink>
+  			</apex:outputPanel>  			  			
+			<apex:outputPanel layout="block" styleClass="setup-leftnav-header {!IF(activeitem == 'approval-process', 'setup-leftnav-header-active', '')}" rendered="{!showApprovalProcess}">
+  				<apex:outputLink value="/apex/SetUpWorkflow?sname={!sname}">Workflow</apex:outputLink>
+  			</apex:outputPanel>
+ 	
+
+			</div>
+		
+		</div>
+	
+	</div>
+
+</apex:component>

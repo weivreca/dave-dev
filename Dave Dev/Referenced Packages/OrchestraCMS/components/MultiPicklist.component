@@ -1,0 +1,38 @@
+<apex:component id="dt">
+
+  <apex:attribute name="cName" type="String" description="Passthrough Id"  />
+  <apex:attribute name="cDisable" type="Boolean" description="Passthrough Id" default="false"/>  
+  <apex:attribute name="cPassthroughId" type="String" description="Passthrough Id" />
+  <apex:attribute name="cValue" type="String" description="The panel unique identifier"  />
+  <apex:attribute name="cType" type="String" description="The type of select field to use" required="false"  />
+  <apex:attribute name="cObjectName" type="String" description="The object name"  />
+  <apex:attribute name="cFieldName" type="String" description="The field name"  />
+  <apex:attribute name="cSelectOptions" type="ApexPages.SelectOption[]" description="Select option list" />
+  <apex:attribute name="prefix" type="String" description="The package prefix to use when makeing ajax calls" />
+  
+  <apex:attribute name="cOptionsJSON" type="String" description="The options of the picklist" />
+  
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+		
+		$(jq('{!cName}_multipicklist')).multipicklist({
+			passThruId: jq('{!cPassthroughId}'),
+			type: '{!cType}',
+			value: '{!cValue}',
+			disabled: {!cDisable},
+			object_name: '{!cObjectName}',
+			field_name: '{!cFieldName}',
+			prefix: '{!prefix}',
+			site_prefix: '{!$Site.Prefix}/',
+			isPublic: {!IF($Site.Name == null && $CurrentPage.parameters.cache_load == null, 'false', 'true')} 
+		});
+
+	}); 
+		
+  </script>
+  
+  
+  <div class="{!cName} multipicklist {!cType}" id="{!cName}_multipicklist"></div>
+
+</apex:component>

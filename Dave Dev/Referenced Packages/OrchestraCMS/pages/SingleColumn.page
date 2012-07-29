@@ -1,0 +1,94 @@
+<apex:page id="t" controller="cms.CoreController" standardStylesheets="false" showHeader="false" sidebar="false">
+	
+	<apex:composition template="{!page_template}">
+		
+		<apex:define name="header">
+			<style type="text/css">
+				.error{
+					color: red; 
+				}
+			
+				body{
+					font: normal 12px arial,sans-serif;
+					margin: 10px;  
+				}
+				
+				.sf-content h1{
+					font: normal 18px arial,sans-serif;
+				}
+				
+				.sf-content .sf-column1{
+					float: left;
+					margin-right: 10px;  
+				}
+				
+				.sf-content .sf-column2{
+					float: left;
+					margin-right: 10px;  
+				}
+				
+				.sf-content .sf-column3{
+					float: left;
+					margin-right: 10px;  
+				}				
+				
+				.sf-content .sf-clear{
+					clear: both; 
+				}
+				
+				.top-corners{
+					display: none;
+				}	
+				
+				.bottom-corners{
+					display: none; 
+				}
+
+
+            	table.ui-superform {
+            		border: none; 	
+            	}
+            	
+            	table.ui-superform td {
+            		vertical-align: top;
+            		padding: 5px;
+            	}
+            	
+            	table.ui-superform td span{
+            		margin: 0;
+            		padding: 0; 
+            	}
+            	
+            	table.ui-superform div.ui-superform {
+            	
+            	}	
+			
+          		.ui-superform-input div{
+          			padding:0px;
+          			margin: 0px;
+          		}
+          		
+          		.menu .active{
+          			color: red;
+          			font-weight: bold; 
+          		}
+
+				.ocms-file-upload-indicator {
+					background-image: url('{!URLFOR($Resource.jqueryui, '/css/images/General/16px_AnimatedIndeterminateProgress.gif')}');
+				    background-repeat: no-repeat;
+				    display: block;
+				    position: relative;
+				    margin: 2px;
+				    padding: 0px; 
+				    width: 16px; 
+				    height: 16px;
+				}          		
+         	</style>	         	
+        </apex:define>
+		
+		<apex:define name="body" >
+			<c:Panel panelName="column1" panelController="{!controller}" panelHeight="200px" />		
+		</apex:define>	
+	</apex:composition>
+
+</apex:page>

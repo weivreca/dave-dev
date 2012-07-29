@@ -1,0 +1,117 @@
+<apex:page controller="cms.ManageContentTypeController" sidebar="false" showHeader="false" standardStylesheets="false" cache="false" action="{!checkCoreTypes}">
+	<head>
+
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/OCMSScripts.js')}" />
+
+	 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	 	<style type="text/css">
+	 		.edit-btn {
+	 			cursor:pointer;
+	 		}
+	 		.delete-btn {
+	 			cursor:pointer;
+	 		}
+	 	</style>
+	  	<script type="text/javascript">
+			$(document).ready(function() {
+				initPage();
+			});
+
+	        function initPage() {
+				$("#new-content-type").button().click(function() {
+					window.location = '/apex/CreateContentType?sname={!sname}';
+					return true;
+				});
+	            $("#core-content-types .list-row:odd").addClass("list-row-odd");
+	            $("#core-content-types .list-row:even").addClass("list-row-even");
+	            $("#custom-content-types .list-row:odd").addClass("list-row-odd");
+	            $("#custom-content-types .list-row:even").addClass("list-row-even");
+				$.orchestracmsUtil.formatErrors();
+			}
+  		</script>
+	</head>
+	<body>
+
+    <apex:outputPanel rendered="{!hasAccess}">
+
+	  	<c:SetupMenu sname="{!sname}" activeitem="manage-content-type" />
+
+	  	<div style="margin-left: 210px; padding: 10px;">
+
+		  <div class="ocms-setup-breadcrumb">
+			 <div class="ocms-setup-breadcrumb-start"></div>
+			 <div class="ocms-setup-breadcrumb-item">Setup</div>
+			 <div class="ocms-setup-breadcrumb-separator-active"></div>
+			 <div class="ocms-setup-breadcrumb-item-active">Content Types</div>
+			 <div class="ocms-setup-breadcrumb-end"></div>
+			 <div class="ocms-setup-clear"></div>
+		  </div>
+		  <br />
+
+			<apex:outputPanel id="ManageContentTypeList">
+
+			    <apex:messages styleClass="ocms-errors"/>
+
+				<div style="font-size: 16px; padding-bottom: 8px;">Core Types</div>
+				<table id="core-content-types" class="ocms-list" style="margin-left:10px" cellspacing="0" cellpadding="5" width="800">
+		  			<tr class="list-header" >
+						<td style="width: 2%;"></td>
+					    <td style="width: 24%">Name</td>
+					    <td class="last" style="width: 24%">Label</td>
+				  	</tr>
+				<apex:repeat value="{!coreContentTypes}" var="ctype">
+					<tr class="list-row">
+						<td>&nbsp;</td>
+						<td class="ocms-clickable" onclick="window.location= '/apex/CreateContentType?sname={!sname}&type={!ctype.Id}&mode=edit'; return false;">{!ctype.Name}</td>
+	                    <td class="last">{!ctype.Label}</td>
+	                </tr>
+				</apex:repeat>
+					<tr class="list-footer">
+					    <td colspan="3"  class="last">&nbsp;</td>
+		            </tr>
+				</table>
+
+				<div style="font-size: 16px; margin: 10px; float: left;">Custom Content Types</div>
+			  	<div style="margin:10px;" id="new-content-type" >New Content Type</div>
+				<table id="custom-content-types" class="ocms-list" style="margin-left:10px;" cellspacing="0" cellpadding="5" width="800">
+		  			<tr class="list-header" >
+						<td style="width: 2%;"></td>
+					    <td style="width: 24%">Name</td>
+					    <td style="width: 24%" class="last">Label</td>
+				  	</tr>
+				<apex:repeat value="{!customContentTypes}" var="ctype">
+					<tr class="list-row">
+						<td>
+							<apex:form >
+								<apex:commandLink action="{!deleteType}" value="" rerender="ManageContentTypeList" oncomplete="initPage()">
+									<apex:param name="id" value="{!ctype.Id}" />
+									<img width="16px" height="16px" src="{!URLFOR($Resource.CmsImages, 'btn_remove.png')}" />
+								</apex:commandLink>
+							</apex:form>
+						</td>
+						<td class="ocms-clickable" onclick="openTab('{!JSENCODE(ctype.Label)}', '/apex/CreateContentType?sname={!sname}&type={!ctype.Id}&mode=edit', '{!ctype.Id}', 'ContentType'); return false;">{!ctype.Name}</td>
+	                    <td class="last">{!ctype.Label}</td>
+	                </tr>
+	            </apex:repeat>
+					<tr class="list-footer">
+					    <td colspan="3" >&nbsp;</td>
+		            </tr>
+				</table>
+			</apex:outputPanel>
+
+		</div>
+
+	</apex:outputPanel>
+
+	<apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Templates > Content Types permission
+    	</div>
+	</apex:outputPanel>
+
+	</body>
+</apex:page>

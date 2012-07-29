@@ -1,0 +1,69 @@
+<apex:page id="installer" controller="cms.SiteTags" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+
+<head>
+
+    <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" /> 	
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+	 <script type="text/javascript"> 
+	 	$(document).ready(function(){
+	 		$('#saveButton').button().click(function(){
+		 		save();
+		 	});
+	 	});
+	 </script>
+
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="site-tags" />
+	
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+	
+	  <div class="ocms-setup-breadcrumb">
+		 <div class="ocms-setup-breadcrumb-start"></div>
+		 <div class="ocms-setup-breadcrumb-item">Setup</div>
+		 <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		 <div class="ocms-setup-breadcrumb-item-active">Tags</div>
+		 <div class="ocms-setup-breadcrumb-end"></div>
+		 <div class="ocms-clear"></div>
+	  </div>
+	
+	  <br />
+	
+	<apex:form >
+	
+	<apex:actionFunction action="{!updateSettings}" name="save" />
+	
+	<apex:outputPanel rendered="{!showSaveComplete}" layout="block"><em>Settings Saved</em><br /><br /></apex:outputPanel>
+	
+	<apex:inputCheckbox value="{!personalTags}" /> Enable Personal Tags <br /><br />
+	
+	<apex:inputCheckbox value="{!publicTags}" /> Enable Public Tags <br /><br />
+	
+	<div id="saveButton">Save</div>
+	
+	</apex:form>
+	
+	</apex:outputPanel> 
+
+  </apex:outputPanel>
+
+  <apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Tags permission
+    	</div>	
+  </apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

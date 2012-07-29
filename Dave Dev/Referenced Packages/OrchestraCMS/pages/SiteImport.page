@@ -1,0 +1,507 @@
+<apex:page controller="cms.SiteImportController" showHeader="false" sidebar="false" cache="false" title="Setup">
+
+<html>
+
+<head>
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ <!-- This is the jquery cookie extension only -->
+ <apex:includeScript value="{!$Resource.cms__jquery}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+ 
+  <script type="text/javascript">		  
+		
+	function jq(myid){
+    	return '#'+myid.replace(/:/g,"\\:").replace(/\./g,"\\.");
+    }
+
+	var deleteAllData = false;
+	var stage = 0; // Select source
+
+	function installerComplete(){
+		$('#importInstallerMessage').hide();
+		$('#importInstallerLoader').hide();
+		$('#importInstallerSuccess').show();			
+	}
+	
+	function retry(){
+	
+		executeVerify();
+				
+		$('#importMessage').html('Verifying Files...');
+		$('#importLoader').show();
+		$(jq('{!$Component.f.importStatus}')).hide();
+	
+	}
+	
+	function next(){
+	
+		if('{!JSENCODE(selectedSourceStr)}' == 'Installer' || $(jq('{!$Component.f.source}')).val() == 'Installer'){
+
+			if({!allowDataReset} && $(jq('{!$Component.statusDataReset}')).html() == 'false' && $(jq('{!$Component.f.dataReset}')).attr('checked')){
+
+				executeResetData();
+				$('#selectSource').hide();
+				$('#importInstaller').show();
+				$('#importInstallerMessage').html('Deleting old site data...');
+				$('#importInstallerLoader').show();				
+			
+			}else{	
+
+				executeInstallerImport();
+				$('#selectSource').hide();
+				$('#importInstaller').show();
+				$('#importInstallerMessage').html('Running Installer...');
+				$('#importInstallerLoader').show();				
+
+			}
+				
+		}else if('{!JSENCODE(selectedSourceStr)}' == 'Folder' || $(jq('{!$Component.f.source}')).val() == 'Folder'){
+		
+			if($(jq('{!$Component.statusSelected}')).html() == 'false'){
+	
+				executeVerify();
+				
+				$('#importMessage').html('Verifying Files...');
+				$('#importLoader').show();
+				$('#importFiles').show();
+				$('#selectSource').hide();
+	
+			}else if($(jq('{!$Component.statusVerified}')).html() == 'true'){
+					
+				if({!allowDataReset} && $(jq('{!$Component.statusDataReset}')).html() == 'false' && $(jq('{!$Component.f.dataReset}')).attr('checked')){
+	
+					$('#importMessage').html('Deleting old site data...');
+					$('#importLoader').show();
+					executeResetData();
+	
+				}else{
+					
+					// Start first import
+					if($(jq('{!$Component.statusImporting}')).html() == 'false'){
+						
+
+						$('#importMessage').html('Importing data... Part 1 of 4');
+						$('#importLoader').hide();
+						$('#importFiles').show();
+						$(jq('{!$Component.f.importStatus}')).show();
+
+						executeFileImport();
+					
+					// Secondary imports
+					}else{
+					
+						// Not yet complete, proceed to next file
+						if($(jq('{!$Component.statusImported}')).html() == 'false'){
+	
+							window.setTimeout(function(){executeFileImport();}, 5000);
+	
+						// Finished first pass
+						}else{
+							
+							$('#importMessage').html('Building data relationships... Part 2 of 4');
+							executeFileImportReferences();
+						
+						}
+					
+					}
+									
+				}
+				
+			}else if($(jq('{!$Component.statusVerified}')).html() == 'false'){
+			
+				$('#importMessage').html('One or more Documents could not be found...');
+				$(jq('{!$Component.f.importStatus}')).show();
+				$('#importLoader').hide();				
+				$('#selectSource').hide();
+				$('#importFiles').show();
+			
+			}
+		}
+	}
+
+	function nextPart2(){
+	
+		if($(jq('{!$Component.statusImportedReferences}')).html() == 'false'){
+		
+			window.setTimeout(function(){executeFileImportReferences();}, 5000);
+			
+		}else{
+
+			$('#importMessage').html('Updating content links... Part 3 of 4');		
+			executeFileRewriteLinks();
+		
+		}
+	
+	}
+
+	function nextPart3(){
+	
+		if($(jq('{!$Component.statusRewroteLinks}')).html() == 'false'){
+			
+			window.setTimeout(function(){executeFileRewriteLinks();}, 5000);
+			
+		}else{
+		
+			$('#importMessage').html('Cleaning up data... Part 4 of 4');
+			executeFileImportCleanup();
+		
+		}
+	
+	}
+
+	function nextPart4(){
+	
+		if($(jq('{!$Component.statusCleanedUp}')).html() == 'false'){
+			
+			window.setTimeout(function(){executeFileImportCleanup();}, 5000);
+			
+		}else{
+		
+			$('#importMessage').html('Cleaning up data... Part 4 of 4');
+		
+		}
+	
+	}
+	
+	$(document).ready(function(){
+		
+		$(jq('{!$Component.f.dataReset}')).bind('change', function(){
+
+			if($(this).attr('checked')){
+				deleteAllData = true;
+			}else{
+				deleteAllData = false;				
+			}
+
+		});
+		
+		$(jq('{!$Component.f.source}')).bind('change', function(){
+
+			if($(this).val() == 'Folder'){
+
+				$(jq('{!$Component.f.folder}')).show();
+				$(jq('{!$Component.f.file}')).hide();
+				$('#importButton').hide();
+
+			}else if($(this).val() == 'Installer'){
+			
+				$(jq('{!$Component.f.folder}')).hide();
+				$(jq('{!$Component.f.file}')).hide();
+				$('#importButton').show();
+			
+			}else{
+			
+				$(jq('{!$Component.f.folder}')).hide();
+				$(jq('{!$Component.f.file}')).hide();
+				$('#importButton').hide();
+			
+			}
+
+		});		
+
+		$(jq('{!$Component.f.folderVal}')).bind('change', function(){
+
+			if($(this).val() != '' && $(this).val() != null){
+
+				$('#loadingNext').show();
+				$(jq('{!$Component.f.file}')).hide();
+				getFileOptions();
+
+			}else{
+			
+				$(jq('{!$Component.f.file}')).hide();
+				$('#importButton').hide();
+			
+			}
+
+		});
+
+		$('#import').bind('click', function(){
+
+			if($(jq('{!$Component.f.source}')).val() == ''){
+				alert('You must first select a source');
+				return false;
+			}
+
+			if($(jq('{!$Component.f.source}')).val() == 'Folder' && $(jq('{!$Component.f.folderVal}')).val() == ''){
+				alert('You must first select a folder');
+				return false;
+			}
+			
+			if($(jq('{!$Component.f.source}')).val() == 'Folder' && $(jq('{!$Component.f.fileVal}')).val() == ''){
+				alert('You must first select a file');
+				return false;
+			}			
+			
+			if(deleteAllData){
+			
+				if(confirm('Are you sure you want to delete all data?')){
+					
+					next();
+			
+				}
+
+			}else{
+
+				next();
+				
+			}
+			
+			return false;
+
+		});
+	
+	});
+
+	function initFileSelector(){
+			
+			$('#loadingNext').hide();
+			
+			$(jq('{!$Component.f.file}')).show();
+			
+			$(jq('{!$Component.f.fileVal}')).bind('change', function(){
+
+				if($(this).val() != '' && $(this).val() != null){
+	
+					$('#importButton').show();
+	
+				}else{
+				
+					$('#importButton').hide();
+				
+				}
+			
+			});
+			
+	}
+
+   function showOnlineSupport()
+   {
+     openTab('Online Support', 'http://www.orchestracms.com/OrchestraOnlineSupportForm', 'ocms~~Support', 'OnlineSupport');
+   }
+   
+  </script>
+
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+<c:SetupMenu sname="{!site_name}" activeitem="site-import" />
+
+<div style="margin-left: 210px; padding: 10px;"> 
+
+  <div class="ocms-setup-breadcrumb">
+	 <div class="ocms-setup-breadcrumb-start"></div>
+	 <div class="ocms-setup-breadcrumb-item">Setup</div>
+	 <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+	 <div class="ocms-setup-breadcrumb-item-active">Site Import</div>
+	 <div class="ocms-setup-breadcrumb-end"></div>
+	 <div class="ocms-clear"></div>
+  </div>
+  
+  <br /><br />
+  
+  <apex:outputPanel >
+  
+	  Please contact <span onclick="showOnlineSupport();" style="color: #788E1E"><strong>Support</strong></span> for details regarding Import.<br /><br />
+	
+  </apex:outputPanel>  
+  
+  <apex:outputPanel rendered="false">
+  
+	  <apex:outputPanel id="statusContainer" style="display: none;">
+		<apex:outputText id="statusSelected" 			value="{!sourceSelected}" />
+	    <apex:outputText id="statusVerified" 			value="{!sourceVerified}" />
+	    <apex:outputText id="statusVerifyFailed"		value="{!verifyFailed}" />
+	    <apex:outputText id="statusDataReset" 			value="{!sourceDataReset}" />
+	    <apex:outputText id="statusImporting" 			value="{!sourceImporting}" />
+	    <apex:outputText id="statusImported" 			value="{!sourceImported}" />
+	    <apex:outputText id="statusImportingReferences" value="{!sourceImportingReferences}" />
+	    <apex:outputText id="statusImportedReferences" 	value="{!sourceImportedReferences}" />
+	    <apex:outputText id="statusRewritingLinks" 		value="{!sourceRewritingLinks}" />
+	    <apex:outputText id="statusRewroteLinks" 		value="{!sourceRewroteLinks}" />
+	    <apex:outputText id="statusCleaningUp" 			value="{!sourceCleaningUp}" />
+	    <apex:outputText id="statusCleanedUp" 			value="{!sourceCleanedUp}" />
+	  </apex:outputPanel>
+	  
+	  <div id="status"></div>
+	  <div id="importStatus"></div>	
+	  
+	  <apex:form id="f">
+	    
+	  <apex:actionFunction action="{!fileOptions}" 				name="getFileOptions" 				oncomplete="$(jq('{!$Component.f.file}')).show(); initFileSelector();" rerender="file" />  
+	  <apex:actionFunction action="{!resetData}" 				name="executeResetData" 			oncomplete="next()" rerender="statusContainer" /> 
+	  <apex:actionFunction action="{!fileImportVerify}" 		name="executeVerify" 	  			oncomplete="next()" rerender="statusContainer,importStatus" />
+	  <apex:actionFunction action="{!fileImport}" 				name="executeFileImport"   			oncomplete="next()" rerender="statusContainer,importStatus" />
+	  <apex:actionFunction action="{!fileImportReferences}" 	name="executeFileImportReferences"  oncomplete="nextPart2()" rerender="statusContainer,importStatus" />
+	  <apex:actionFunction action="{!fileImportRewriteLinks}" 	name="executeFileRewriteLinks"  	oncomplete="nextPart3()" rerender="statusContainer,importStatus" />
+	  <apex:actionFunction action="{!fileImportCleanup}" 		name="executeFileImportCleanup"   	oncomplete="nextPart4()" rerender="statusContainer,importStatus" />
+	  <apex:actionFunction action="{!installerImport}" 			name="executeInstallerImport"   	oncomplete="installerComplete();" />
+	
+	  <div id="selectSource">
+	
+		  <div style="background-color: #e7e7e7; padding: 10px; width: 500px;">
+		  	  <strong>WARNING:</strong> It is recommended that you test an import within a Sandbox environment before
+			  importing into a Production organization.
+		  </div>
+	
+	  	  <br />
+	
+		  <apex:outputPanel rendered="{!allowDataReset}">
+			  <table border="0" cellspacing="0" cellpadding="0">
+			    <tr>
+			      <td style="width: 100px; padding-bottom: 5px;">Source</td>
+			      <td style="width: 200px; padding-bottom: 5px;">		  
+			      	<apex:selectList id="source" value="{!selectedSourceStr}" multiselect="false" size="1">
+			    		<apex:selectOptions value="{!selectedSourceOptions}" />
+			  		</apex:selectList>
+			  	  </td>
+			  	  <td style="width: 30px; padding-bottom: 5px;">&nbsp;</td>
+			    </tr>
+			  </table>
+		  </apex:outputPanel> 
+	
+		  <apex:outputPanel id="folder" style="{!IF(!allowDataReset, '', 'display: none;')}">
+			  <table border="0" cellspacing="0" cellpadding="0">
+			    <tr>
+			      <td style="width: 100px; padding-bottom: 5px;">Folder</td>
+			      <td style="width: 200px; padding-bottom: 5px;">
+				    <apex:selectList id="folderVal" value="{!selectedFolderStr}" multiselect="false" size="1">
+				      <apex:selectOptions value="{!selectedFolderOptions}" />
+				    </apex:selectList>
+				  </td>
+			  	  <td style="width: 30px; padding-bottom: 5px;">
+			  	    <div id="loadingNext" style="display: none;"><img src="{!$Resource.ajaxLoader}" height="20" width="20" /></div>
+			  	  </td>
+				</tr>
+			  </table>
+	 	  </apex:outputPanel>
+	
+		  <apex:outputPanel id="file" style="display: none;">
+			  <table border="0" cellspacing="0" cellpadding="0">
+			    <tr>
+			      <td style="width: 100px; padding-bottom: 5px;">File</td>
+			      <td style="width: 200px; padding-bottom: 5px;">
+				    <apex:selectList id="fileVal" value="{!selectedFileStr}" multiselect="false" size="1">
+				      <apex:selectOptions value="{!selectedFileOptions}" />
+				    </apex:selectList>
+				  </td>
+			  	  <td style="width: 30px; padding-bottom: 5px;">&nbsp;</td>			  
+				</tr>
+			  </table>
+		  </apex:outputPanel>
+	
+		  <br />
+		
+		  <apex:outputPanel rendered="{!allowDataReset}">
+			  <div style="background-color: #e7e7e7; padding: 10px; width: 500px;">
+			  	<strong style="color: #990000;">DEVELOPERS ONLY:</strong> This capability is only available within developer organizations. All data and media will
+			  	be <strong>deleted</strong>!<br /><br /> 
+			  	
+			  	Delete all existing site data: <apex:inputCheckbox value="{!dataReset}" id="dataReset" />
+		  	  </div>
+		  	  <br /><br />
+		  </apex:outputPanel>
+		 
+		 <div id="importButton" style="display: none;"> 
+		 	<input id="import" type="button" value="Import" onclick="return false;" />
+	     </div>
+	  
+	  </div> 
+	
+	  <div id="importInstaller" style="display: none;">
+	
+	  	 <span id="importInstallerMessage"></span> <img id="importInstallerLoader" src="{!$Resource.ajaxLoader}" style="display: none;" height="20" width="20" />
+	
+		 <div id="importInstallerSuccess" style="display: none;">
+		   <strong>Site Import Complete!</strong><br /><br />
+	   	   <apex:commandButton value="Close" action="{!done}" />	
+		 </div>
+	
+	  </div>
+	
+	  <div id="importFiles" style="display: none;">
+	  	 
+	  	 <div style="background-color: #e7e7e7; padding: 10px; width: 500px;">
+		  	  <strong>WARNING:</strong> Do not close this window or tab before the import is completed.
+		 </div>
+		  
+		 <br />
+	  	 
+	  	 <span id="importMessage"></span> <img id="importLoader" src="{!$Resource.ajaxLoader}" style="display: none;" height="20" width="20" /><br /><br />
+	     <apex:outputPanel id="importStatus" style="{!IF(!sourceImporting, 'display: none;', '')}" layout="block">
+	    	<table border="0" cellspacing="0" cellpadding="5">
+	    	<apex:repeat value="{!fileQueue}" var="file">
+	       		<tr>
+	       		  <td height="30" style="padding-left: 0px;">{!file.fileName}</td>
+	       		  <td>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Queued', true, false)}">
+											       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Processing', true, false)}">
+	  	 				<img src="{!$Resource.ajaxLoader}" height="20" width="20" />					       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Found', true, false)}">
+						<span style="color: #009900;">Found</span>       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Failed', true, false)}">
+						<span style="color: #990000;"><strong>Failed</strong>: {!file.fileErrorCount} Error(s)</span>  	 									       		  	
+	       		  	</apex:outputText>       		  	
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Not Found', true, false)}">
+						<span style="color: #990000;"><strong>Not Found</strong></span>       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Part 1 of 4 Complete', true, false)}">
+						<span style="color: #009900;">Part 1 of 4 Complete</span>       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Part 2 of 4 Complete', true, false)}">
+						<span style="color: #009900;">Part 2 of 4 Complete</span>       		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Part 3 of 4 Complete', true, false)}">
+						<span style="color: #009900;">Part 3 of 4 Complete</span>     		  	
+	       		  	</apex:outputText>
+	       		  	<apex:outputText rendered="{!IF(file.fileStatus == 'Part 4 of 4 Complete', true, false)}">
+						<span style="color: #009900;">Part 4 of 4 Complete</span>     		  	
+	       		  	</apex:outputText>       		  	
+	       		  </td>
+	       		</tr>
+	     	</apex:repeat>
+	     	</table><br />
+	
+	   		<apex:commandButton value="Cancel" action="{!cancel}" rendered="{!IF(sourceVerified == false && sourceSelected == true, true, false)}" />
+	   		<input class="btn" type="submit" value="Retry" onclick="retry(); return false;" style="{!IF(sourceVerified == false && sourceSelected == true, 'display: inline;', 'display: none;')}" />
+	
+			<apex:outputPanel rendered="{!IF(sourceCleanedUp == true, true, false)}">
+				<strong>Import Complete.</strong><br />
+				<apex:outputPanel rendered="{!IF(totalImportErrors > 0, true, false)}" style="color: #990000;">{!totalImportErrors} error(s).</apex:outputPanel>		
+			</apex:outputPanel><br /><br />
+			
+	     	<apex:commandButton value="Close" action="{!done}" rendered="{!IF(sourceCleanedUp == true, true, false)}" />
+	     	
+	     </apex:outputPanel><br />
+	
+	  </div>
+	  
+	  </apex:form>
+
+	</apex:outputPanel>
+	
+	</div>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Site Import permission
+   	</div>	
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

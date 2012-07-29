@@ -1,0 +1,54 @@
+<apex:component controller="cms.ContentList" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+		$(document).ready(function(){
+
+			$('#DynamicTargetPageLink').ocmsInput({instructionalText:'Link to which any content should point to.', includeBreak: false});
+
+		});
+
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"DynamicTargetPageLink", "value":$('#DynamicTargetPageLink').val(), "type":"Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+	</script>
+
+    <apex:outputPanel >
+        <form>
+            <table class="ocms-editor">
+  				<tr>
+					<td valign="top" style="line-height: 21px;">Target Page</td>
+					<td valign="top">
+						<c:PageSelector cPassThroughId="DynamicTargetPageLink" value="{!DynamicTargetPageLink}"
+                                                    dialogId="DynamicTargetPageLinkDlg" disabled="{!layout_disabled}"
+                                                    sname="{!content.cms__Site_Name__c}" token="{!token}"/>
+						<input type="hidden" id="DynamicTargetPageLink" name="DynamicTargetPageLink" value="{!DynamicTargetPageLink}" />
+					</td>
+				</tr>
+			</table>
+        </form>
+    </apex:outputPanel>
+
+</apex:component>

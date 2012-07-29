@@ -1,0 +1,133 @@
+<apex:page controller="cms.LibrariesController"  showHeader="false" sidebar="false" cache="false" standardStylesheets="false" title="Setup" >
+  
+  <html>
+
+<head>
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ <!-- This is the jquery cookie extension only -->
+ <apex:includeScript value="{!$Resource.cms__jquery}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+</head>
+
+<body>
+
+<c:SetupMenu sname="{!site_name}" activeitem="libraries" />
+
+<div style="margin-left: 210px; padding: 10px;">
+
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+  		  <div class="ocms-setup-breadcrumb-separator"></div>
+		  <div class="ocms-setup-breadcrumb-item">Libraries</div>  		  
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		  <div class="ocms-setup-breadcrumb-item-active">Edit Library</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+
+   <apex:PageMessages />
+      
+      <br />
+
+          <apex:form >
+          
+          		<apex:actionFunction action="{!UpdateLibrary}" name="Save" />
+		    	<apex:actionFunction action="{!Cancel}" name="Cancel" immediate="true" />
+		    	<apex:actionFunction action="{!TestConnection}" name="Test" />
+
+				<script type="text/javascript">
+					$(document).ready(function(){
+
+						$('#saveButton').button().click(function(){
+						 		Save();
+						});
+
+						$('#cancelButton').button().click(function(){
+						 		Cancel();
+						});
+						
+						$('#testButton').button().click(function(){
+						 		Test();
+						});						
+					
+					}); 
+				</script>
+				          
+                 <TABLE>
+                    <TR>
+                        <TD width="120px">Repository* &nbsp;</TD>
+                        <TD><apex:outputField value="{!currentLibrary.cms__Origin__c}"/></TD>
+                    </TR>
+                    <TR >
+                        <TD>Name* &nbsp;</TD>
+                        <TD><apex:inputField value="{!currentLibrary.Name}" style="width:350px;"/></TD>
+                   </TR>
+                   <TR  valign="top" >
+                        <TD>Description &nbsp;</TD>
+                        <TD><apex:inputField value="{!currentLibrary.cms__Description__c}" style="width:355px;size:30px;vertical-align:text-top;"/></TD>
+                   </TR>
+                    <TR>
+                    <TD></TD>
+                    <TD style="color:#C0C0C0;height:10px;padding-bottom:10px;">Maximum 255 characters</TD>
+                   </TR>
+              		 <TR style="padding-top:1px;">
+                        <TD>Sharing &nbsp;</TD>
+                       <TD>Share this library with the other Sites in your Salesforce.com organization?  Once shared, it cannot be unshared.</TD>
+                    </TR>
+              		<TR style="padding-top:1px;">
+                       <TD></TD>
+                       <TD style="width:60px;">Share?&nbsp;
+                       	<apex:selectRadio disabled="{!currentLibrary.cms__Share__c}" style="display:inline-table" value="{!currentLibrary.cms__Share__c}">
+                       	<apex:selectOptions value="{!items}"/>
+                       	</apex:selectRadio><br/><br/>
+                       </TD>
+                    </TR>
+                   <TR >
+                        <TD>Link* &nbsp;</TD>
+                        <TD>{!currentLibrary.Link__c}</TD>
+                   </TR>
+                    <TR>
+                   		<apex:OutputPanel rendered="{!IF(currentLibrary.cms__Origin__c == 'Amazon CloudFront', true, false)}">
+                  
+		           			<TD> Origin Bucket* &nbsp;</TD>
+		           			<TD style="width:350px;">{!currentLibrary.Repository_Link__c}</TD>
+		           	</apex:OutputPanel>
+		           </TR>
+                   <TR>
+                       <TD>Access Key ID* &nbsp;</TD>
+                       <TD><apex:inputField value="{!currentLibrary.cms__Access_Key__c}" style="width:350px;"/></TD>
+                   </TR>
+                   <TR>
+                       <TD>Secret Access Key* &nbsp;</TD>
+                       <TD><apex:inputField value="{!currentLibrary.cms__Secret_Key__c}" style="width:350px;"/></TD>
+                   </TR>
+                   <TR> 
+                        <TD>Allow Uploads &nbsp;</TD> 
+                        <TD><apex:inputField value="{!currentLibrary.cms__Can_Upload__c}" /></TD>
+		                             
+		           </TR> 
+                   <TR>
+                       <TD></TD>
+                       <TD>
+                       <div id="testButton">Test</div> {!ConnectStatus} 
+                       
+                       </TD>
+                  </TR>
+             </TABLE>
+                   
+        <BR/>   
+     
+		<div id="saveButton">Save</div>
+		<div id="cancelButton">Cancel</div>
+		
+  </apex:form>
+ 
+  </div>          
+  
+  </body>
+
+</html>
+</apex:page>

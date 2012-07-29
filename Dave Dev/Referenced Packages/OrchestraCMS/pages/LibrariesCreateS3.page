@@ -1,0 +1,142 @@
+<apex:page controller="cms.LibrariesController"  showHeader="false" sidebar="false" cache="false" title="Setup" >
+  
+<html>
+
+<head>
+   <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+   <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+   <!-- This is the jquery cookie extension only -->
+   <apex:includeScript value="{!$Resource.cms__jquery}" />
+   <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+   <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+  <c:SetupMenu sname="{!site_name}" activeitem="libraries" />
+
+	<div style="margin-left: 210px; padding: 10px;">
+
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator"></div>		  
+		  <div class="ocms-setup-breadcrumb-item">Libraries</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>
+		  <div class="ocms-setup-breadcrumb-item-active">Add Library</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+
+	    <p>Choose the type of repository you want to connect with as an OrchestraCMS library and then set the credentials.  
+  		The library name will appear in Manage Libraries and when browsing for content.  </p><br />
+         
+        <apex:pageMessages />
+         
+          <apex:form >
+          
+          		<apex:actionFunction action="{!SaveLibrary}" name="Save" />
+		    	<apex:actionFunction action="{!Cancel}" name="Cancel" immediate="true" />
+		    	<apex:actionFunction action="{!TestConnection}" name="Test" />
+
+				<script type="text/javascript">
+					$(document).ready(function(){
+
+						$('#saveButton').button().click(function(){
+						 		Save();
+						});
+
+						$('#cancelButton').button().click(function(){
+						 		Cancel();
+						});
+						
+						$('#testButton').button().click(function(){
+						 		Test();
+						});						
+					
+					}); 
+				</script>
+		    	
+                <table>
+                    <TR style="padding-top:1px;">
+                       <TD width="120px">Repository* &nbsp;</TD>
+                       <TD><apex:outputField value="{!currentLibrary.cms__Origin__c}" /></TD>
+                    </TR>
+                    <TR style="padding-top:1px;">
+                        <TD>Name* &nbsp;</TD>
+                       <TD><apex:inputField value="{!currentLibrary.Name}" style="width:250px;"/></TD>
+                    </TR>
+                    <TR style="padding-top:1px;">
+                        <TD>Description &nbsp;</TD>
+                       <TD><apex:inputField value="{!currentLibrary.cms__Description__c}" style="width:355px;"/></TD>
+                    </TR>
+                    <TR>
+                    <TD></TD>
+                    <TD style="color:#C0C0C0;height:10px;padding-bottom:10px;">Maximum 255 characters</TD>
+                   </TR>
+                    <TR style="padding-top:1px;">
+                        <TD>Sharing &nbsp;</TD>
+                       <TD>Share this library with the other Sites in your Salesforce.com organization?  Once shared, it cannot be unshared.</TD>
+                    </TR>
+                    <TR style="padding-top:1px;">
+                       <TD></TD>
+                       <TD style="width:60px;">Share?&nbsp;
+                       
+                       	<apex:selectRadio style="display:inline-table" value="{!currentLibrary.cms__Share__c}">
+                       	<apex:selectOptions value="{!items}"/>
+                       	</apex:selectRadio><br/><br/>
+                       </TD>
+		             </TR>
+                    <TR style="padding-top:1px;">
+                        <TD>Link* &nbsp;</TD>
+                       <TD><apex:inputField value="{!currentLibrary.cms__Link__c}" style="width:350px;"/></TD>
+                    </TR>
+                    <apex:outputPanel rendered="{!IF(currentLibrary.cms__Origin__c == 'Amazon CloudFront', true, false)}">
+                    <tr style="padding-top:1px;">
+                        <td>Origin Bucket* &nbsp;</td>
+                       	<td><apex:inputField value="{!currentLibrary.cms__Repository_Link__c}" style="width:350px;"/></td>
+		             </tr>
+		            </apex:OutputPanel>
+                    <tr style="padding-top:1px;">
+                       <td>Access Key ID* &nbsp;</td>
+                       <td><apex:inputField value="{!currentLibrary.cms__Access_Key__c}" style="width:350px;"/></td>
+                    </tr>
+                    <tr style="padding-top:1px;">
+                       <td>Secret Access Key* &nbsp;</td>
+                       <td><apex:inputField value="{!currentLibrary.cms__Secret_Key__c}" style="width:350px;"/></td>
+                    </tr>
+                    <tr style="padding-top:1px;"> 
+                        <td>Allow Uploads &nbsp;</td> 
+                        <td><apex:inputField value="{!currentLibrary.cms__Can_Upload__c}" /></td>                         
+                    </tr> 
+                    <tr style="padding-top: 1px;">
+                       <td></td>
+                       <td>
+                       <div id="testButton">Test</div> {!ConnectStatus} 
+                       
+                       </td>
+                    </tr>
+               </table>
+                   
+        	   <br /> 
+
+			   <div id="saveButton">Save</div>
+			   <div id="cancelButton">Cancel</div>
+          
+  			   </apex:form>
+  
+    </div>
+  </apex:outputPanel>
+
+  <apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Libraries permission
+    	</div>	
+  </apex:outputPanel>
+
+</body>
+
+</html>
+</apex:page>

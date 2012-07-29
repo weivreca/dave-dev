@@ -1,0 +1,64 @@
+<apex:page >
+<html>
+
+<head>
+<title>OrchestraCMS - Deploy Package</title>
+</head>
+<body>
+	<div style="padding: 25px;">
+      <h1 style="font-size: 16px; font-family: arial; margin: 0px; padding: 0px;">Before continuing ensure that:</h1><br /><br />
+
+	  <apex:messages />
+	  
+	  <div style="font-family: arial; font-size: 12px; color: 000000#; line-height: 25px;">
+	  
+	  <strong style="color: #008800; font-size: 16px;">1.</strong> The OrchestraCMS Package is deployed<br />
+	  
+	  <div style="padding-left: 17px;">
+
+	  To do this go to <strong>Setup > View Installed Packages</strong><br />
+	  
+	  Click on <strong>OrchestraCMS</strong><br />
+	  
+	  Click on <strong>Deploy</strong> to launch the deploy wizard.<br /><br />
+
+	  </div>
+ 
+	  <strong style="color: #008800; font-size: 16px;">2.</strong> The Site Guest user has access to the necessary Objects.
+
+      <div style="padding-left: 17px;">	    
+	 
+	  Go to <strong>Setup > Develop > Sites</strong><br />
+	  
+	  Click on the site name<br />
+	  
+	  Click <strong>Public Access Settings</strong><br />
+	  
+	  Click <strong>Edit</strong><br />
+	  
+	  In the <strong>Custom Object Permissions</strong> section enable <strong>Read</strong> access for:
+	  
+	  <ul style="padding-left: 5px;">
+	    <li>Attributes</li>
+	    <li>Content</li>
+	    <li>Content Types</li>
+	    <li>Content Relationships</li>
+	    <li>Content Layouts</li>
+	    <li>Content Layout Instances</li>
+	    <li>Page Content Layout Instances</li>
+	    <li>Page Layouts</li>
+	    <li>Pages</li>
+	    <li>Sites</li>
+	  </ul>
+	  
+	  Click <strong>Save</strong><br />
+	 
+	  </div>
+	  
+	  </div>
+
+    </div>
+</body>
+
+</html>
+</apex:page>

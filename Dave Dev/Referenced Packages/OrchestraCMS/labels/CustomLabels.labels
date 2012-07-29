@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>email_verification_text_link</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>email verification text link</shortDescription>
+        <value>Click here to confirm your subscription</value>
+    </labels>
+    <labels>
+        <fullName>myprofile_myalerts</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>myprofile myalerts</shortDescription>
+        <value>My alerts</value>
+    </labels>
+    <labels>
+        <fullName>myprofile_mysubscriptions</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>myprofile mysubscriptions</shortDescription>
+        <value>My subscriptions</value>
+    </labels>
+    <labels>
+        <fullName>portal_login_button</fullName>
+        <categories>Portal,Login,Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Login</shortDescription>
+        <value>Login</value>
+    </labels>
+    <labels>
+        <fullName>portal_login_status_logout_link</fullName>
+        <categories>Portal,Logout,Status</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Logout</shortDescription>
+        <value>Logout</value>
+    </labels>
+    <labels>
+        <fullName>portal_login_status_new_user_link</fullName>
+        <categories>Portal,Login,Status</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>New User</shortDescription>
+        <value>New User?</value>
+    </labels>
+    <labels>
+        <fullName>portal_status_back_to_portal_link</fullName>
+        <categories>Portal,Status,BackToPortal</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Back to Portal</shortDescription>
+        <value>Back to Portal</value>
+    </labels>
+    <labels>
+        <fullName>portal_status_welcome</fullName>
+        <categories>Portal,Status,Welcome</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Welcome</shortDescription>
+        <value>Welcome</value>
+    </labels>
+    <labels>
+        <fullName>subscription_email_alert_label</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription email alert label</shortDescription>
+        <value>Add an email alert for {tags}</value>
+    </labels>
+    <labels>
+        <fullName>subscription_email_label</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription-email-label</shortDescription>
+        <value>Email address:</value>
+    </labels>
+    <labels>
+        <fullName>subscription_enter_email_message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription enter email message</shortDescription>
+        <value>You must enter an email address</value>
+    </labels>
+    <labels>
+        <fullName>subscription_error</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription error</shortDescription>
+        <value>The following error occurred {error} while processing your request for this topic {tags}</value>
+    </labels>
+    <labels>
+        <fullName>subscription_exists_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription exists msg</shortDescription>
+        <value>You are alrady subscribed to {tags}</value>
+    </labels>
+    <labels>
+        <fullName>subscription_guest_success_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription guest success msg</shortDescription>
+        <value>You are subscribed to {tags}
+You must verify your subscription by selecting the verification link sent to your email in order to receive the subscription</value>
+    </labels>
+    <labels>
+        <fullName>subscription_invalid_email_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription invalid email msg</shortDescription>
+        <value>This {email}  email is invalid</value>
+    </labels>
+    <labels>
+        <fullName>subscription_no_taxonomy_error</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription no taxonomy error</shortDescription>
+        <value>Taxonomy for the requested topic subscription doesn&apos;t exist</value>
+    </labels>
+    <labels>
+        <fullName>subscription_not_verified_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription not verified msg</shortDescription>
+        <value>You are currently subscribed to {tags}, but you did not verify your subscription that was sent to you in the email</value>
+    </labels>
+    <labels>
+        <fullName>subscription_subscribe_label</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription subscribe label</shortDescription>
+        <value>Subscribe to the {tags} email</value>
+    </labels>
+    <labels>
+        <fullName>subscription_success_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription success msg</shortDescription>
+        <value>You are subscribed to {tags}</value>
+    </labels>
+    <labels>
+        <fullName>subscription_to_email_alerts_success_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>subscription to email alerts success msg</shortDescription>
+        <value>You currently receive email alerts for {tags}</value>
+    </labels>
+    <labels>
+        <fullName>taxonomy_load_more_button</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>taxonomy.load.more.button</shortDescription>
+        <value>View more</value>
+    </labels>
+    <labels>
+        <fullName>taxonomy_load_noitems_msg</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>taxonomy load noitems msg</shortDescription>
+        <value>There are no items to display</value>
+    </labels>
+</CustomLabels>

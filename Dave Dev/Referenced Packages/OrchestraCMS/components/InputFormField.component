@@ -1,0 +1,63 @@
+<apex:component id="c22" >
+
+	<apex:attribute name="field" description="This is the field that this component will render" type="cms.FormField" required="true"/>
+	<apex:attribute name="disabled" description="this determins if the field is disabled" type="Boolean" default="false"/>
+	<apex:attribute name="prefix"  type="String" description="this is the package prefix to use for ajax calls" />
+	<apex:attribute name="submitAction" type="ApexPages.Action" description="The action to execute for a submit button" /> 
+
+	<!-- Input fields for the different possible field_types, non-hidden -->
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i1" value="{!field.a.cms__Text_Value__c}" rendered="{!field.field_type == 'STRING'}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;"  disabled="{!disabled}"/>
+	
+	<apex:outputText escape="false" rendered="{!field.field_type == 'DATE'}">
+		<c:DateTimeSelector cDisable="false" cName="{!field.objectName+'_'+field.name}" cShowDateLabel="false" cType="date" cDateTime="{!field.a.cms__Text_Value__c}" cPassthroughId="{!$Component.i2}" />
+		<apex:inputHidden id="i2" value="{!field.a.cms__Text_Value__c}"  />
+	</apex:outputText>
+	
+	<apex:outputText escape="false" rendered="{!field.field_type == 'DATETIME'}">
+		<c:DateTimeSelector cDisable="false" cName="{!field.objectName+'_'+field.name}" cShowDateLabel="false" cType="datetime" cDateTime="{!field.a.cms__Text_Value__c}" cPassthroughId="{!$Component.i3}" />
+		<apex:inputHidden id="i3" value="{!field.a.cms__Text_Value__c}"  />
+	</apex:outputText> 
+
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i4" value="{!field.a.cms__Email_Value__c}" rendered="{!field.field_type == 'EMAIL'}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;"  />
+	<apex:inputField styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i5" value="{!field.a.cms__Boolean_Value__c}" rendered="{!field.field_type == 'BOOLEAN'}"/>
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i6" value="{!field.a.cms__URL_Value__c}" rendered="{!field.field_type == 'URL'}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;"   />
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i7" value="{!field.a.cms__Currency_Value__c}" rendered="{!field.field_type == 'CURRENCY'}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;"   />
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i8" value="{!field.a.cms__Number_Value__c}" rendered="{!OR(field.field_type == 'DOUBLE', field.field_type == 'INTEGER')}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;"   />
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i9" value="{!field.a.cms__Percent_Value__c}" rendered="{!field.field_type == 'PERCENT'}" style="width:{!If(ISBLANK(field.width), '200', field.width)}px;" />
+	<apex:inputField styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i10" value="{!field.a.cms__Value__c}" rendered="{!field.field_type == 'TEXTAREA'}" style="width: {!field.width}px;"/>
+	<apex:inputField styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i11" value="{!field.a.cms__Phone_Value__c}" rendered="{!field.field_type == 'PHONE'}" style="width: {!field.width}px;"/>
+	<apex:inputText styleClass="{!field.objectName+'_'+field.name} {!IF(field.required, 'required', '')} {!IF(!ISBLANK(field.error),'error_field', '')}" id="i12" value="{!field.a.cms__Text_Value__c}" rendered="{!field.field_type == 'REFERENCE'}" style="width: {!field.width}px;" />
+
+	<apex:outputText escape="false" rendered="{!field.field_type == 'PICKLIST'}"> 
+		<apex:inputHidden id="i13" value="{!field.a.cms__Text_Value__c}"  />
+		<c:PickList cDisable="false" prefix="{!prefix}" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="{!field.objectName+'_'+field.name}" cPassthroughId="{!$Component.i13}" cType="{!field.picklistType}" cValue="{!field.Value}" cOptionsJSON="{!field.OptionsJSON}"   /> 
+	</apex:outputText>
+
+	<apex:outputText escape="false" rendered="{!field.field_type == 'MULTIPICKLIST'}"> 
+		<apex:inputHidden id="i14" value="{!field.a.cms__Text_Value__c}"  />
+		<c:MultiPicklist cDisable="false" prefix="{!prefix}" cObjectName="{!field.objectName}" cFieldName="{!field.name}" cName="{!field.objectName+'_'+field.name}" cPassthroughId="{!$Component.i14}" cType="{!field.picklistType}" cValue="{!field.a.cms__Text_Value__c}" cOptionsJSON="{!field.OptionsJSON}" /> 
+	</apex:outputText>
+
+	<apex:outputText escape="false" rendered="{!field.field_type == 'OCMSPLAINTEXT'}">
+		<apex:outputText escape="false" value="{!field.Value}"/>
+	</apex:outputText>
+	
+	<apex:outputText escape="false" rendered="{!field.field_type == 'OCMSRICHTEXT'}">
+		<apex:outputText escape="false" value="{!field.Value}"/>
+	</apex:outputText>
+	
+	<apex:outputText escape="false" rendered="{!field.field_type == 'ATTACHMENT'}">
+		<apex:inputFile value="{!field.attachment.body}" filename="{!field.attachment.name}" />
+	</apex:outputText>
+
+	<apex:outputText escape="false" rendered="{!field.field_type == 'SUBMITBUTTON'}">
+		<apex:commandButton value="{!field.value}" action="{!submitAction}" styleClass="simple-form-submit-btn" />
+	</apex:outputText>						
+
+	<apex:outputText escape="false" rendered="{!!ISBLANK(field.error)}">
+		<div id="{!field.objectName+'_'+field.name+'_error'}" class="inline-errormsg">
+			<apex:outputText value="{!field.error}" />
+		</div>
+	</apex:outputText> 
+
+</apex:component>

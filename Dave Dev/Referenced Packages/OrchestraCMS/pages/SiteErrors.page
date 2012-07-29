@@ -1,0 +1,145 @@
+<apex:page id="installer" controller="cms.SiteErrorPageSetup" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+<head>
+
+	 <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	 <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+	 <c:CmsScripts />
+     <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+	 <script type="text/javascript">
+		$(document).data('allowPublicTags', {!allowPublicTags});
+		$(document).data('allowPersonalTags', {!allowPersonalTags});
+		$(document).data('token', '{!token}'); 
+	 </script>
+     <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/SpecialPageCreate.js')}" />
+
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="error-pages" />
+
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+
+	  <div class="ocms-setup-breadcrumb">
+		 <div class="ocms-setup-breadcrumb-start"></div>
+		 <div class="ocms-setup-breadcrumb-item">Setup</div>
+		 <div class="ocms-setup-breadcrumb-separator-active"></div>
+		 <div class="ocms-setup-breadcrumb-item-active">Error Pages</div>
+		 <div class="ocms-setup-breadcrumb-end"></div>
+		 <div class="ocms-clear"></div>
+	  </div>
+
+	  <br />
+
+	<table border="0" cellspacing="0" cellpadding="0">
+	<!-- Page Not Found -->
+	<tr>
+	  <td style="padding: 5px 5px 5px 0px; width: 200px;" valign="top">Page Not Found:</td>
+	  <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+		<apex:outputText rendered="{!showPageNotFound}">
+	      <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(pageNotFound.Name__c)}','{!pageNotFound.Version_Number__c}','/apex/Edit?sname={!sname}&id={!pageNotFoundIdText}', '{!pageNotFoundIdText}'); return false;">{!HTMLENCODE(pageNotFound.Name__c)}</a>
+	    </apex:outputText>
+	    <apex:outputText rendered="{!showCreatePageNotFound}">
+		  <a href="#" class="setup-link create-link" title="Page Not Found">Create</a>
+	    </apex:outputText>
+	  </td>
+	  <td style="width: 50px;"></td>
+	  <td style="padding: 5px 5px 5px 0px;" valign="top">
+
+	  </td>
+	</tr>
+
+	<!-- Authorization Required -->
+
+	<tr>
+	  <td style="padding: 5px 5px 5px 0px; width: 200px;" valign="top">Authorization Required:</td>
+	  <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+		<apex:outputText rendered="{!showAuthorizationRequired}">
+	      <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(authorizationReq.Name__c)}','{!authorizationReq.Version_Number__c}','/apex/Edit?sname={!sname}&id={!authorizationRequiredIdText}', '{!authorizationRequiredIdText}'); return false;">{!HTMLENCODE(authorizationReq.Name__c)}</a>
+	    </apex:outputText>
+	    <apex:outputText rendered="{!showCreateAuthorizationRequired}">
+		  <a href="#" class="setup-link create-link" title="Authorization Required">Create</a>
+	    </apex:outputText>
+	  </td>
+	  <td style="width: 50px;"></td>
+	  <td style="padding: 5px 5px 5px 0px;" valign="top">
+
+	  </td>
+	</tr>
+
+	<!-- Generic Error -->
+
+	<tr>
+	  <td style="padding: 5px 5px 5px 0px; width: 200px;" valign="top">Generic Error:</td>
+	  <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+		<apex:outputText rendered="{!showGenericError}">
+	      <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(genericError.Name__c)}','{!genericError.Version_Number__c}','/apex/Edit?sname={!sname}&id={!genericErrorIdText}', '{!genericErrorIdText}'); return false;">{!HTMLENCODE(genericError.Name__c)}</a>
+	    </apex:outputText>
+	    <apex:outputText rendered="{!showCreateGenericError}">
+		  <a href="#" class="setup-link create-link" title="Generic Error">Create</a>
+	    </apex:outputText>
+	  </td>
+	  <td style="width: 50px;"></td>
+	  <td style="padding: 5px 5px 5px 0px;" valign="top">
+
+	  </td>
+	</tr>
+
+	<!-- Maintenance -->
+
+	<tr>
+	  <td style="padding: 5px 5px 5px 0px; width: 200px;" valign="top">Maintenance:</td>
+	  <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+		<apex:outputText rendered="{!showMaintenance}">
+	      <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(maintenance.Name__c)}','{!maintenance.Version_Number__c}','/apex/Edit?sname={!sname}&id={!maintenanceIdText}', '{!maintenanceIdText}'); return false;">{!HTMLENCODE(maintenance.Name__c)}</a>
+	    </apex:outputText>
+	    <apex:outputText rendered="{!showCreateMaintenance}">
+		  <a href="#" class="setup-link create-link" title="Maintenance">Create</a>
+	    </apex:outputText>
+	  </td>
+	  <td style="width: 50px;"></td>
+	  <td style="padding: 5px 5px 5px 0px;" valign="top">
+
+	  </td>
+	</tr>
+
+	<!-- Limit Exceeded // -->
+
+	<tr>
+	  <td style="padding: 5px 5px 5px 0px; width: 200px;" valign="top">Limit Exceeded:</td>
+	  <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+		<apex:outputText rendered="{!showLimitExceeded}">
+	      <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(limitExceeded.Name__c)}','{!limitExceeded.Version_Number__c}','/apex/Edit?sname={!sname}&id={!limitExceededIdText}', '{!limitExceededIdText}'); return false;">{!HTMLENCODE(limitExceeded.Name__c)}</a>
+	    </apex:outputText>
+	    <apex:outputText rendered="{!showCreateLimitExceeded}">
+		  <a href="#" class="setup-link create-link" title="Limit Exceeded">Create</a>
+	    </apex:outputText>
+	  </td>
+	  <td style="width: 50px;"></td>
+	  <td style="padding: 5px 5px 5px 0px;" valign="top">
+
+	  </td>
+	</tr>
+
+	</table>
+
+	</apex:outputPanel>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Error Pages permission
+    	</div>
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

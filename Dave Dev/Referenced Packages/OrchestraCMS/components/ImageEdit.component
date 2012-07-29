@@ -1,0 +1,97 @@
+<apex:component controller="cms.Image" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+		$(document).ready(function(){
+			$('#AltText').ocmsInput({instructionalText:'Necessary for accessibility compliance'});
+			$('#TitleText').ocmsInput({instructionalText:'Text that appears when the mouse pointer hovers over the image'});
+			$('#ImageLink').ocmsInput({instructionalText:'Link target when clicking on the image', includeBreak: false});
+
+			$('#image-input').image_selector_input({
+				type: 'Image',
+				disabled: {!layout_disabled},
+				sname: '{!JSENCODE(content.Site_Name__c)}',
+				ajaxLoader: '{!$Resource.ajaxLoader}',
+				onSelect : function(dialog) {
+					if($('AltText').val() == '' || $('AltText').val() == null)
+						$('#AltText').val(dialog.selected.name);
+				},
+				url: '{!Image}',
+				instructionalText: 'Link target when clicking on the image'
+			});
+
+
+		});
+
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"Image", "value":$('#image-input').image_selector_input('getSelected'), "type":"Text"});
+			attributes.push({"name":"ImageLink", "value":$('#ImageLink').val(), "type":"Text"});
+			attributes.push({"name":"AltText", "value":$('#AltText').val(), "type":"Text"});
+			attributes.push({"name":"TitleText", "value":$('#TitleText').val(), "type":"Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+	</script>
+
+    <apex:outputPanel >
+        <form>
+            <table class="ocms-editor">
+            	<tr>
+            	  <td colspan="2">
+				  	  <div id="image-input"></div>
+				  </td>
+			 	</tr>
+			 	<tr>
+			 	  <td valign="top"><label for="AltText" >Alternative Text</label></td>
+			 	  <td valign="top">
+			 	  	<apex:outputText escape="false" rendered="{!!layout_disabled}">
+			 	  		<input type="text" name="AltText" id="AltText" value="{!AltText}" size="70"  />
+			 	  	</apex:outputText>
+			 	  	<apex:outputText escape="false" rendered="{!layout_disabled}">
+			 	  		<input type="text" name="AltText" id="AltText" value="{!AltText}" size="70"  disabled="disabled" />
+			 	  	</apex:outputText>
+			 	  </td>
+			 	</tr>
+				<tr>
+					<td valign="top">Title Text</td>
+					<td valign="top">
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<input type="text" name="TitleText" id="TitleText" value="{!TitleText}" size="70" />
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<input type="text" name="TitleText" id="TitleText" value="{!TitleText}" size="70" disabled="disabled" />
+						</apex:outputText>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top" style="line-height: 21px;">Link</td>
+					<td valign="top">
+						<c:PageSelector cPassThroughId="ImageLink" value="{!ImageLink}"  dialogId="SmallBlockTarget" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+						<input type="hidden" id="ImageLink" name="ImageLink" value="{!ImageLink}" />
+					</td>
+				</tr>
+			</table>
+        </form>
+    </apex:outputPanel>
+
+</apex:component>

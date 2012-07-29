@@ -1,0 +1,1 @@
+<apex:page controller="cms.PageManagerAjaxController" action="{!loadResponse}" showHeader="false" sidebar="false" contentType="text/plain">{!JSONResponse}</apex:page>

@@ -1,0 +1,231 @@
+<apex:component controller="cms.RecordListController">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.fieldselector.css')}" />
+
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryData.js')}" />
+	<script type="text/javascript">
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+
+			attributes.push({"name":"SObjectType", "value":$('#SObjectType').val(), "type":"Text"});
+			attributes.push({"name":"RecordDetailPage", "value":$('#RecordDetailPage').val(), "type":"Text"});
+			attributes.push({"name":"ListPageSize", "value":$('#ListPageSize').val(), "type":"Integer"});
+			attributes.push({"name":"SortOrder", "value":$('#order:checked').val(), "type":"Text"});
+			attributes.push({"name":"Filter", "value":$('#Filter').val(), "type":"Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}');
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+		jQuery(document).data('cleardot', '{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}');
+		jQuery(document).data('removeBtn', '{!URLFOR($Resource.CmsImages,'/btn_remove.png')}');
+		jQuery(document).data('editBtn', '{!URLFOR($Resource.CmsImages,'/btn_edit.png')}');
+
+		$(document).ready(function(){
+
+			var field_selector = $('#field_selector').ocmsFieldDraggables({
+				SObjectType: '{!SObjectType}',
+				token: '{!token}',
+				disabled: {!disabled}
+			});
+
+			var selected_fields = $('#selected_fields').ocmsFieldAcceptor({
+				selected: {!ColumnFieldListJSON},
+				disabled: {!disabled},
+				content_type: 'DetailField',
+				site_name: '{!content.cms__Site_Name__c}',
+				parent_id: '{!content.Id}',
+				token: '{!token}'
+			});
+
+			var link_fields = $('#link_fields').ocmsFieldAcceptor({
+				selected: {!LinkFieldListJSON},
+				height: 80,
+				disabled: {!disabled},
+				detail_type: 'link',
+				content_type: 'DetailField',
+				site_name: '{!content.cms__Site_Name__c}',
+				parent_id: '{!content.Id}',
+				token: '{!token}'
+			});
+
+			var sort_fields = $('#sort_fields').ocmsFieldAcceptor({
+				selected: {!SortFieldListJSON},
+				height: 76,
+				disabled: {!disabled},
+				detail_type: 'sort',
+				content_type: 'DetailField',
+				site_name: '{!content.cms__Site_Name__c}',
+				parent_id: '{!content.Id}',
+				token: '{!token}'
+			});
+
+			$('#SObjectType').change(function(){
+
+				var input = $(this);
+				if(field_selector.ocmsFieldDraggables('getSObjectType') != '' && field_selector.ocmsFieldDraggables('getSObjectType') != undefined && field_selector.ocmsFieldDraggables('getSObjectType') != null) {
+					$('<div></div>').ocmsShowConfirmationDlg({
+						message: 'Changing the object type will remove all existing fields from the drop regions. Are you sure you want to do this?',
+						onOK: function(dialog, cb) {
+							selected_fields.ocmsFieldAcceptor('clear');
+							link_fields.ocmsFieldAcceptor('clear');
+							sort_fields.ocmsFieldAcceptor('clear');
+							field_selector.ocmsFieldDraggables('setSObjectType', input.val());
+							dialog.closeDialog();
+						},
+
+						onCANCEL: function(dialog, cb) {
+							$('#SObjectType').val(field_selector.ocmsFieldDraggables('getSObjectType'));
+							dialog.closeDialog();
+						}
+					});
+				} else {
+					field_selector.ocmsFieldDraggables('setSObjectType', input.val());
+				}
+				saveLookAndFeel();
+				return false;
+			});
+
+			if({!disabled}) {
+				$('#Filter').attr('disabled', 'true');
+				$('.record-list-editor input').attr('disabled', 'disabled');
+			}
+
+		});
+
+	</script>
+
+	<div class="help-text">
+		Select the Salesforce object and then drag and drop the fields you would like in your list.<br />
+		Top to bottom order equals left to right order when the list is displayed.<br />
+		If you want to link the list to a record detail page, select the page and identify the field that links them. <br />
+	</div>
+
+	<form>
+    	<div class="record-list-editor">
+    		<table>
+	             <tr>
+	               <td>
+	                 Salesforce Object
+	               </td>
+	               <td>
+	                <apex:outputText escape="false" rendered="{!disabled}" >
+		                <select name="SObjectType" id="SOjbectType" disabled="disabled">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		             </apex:outputText>
+	                 <apex:outputText escape="false" rendered="{!!disabled}" >
+		                <select name="SObjectType" id="SObjectType">
+		                	<apex:repeat value="{!objectSelectOptions}" var="o">
+			                	<apex:outputText escape="false" rendered="{!o.selected}">
+			                		<option value="{!o.so.Value}" selected="selected"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+			                	<apex:outputText escape="false" rendered="{!!o.selected}">
+			                	 	<option value="{!o.so.Value}"><apex:outputText value="{!o.so.Label}" /></option>
+			                	</apex:outputText>
+		                	</apex:repeat>
+		                </select>
+		              </apex:outputText>
+				  </td>
+				  <td>Record List</td>
+				  <td>Link record list to detail by</td>
+				</tr>
+				<tr>
+					<td colspan="2"><div id="field_selector"></div></td>
+					<td style="position: relative;">
+						<div style="position: relative;">
+							<div id="selected_fields"></div>
+						</div>
+						<div style="clear:both;"></div>
+					</td>
+					<td valign="top" style="position: relative;">
+						<div style="position: relative;">
+							<div id="link_fields"></div>
+							<div style="margin-top: 10px; margin-bottom: 10px;">Sort record list rows by</div>
+							<div>
+								<div id="sort_fields" style="float: left;"></div>
+								<div style="float: left;">
+									<apex:outputText escape="false" rendered="{!SortOrder != 'desc'}">
+										<div><input type="radio" name="order" id="order" value="asc" checked="true" />A-Z</div>
+									</apex:outputText>
+									<apex:outputText escape="false" rendered="{!SortOrder == 'desc'}">
+										<div><input type="radio" name="order" id="order" value="asc" />A-Z</div>
+									</apex:outputText>
+
+									<apex:outputText escape="false" rendered="{!SortOrder == 'desc'}">
+										<div><input type="radio" name="order" id="order" value="desc" checked="true"/>Z-A</div>
+									</apex:outputText>
+									<apex:outputText escape="false" rendered="{!SortOrder != 'desc'}">
+										<div><input type="radio" name="order" id="order" value="desc" />Z-A</div>
+									</apex:outputText>
+								</div>
+								<div style="clear:both;"></div>
+							</div>
+						</div>
+						<div style="clear:both;"></div>
+					</td>
+				</tr>
+    		</table>
+        	<table>
+				<tr>
+				  <td>
+				 	<h2>Link to a Detail Page</h2>
+				  </td>
+				 </tr>
+				 <tr>
+				  <td>
+					<input type="hidden" name="RecordDetailPage" id="RecordDetailPage" value="{!RecordDetailPage}" />
+			    	<c:PageSelector cPassThroughId="RecordDetailPage" value="{!RecordDetailPage}"  dialogId="RecordDetailPageDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+				 	<h2>Display</h2>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+	        		Show <select id="Filter" name="Filter">
+	        			   <option value="all">All Visible Records</option>
+	        			   <apex:outputText escape="false" rendered="{!Filter == 'owner'}">
+	        			       <option value="owner" selected="true">Owned by User</option>
+	        			   </apex:outputText>
+	        			   <apex:outputText escape="false" rendered="{!Filter != 'owner'}">
+	        			       <option value="owner">Owned by User</option>
+	        			   </apex:outputText>
+	        			 </select>
+				  </td>
+				</tr>
+				<tr>
+				  <td>
+					Rows per page <input type="text" size="3" name="ListPageSize" id="ListPageSize" value="{!ListPageSize}" /> maximum 1000
+				  </td>
+				</tr>
+        	</table>
+        </div>
+	</form>
+
+
+</apex:component>

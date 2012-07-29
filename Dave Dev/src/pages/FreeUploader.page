@@ -1,0 +1,41 @@
+<apex:page showHeader="false" standardStylesheets="false">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Free Uploader</title>
+  <apex:includeScript value="{!URLFOR($Resource.FreeUploader, 'js/AC_RunActiveContent.js')}"/>
+
+
+</head>
+<body>
+  <div id="allbox">
+        <h2>
+free sample 
+        </h2>
+        <p>
+Choose an image.
+        </p>
+        <p>
+        </p>
+        <p>
+            
+            <noscript>
+               
+                <object type="application/x-shockwave-flash" width="300" height="50" data="uploader-free.swf" id="imageUploader">
+                
+                  <param name="movie" value="uploader-free.swf" />
+                  <param name="allowScriptAccess" value="sameDomain" />
+                  <param name="flashVars" value="configFile=config.xml&amp;IDValue=xml" />
+                  <param name="quality" value="high" />
+                </object>
+            </noscript>
+        </p>
+
+
+     
+
+  </div>
+</body>
+</html>
+
+</apex:page>

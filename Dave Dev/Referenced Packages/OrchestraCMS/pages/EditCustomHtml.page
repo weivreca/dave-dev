@@ -1,0 +1,5 @@
+<apex:page controller="cms.CreateContentController"  showHeader="false" sidebar="false" cache="false" title="Orchestra CMS" standardStylesheets="false">
+	<apex:outputPanel layout="block">	
+		<c:CustomHtmlEdit disabled="{!disableAll}" content="{!content}" properties="{!content_properties}" layout_instance="{!current_content_layout_instance}" layout_instance_properties="{!current_content_layout_instance_properties}"  />
+	</apex:outputPanel>
+</apex:page>

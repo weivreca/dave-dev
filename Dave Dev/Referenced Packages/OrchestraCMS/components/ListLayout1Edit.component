@@ -1,0 +1,215 @@
+<apex:component controller="cms.ListLayout1" allowDml="true">
+
+ 	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+
+	<script type="text/javascript" language="javascript" >
+		$(document).ready(function(){
+
+		    if({!close_tab} && '{!JSENCODE(tab)}' != '')
+		 	  closeTab('{!JSENCODE(tab)}');
+
+			if({!!published}) {
+
+				//figure out the path to the images
+
+				var location = "{!URLFOR($Resource.OrchestraCMSUI, '/selector/color/images/Bars.png')}";
+				var path = location.substr(0, location.length-8);
+				$('#bg').jPicker({
+					window: {
+						position: {
+							x: 'screenCenter',
+							y: 'bottom'
+						}
+					},
+					images:	{
+						clientPath: path, /* Path to image files */
+					}
+				});
+
+				$('#fc').jPicker({
+					window: {
+						position: {
+							x: 'screenCenter',
+							y: 'bottom'
+						}
+					},
+					images:	{
+						clientPath: path, /* Path to image files */
+					}
+
+				});
+
+
+				/*$('#bg, #fc').ColorPicker({
+					onSubmit: function(hsb, hex, rgb, el) {
+						$(el).val(hex);
+						$(el).change();
+						$(el).ColorPickerHide();
+					},
+
+					onBeforeShow: function() {
+						$(this).ColorPickerSetColor(this.value);
+					}
+
+
+				}).bind('keyup', function() {
+					$(this).ColorPickerSetColor(this.value);
+				}); */
+
+			}
+		});
+
+
+			function saveLookAndFeel(cb) {
+				var content_attributes = new Array();
+				var cli_attributes = new Array();
+
+				content_attributes.push({"name":"ListTitle", "value":$('#ListTitle').val(), "type":"Text"});
+				content_attributes.push({"name":"ListLayout1Height", "value":$('#ListLayout1Height').val(), "type":"Text"});
+
+				cli_attributes.push({"name":"BackgroundColor", "value":$('#bg').val(), "type":"Text"});
+				cli_attributes.push({"name":"FontColor", "value":$('#fc').val(), "type":"Text"});
+				cli_attributes.push({"name":"ShowMoreLink", "value":$('#ShowMoreLink:checked').val() == 'True' ? 'True' : 'False', "type":"Boolean"});
+				cli_attributes.push({"name":"MoreTargetLink", "value":$('#MoreTargetLink').val(), "type":"Text"});
+				cli_attributes.push({"name":"MoreTargetText", "value":$('#MoreTargetText').val(), "type":"Text"});
+				cli_attributes.push({"name":"MoreTargetImage", "value":$('#MoreTargetImageInput').val(), "type":"Text"});
+				cli_attributes.push({"name":"MoreTargetHoverImage", "value":$('#MoreTargetHoverImageInput').val(), "type":"Text"});
+
+				$.ocms.saveContentLayoutInstance({"id":"{!layout_instance.Id}","content_layout_id":"{!layout_instance.Content_Layout__c}","content_id":"{!content.Id}"},
+					cli_attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					null
+				);
+
+
+				$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+					content_attributes,
+					"{!JSENCODE(Content.Site_Name__c)}",
+					cb,
+					'{!token}'
+				);
+
+	 		}
+
+	 		function saveLookAndFeelClose(cb) {
+	 			saveLookAndFeel(cb);
+	 			closeTab('{!JSENCODE(tab)}');
+	 		}
+
+	</script>
+
+	<apex:outputPanel layout="block" style="padding: 5px;">
+		<form>
+		   <table>
+			  <tr>
+			  	<td>List Title</td>
+				<td colspan="2">
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" id="ListTitle" name="ListTitle" value="{!ListTitle}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" id="ListTitle" name="ListTitle" value="{!ListTitle}" />
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>Background Color</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="bc" id="bc" value="{!BackgroundColor}" size="6" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="bg" id="bg" value="{!BackgroundColor}"  size="6" />
+					</apex:outputText>
+				</td>
+				<td></td>
+			  </tr>
+			  <tr>
+			  	<td>Font Color</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" value="{!FontColor}" id="fc" name="fc" size="6" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" value="{!FontColor}" id="fc" name="fc" size="6" />
+					</apex:outputText>
+				</td>
+				<td></td>
+			  </tr>
+			  <tr>
+			  	<td>List Layout Height</td>
+				<td colspan="2">
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" id="ListLayout1Height" name="ListLayout1Height" value="{!ListLayout1Height}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" id="ListLayout1Height" name="ListLayout1Height" value="{!ListLayout1Height}" />
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>Show More Link</td>
+				<td colspan="2">
+					<apex:outputText escape="false" rendered="{!ShowMoreLink}">
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<input type="checkbox" id="ShowMoreLink" name="ShowMoreLink" value="True" checked="checked" disabled="disabled" />
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<input type="checkbox" id="ShowMoreLink" name="ShowMoreLink" value="True" checked="checked" />
+						</apex:outputText>
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!ShowMoreLink}">
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<input type="checkbox" id="ShowMoreLink" name="ShowMoreLink" value="True" disabled="disabled" />
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<input type="checkbox" id="ShowMoreLink" name="ShowMoreLink" value="True" />
+						</apex:outputText>
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>More Target Page</td>
+				<td colspan="2">
+					<input type="hidden" name="MoreTargetLink" id="MoreTargetLink" value="{!MoreTargetLink}" />
+			    	<c:PageSelector cPassThroughId="MoreTargetLink" value="{!MoreTargetLink}"  dialogId="ListLayoutMore" disabled="{!layout_disabled}" sname="{!content.cms__Site_Name__c}" token="{!token}" />
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>MoreTargetText</td>
+				<td colspan="2">
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="MoreTargetText" id="MoreTargetText" value="{!MoreTargetText}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="MoreTargetText" id="MoreTargetText" value="{!MoreTargetText}" />
+					</apex:outputText>
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>MoreTargetImage</td>
+				<td colspan="2">
+					<input type="hidden" name="MoreTargetImageInput" id="MoreTargetImageInput" value="{!MoreTargetImage}"  />
+					<c:ImageSelector id="Image" sname="{!content.cms__Site_Name__c}" cPassThroughId="MoreTargetImageInput" cImage="{!MoreTargetImage}" type="Image" DialogId="Image" disabled="{!layout_disabled}" />
+				</td>
+			  </tr>
+			  <tr>
+			  	<td>MoreTargetHoverImage</td>
+				<td colspan="2">
+					<input type="hidden" name="MoreTargetImageHoverInput" id="MoreTargetHoverImageInput" value="{!MoreTargetHoverImage}" />
+					<c:ImageSelector id="ImageHover" sname="{!content.cms__Site_Name__c}" cPassThroughId="MoreTargetHoverImageInput" cImage="{!MoreTargetHoverImage}" type="Image" DialogId="HoverImage" disabled="{!layout_disabled}" />
+				</td>
+			  </tr>
+			</table>
+
+		</form>
+	</apex:outputPanel>
+
+
+</apex:component>

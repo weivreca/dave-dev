@@ -1,0 +1,222 @@
+<apex:page id="pli" controller="cms.PageLayoutInstaller" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS">
+
+<html>
+
+<head>
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ 	<!-- This is the jquery cookie extension only -->
+	<apex:includeScript value="{!$Resource.cms__jquery}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/OCMSScripts.js')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="manage-page-layouts" />
+
+	<apex:form style="margin: 0px; padding: 0px;" >
+
+	<apex:actionFunction id="installfnc" action="{!installStepOne}" name="installStepOne" rerender="main">
+	  <apex:param id="pageName" name="pageName" value="" />
+	  <apex:param id="pageNamespace" name="pageNamespace" value="" />
+	</apex:actionFunction>	
+	
+	<apex:actionFunction id="uninstallfnc" action="{!uninstallLayout}" name="uninstallLayout" rerender="main">
+	  <apex:param id="layoutId" name="layoutId" value="" />
+	</apex:actionFunction>
+	
+	<apex:actionFunction id="fncEdit" action="{!edit}" name="edit" rerender="main">
+	  <apex:param id="layoutEditId" name="layoutEditId" value="" />
+	</apex:actionFunction>
+
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+
+	  <div class="ocms-setup-breadcrumb">
+		 <div class="ocms-setup-breadcrumb-start"></div>
+		 <div class="ocms-setup-breadcrumb-item">Setup</div>
+		 <div class="ocms-setup-breadcrumb-separator-active"></div>
+		 <div class="ocms-setup-breadcrumb-item-active">Page Templates</div>
+		 <div class="ocms-setup-breadcrumb-end"></div>
+		 <div class="ocms-clear"></div>
+	  </div>
+
+	  <br />
+
+	<apex:outputPanel id="messages" layout="block" rendered="{!showMessages}">
+		<div style="border: 1px solid #DEDEDE;">
+		<apex:repeat value="{!messages}" var="message">
+			<apex:outputPanel layout="block" style="padding: 5px;">{!message.detail}</apex:outputPanel>
+		</apex:repeat>
+		</div>
+		<br/>
+	</apex:outputPanel>
+
+	<apex:outputPanel rendered="{!showHome}">
+
+	<table cellspacing="0" cellpadding="0" border="0">
+	<tr>
+	<td valign="top">
+
+	<span style="font-size: 16px; padding-bottom: 8px;">Auto Discovered Pages</span><br /><br />
+
+	<table cellspacing="0" cellpadding="0" border="0">
+	<tr style="background-color: rgb(231, 231, 232);">
+	  <td style="padding: 2px; width: 200px;">Name</td>
+	  <td style="padding: 2px; width: 100px;">Namespace</td>
+	  <td style="padding: 2px; width: 100px;">&nbsp;</td>
+	</tr>
+
+	<apex:repeat value="{!available_pages}" var="page">
+	<tr>
+	  <td style="padding: 5px 2px;">{!page.Name}</td>
+	  <td style="padding: 5px 2px;">{!page.NamespacePrefix}</td>
+	  <td style="text-align: center;">
+	    <a href="#" class="setup-link" onclick="installStepOne('{!JSENCODE(page.Name)}','{!JSENCODE(page.NamespacePrefix)}');">Install</a>
+	  </td>
+	</tr>
+	</apex:repeat>
+
+	</table>
+
+	</td>
+	<td style="width: 25px;">&nbsp;</td>
+	<td valign="top">
+
+	<span style="font-size: 16px; padding-bottom: 8px;">Installed Page Templates</span><br /><br />
+
+	<table cellspacing="0" cellpadding="0" border="0">
+	<tr style="background-color: rgb(231, 231, 232);">
+	  <td style="width: 150px; padding: 2px;">Name</td>
+	  <td style="width: 100px; padding: 2px;">Namespace</td>
+	  <td style="width: 150px; padding: 2px;"></td>
+	</tr>
+
+	<apex:repeat value="{!installed_layouts}" var="layout">
+	<tr>
+	  <td style="padding: 5px 2px;">{!layout.Label__c}</td>
+	  <td style="padding: 5px 2px;">{!layout.Namespace__c}</td>
+	  <td style="padding: 5px 2px;"><a href="#" class="setup-link" onclick="edit('{!layout.Id}'); return false;">Edit</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" class="setup-link" onclick="uninstallLayout('{!layout.Id}'); return false;">Uninstall</a></td>
+	</tr>
+	</apex:repeat>
+
+	</table>
+
+
+	</td>
+	</tr>
+	</table>
+	</apex:outputPanel>
+
+	<apex:outputPanel rendered="{!showInstallStepOne}">
+
+	  <strong>Step 1 - Set Properties</strong><br /><br />
+
+	  <table border="0" cellspacing="0" cellpadding="0">
+	  <tr>
+	    <td>Name:</td>
+	    <td>{!selectedPage.Name}</td>
+	  </tr>
+	  <tr>
+	    <td>Namespace:</td>
+	    <td>{!selectedPage.NamespacePrefix}</td>
+	  </tr>
+	  <tr>
+	    <td>Page Caching Enabled:</td>
+	    <td><apex:inputCheckbox value="{!selectedCacheable}" /></td>
+	  </tr>
+	  <tr>
+	    <td>Label:</td>
+	    <td><apex:inputText value="{!selectedLabel}" /></td>
+	  </tr>
+	  <tr>
+	    <td>Description:</td>
+	    <td><apex:inputTextArea value="{!selectedDescription}" cols="50" /></td>
+	  </tr>
+	  </table>
+
+	  <apex:commandButton action="{!installStepTwo}" value="Install" rerender="main" />
+
+	</apex:outputPanel>
+
+	<apex:outputPanel rendered="{!showEdit}">
+
+	  <table border="0" cellspacing="0" cellpadding="0">
+	  <tr>
+	    <td>Name:</td>
+	    <td>{!selectedLayout.Name__c}</td>
+	  </tr>
+	  <tr>
+	    <td>Namespace:</td>
+	    <td>{!selectedLayout.Namespace__c}</td>
+	  </tr>
+	  <tr>
+	    <td>Page Caching Enabled:</td>
+	    <td><apex:inputCheckbox value="{!selectedCacheable}" /></td>
+	  </tr>
+	  <tr>
+	    <td>Label:</td>
+	    <td><apex:inputText value="{!selectedLayout.cms__Label__c}" /></td>
+	  </tr>
+	  <tr>
+	    <td>Description:</td>
+	    <td><apex:inputTextArea value="{!selectedLayout.cms__Description__c}" cols="50" /></td>
+	  </tr>
+	  </table>
+
+	  <table border="0" cellspacing="0" cellpadding="5">
+	    <tr>
+	      <td>
+	        <div style="display: block; width: 194px; height: 144px; background-image: url('{!IF(selectedLayout.Thumbnail_Id__c != null, '/servlet/servlet.FileDownload?file=' + selectedLayout.Thumbnail_Id__c, URLFOR($Resource.CmsImages,'/layout_no_image.png') )}');">
+			  <img src="{!URLFOR($Resource.CmsImages,'/layout.png')}" width="194" height="144" />
+	      	</div>
+	      	<span style="font-size: 10px; font-family: arial;">Small<br />Width: 194px - Height: 144px</span>
+	      </td>
+	      <td>&nbsp;</td>
+	      <td>
+	        <div style="display: block; width: 261px; height: 192px; background-image: url('{!IF(selectedLayout.Thumbnail_Large_Id__c != null, '/servlet/servlet.FileDownload?file=' + selectedLayout.Thumbnail_Large_Id__c, URLFOR($Resource.CmsImages,'/layout_large_no_image.png') )}');">
+			  <img src="{!URLFOR($Resource.CmsImages,'/layout_large.png')}" width="261" height="192" />
+	        </div>
+	        <span style="font-size: 10px; font-family: arial;">Large<br />Width: 261px - Height: 192px</span>
+	      </td>
+	    </tr>
+	  </table>
+
+	  <apex:commandButton action="{!updatePageLayout}" value="Update" />
+
+	  <br /><br /><hr /><br /><br />
+
+	  <apex:outputPanel id="availableImages">
+
+	    <strong>Upload New Image</strong><br /><br />
+
+			<apex:inputFile id="fileObj" value="{!fileData}" filename="{!fileName}" /><br />
+	        <apex:selectRadio value="{!filetype}">
+	            <apex:selectOptions value="{!items}"/>
+	        </apex:selectRadio>
+			<apex:commandButton action="{!addFile}" value="Upload New File" />
+
+	  </apex:outputPanel>
+
+	</apex:outputPanel>
+
+	</apex:outputPanel>
+
+
+	</apex:form>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Templates -> Page Templates permission
+   	</div>
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

@@ -1,0 +1,106 @@
+<apex:page id="sw" controller="cms.CoreController" standardStylesheets="false" showHeader="false" sidebar="false">
+	
+	<apex:composition template="{!page_template}">
+		
+		<apex:define name="header">
+			<link rel="stylesheet" href="{!URLFOR($Resource.Skyward, 'css/screen.css')}" type="text/css" media="screen" charset="utf-8" />
+			<link rel="stylesheet" href="{!URLFOR($Resource.Skyward, 'css/print.css')}" type="text/css" media="print" charset="utf-8" />
+
+			<!--[if lt IE 8]><link rel="stylesheet" href="{!URLFOR($Resource.everready, 'css/ie.css')}" type="text/css" media="screen" charset="utf-8" /><![endif]-->
+
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.Skyward, 'css/superfish.css')}" media="screen" charset="utf-8" />
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.Skyward, 'css/superfish-vertical.css')}" media="screen" charset="utf-8" />
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.Skyward, 'css/footer.css')}" media="screen" charset="utf-8" />
+
+			<script type="text/javascript" src="{!URLFOR($Resource.Skyward, 'js/hoverIntent.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.Skyward, 'js/superfish.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.Skyward, 'js/global.js')}" charset="utf-8"></script>
+		
+        </apex:define>
+        
+		<apex:define name="body">
+		
+			<div id="header-contain">
+				<div id="header">
+					<c:SingleClassStyledMenuPanel panelName="top-menu" panelController="{!controller}" panelHeight="72px" panelWidth="880px" />
+				</div>
+			</div>
+
+			<div id="contentArea">
+				<div class="container">
+					<div id="homepage-mnbanner">
+						<c:SingleImagePanel panelName="banner" panelController="{!controller}" panelHeight="346px" panelWidth="950px" />
+					</div>
+
+					<div class="twocol-leftcol">
+
+						<c:Panel panelName="top-content" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+
+						<div class="clear">&nbsp;</div>
+
+						<div class="twocol-leftcol-2col">
+							<c:Panel panelName="content1" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+						</div>
+
+						<div class="twocol-leftcol-2col last">
+							<c:Panel panelName="content2" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+						</div>
+
+						<div class="clear">&nbsp;</div>
+
+						<c:Panel panelName="content3" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+
+						<div class="clear">&nbsp;</div>
+
+						<div class="twocol-leftcol-2col">
+							<c:Panel panelName="content4" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+						</div>
+
+						<div class="twocol-leftcol-2col last">
+							<c:Panel panelName="content5" panelController="{!controller}" panelHeight="100px" panelWidth="100px" />
+						</div>
+
+						<div class="clear">&nbsp;</div>
+		
+					</div>
+
+					<div class="twocol-rightcol last">
+
+					<div class="boxcap-top"><h3><c:SinglePlainTextPanel panelName="menu-title" panelController="{!controller}" panelHeight="100px" panelWidth="100px" /></h3></div>
+
+					<div class="box">
+						<c:SingleClassStyledMenuPanel panelName="quick-links" panelController="{!controller}" panelHeight="100px" panelWidth="231px" />
+						<div class="clear">&nbsp;</div>
+					</div>
+					<div class="boxcap-bottom">&nbsp;</div>
+
+					<div class="boxcap-top"><h3><c:SinglePlainTextPanel panelName="box-title" panelController="{!controller}" panelHeight="100px" panelWidth="100px" /></h3></div>
+					<div class="box">
+						<c:Panel panelName="box-content" panelController="{!controller}" panelHeight="100px" panelWidth="231px" />
+						<div class="clear">&nbsp;</div>
+					</div>
+					<div class="boxcap-bottom">&nbsp;</div>
+					
+					</div>
+				</div>
+			</div>
+			<div id="footer_contain">
+				<div id="footer">
+					<div id="footer-your-logo">
+						<c:SingleImagePanel panelName="footer-logo" panelController="{!controller}" panelHeight="137px" panelWidth="281px" />
+						<div class="clear"></div>
+						<c:Panel panelName="footer" panelController="{!controller}" panelHeight="30px" panelWidth="281px" />
+					</div>
+					<div id="mission-statement"><c:SinglePlainTextPanel panelName="mission-statement" panelController="{!controller}" panelHeight="70px" panelWidth="281px" /></div>
+					<div id="social-net">
+						<c:Panel panelName="social-net" panelController="{!controller}" panelHeight="30px" panelWidth="100px" />
+					</div>
+				</div>
+			</div>
+			
+			<site:googleAnalyticsTracking />
+		</apex:define>	
+	</apex:composition>        
+        
+        
+</apex:page>

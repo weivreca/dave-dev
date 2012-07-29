@@ -1,0 +1,119 @@
+<apex:component id="pc" controller="cms.PanelController" access="global" >
+
+  <apex:attribute name="panelName" type="String" description="The panel unique identifier" assignTo="{!name}" access="global" />
+  <apex:attribute name="panelController" type="cms.CoreController" description="The executing page controller" assignTo="{!pController}" access="global" />
+  <apex:attribute name="panelHeight" type="String" description="The panel unique identifier" assignTo="{!height}" access="global" />
+  <apex:attribute name="panelWidth" type="String" description="The panel unique identifier" assignTo="{!width}" access="global" />
+  <apex:attribute name="panelInfo" type="String" description="Customized instructions to display in the panel tooltip" assignTo="{!customInfo}" access="global" />  
+  <apex:attribute name="panelAdditonalLayouts" type="String" description="comma seperated list of acceptable templates in additon to all the default templates" assignTo="{!additionalLayouts}" access="global" /> 
+  <apex:attribute name="panelContentLayouts" type="String" description="comma seperated list of acceptable templates" assignTo="{!contentLayouts}" default="CarouselImage,CarouselVideo" access="global"/>
+  <apex:attribute name="panelLimit" type="Integer" description="comma seperated list of acceptable templates" assignTo="{!sizeLimit}" default="-1" />
+  <apex:attribute name="panelStyles" type="String" description="Additional styles to apply to the panel. This is useful for overlapping panels, the styles will only be applied in the edit template" access="global" /> 
+  <apex:attribute name="carouselType" type="String" description="The type of carousel to display options: slideshow, imagescroll" default="slideshow" access="global" />
+  <apex:attribute name="showControls" type="String" description="determines whether or not to show the slideshow controls" default="true" access="global" />
+
+	<apex:outputText escape="false" value="{!EditSource}" />
+
+	<apex:outputText escape="false" rendered="{!showView}">
+
+		<apex:outputText escape="false" rendered="{!carouselType == 'slideshow'}">	
+			<div class="ocmsCarousel">
+				<ul>			
+					<apex:repeat value="{!panelContent}" var="pc">			  	
+						<li class="ocmsCarouselItem">
+							<apex:outputText escape="false" rendered="{!propertiesVisible}">
+								<div style="position: relative; top: 0px; left: 0px;">
+									<div class="debugProperties" style="position: relative;">
+										<div style="position: absolute; top: 0px; left: 0px; z-index: 499;">
+											<img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" />
+										</div>
+										<div class="debugPropertiesDetails" style="position: absolute; top: 25px; left: 0px; text-align: left; padding: 10px; display: none; width: 350px; background-color: rgb(200,200,200); z-index: 500;">
+											<strong>Version:</strong> {!pc.version}<br />
+											<strong>Properties Count:</strong> {!pc.properties_size}<br />
+											<strong>Properties:</strong> <br />
+											<apex:repeat value="{!pc.properties}" var="property" >
+												<div>
+													<apex:outputText value="{!property.cms__Name__c}" /> : <apex:outputText value="{!property.cms__Value__c}" /><br />
+												</div>
+								    		</apex:repeat>
+										</div>
+									</div>
+								</div>
+							</apex:outputText>
+						
+							<apex:outputText rendered="{!pController.router.page_show_controls}" >
+								<div class="previewControls">
+									<div class="previewControlButtons">
+										<span style="{!IF(pc.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span> <span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(pc.content.Approval__c != null && pc.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span><a href="#" onclick="openPageTab('{!pc.editLabel}', '{!pc.version}', '{!pc.editUrl}&sname={!pcontroller.router.site_name}', '{!pc.content_layout_instance.Id}'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" title="Edit" border="0" /></a>
+									</div>
+								</div>
+							</apex:outputText>
+							<apex:outputText escape="false" value="{!pc.Data}" />
+						</li>
+					</apex:repeat>
+				</ul>
+			</div>
+			
+			<apex:outputText escape="false" rendered="{!showControls}" >
+				<div class="carousel-nav">
+					<a class="prev" href="#">prev</a>
+					<div class="swicher s2"></div>
+					<a class="next" href="#">next</a>
+				</div>
+			</apex:outputText>
+		</apex:outputText>
+ 
+  		<apex:outputText escape="false" rendered="{!carouselType == 'imagescroll'}" >
+			<div class="ocmsCarousel">
+				<!-- middle-part -->
+				<div id="middle-part">
+					<div class="text-box">
+						<div class="text-scroll scrollable" >
+							<div class="long">
+								<!-- item-list -->
+								<div class="item-list">
+									<ul style="margin-left: 0.0676433px;">
+										<apex:repeat value="{!panelContent}" var="pc">
+											<li>
+												<apex:outputText escape="false" rendered="{!propertiesVisible}">
+													<div style="position: relative; top: 0px; left: 0px;">
+														<div class="debugProperties" style="position: relative;">
+															<div style="position: absolute; top: 0px; left: 0px; z-index: 499;">
+																<img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" />
+															</div>
+															<div class="debugPropertiesDetails" style="position: absolute; top: 25px; left: 0px; text-align: left; padding: 10px; display: none; width: 350px; background-color: rgb(200,200,200); z-index: 500;">
+																<strong>Version:</strong> {!pc.version}<br />
+																<strong>Properties Count:</strong> {!pc.properties_size}<br />
+																<strong>Properties:</strong> <br />
+																<apex:repeat value="{!pc.properties}" var="property" >
+																	<div>
+																		<apex:outputText value="{!property.cms__Name__c}" /> : <apex:outputText value="{!property.cms__Value__c}" /><br />
+																	</div>
+																</apex:repeat>
+															</div>
+														</div>
+													</div>
+												</apex:outputText>
+						
+												<apex:outputText rendered="{!pController.router.page_show_controls}" >
+													<div class="previewControls">
+														<div class="previewControlButtons">
+															<span style="{!IF(pc.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span> <span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(pc.content.Approval__c != null && pc.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span><a href="#" onclick="openPageTab('{!pc.editLabel}', '{!pc.version}', '{!pc.editUrl}&sname={!pcontroller.router.site_name}', '{!pc.content_layout_instance.Id}'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" title="Edit" border="0" /></a>
+														</div>
+													</div>
+												</apex:outputText>
+												
+												<apex:outputText escape="false" value="{!pc.Data}" />						
+												
+											</li>
+										</apex:repeat>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>  	
+  				</div>
+  			</div>
+		</apex:outputText>
+	</apex:outputText>
+</apex:component>

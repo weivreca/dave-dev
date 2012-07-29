@@ -1,0 +1,15 @@
+<apex:page controller="cms.CreateContentController"  showHeader="false" sidebar="false" cache="false" title="Orchestra CMS" standardStylesheets="false">
+
+   <apex:outputPanel layout="block" rendered="{!isDynamicList}" style="float: left; width: 400px; padding-right: 10px; margin-right: 10px;">
+     <c:DynamicListEditor disabled="{!disableAll}" content="{!content}" properties="{!content_properties}" />
+   </apex:outputPanel>
+
+   <apex:outputPanel layout="block" rendered="{!isStaticList}" style="float: left; width: 600px; padding-right: 10px; margin-right: 10px;">
+     <c:StaticListEditor disabled="{!disableAll}" content="{!content}" properties="{!content_properties}" />
+   </apex:outputPanel>
+
+ 	<apex:outputPanel layout="block">	
+		<c:ListLayout1Edit disabled="{!disableAll}" content="{!content}" properties="{!content_properties}" layout_instance="{!current_content_layout_instance}" layout_instance_properties="{!current_content_layout_instance_properties}"  />
+	</apex:outputPanel>
+
+</apex:page>

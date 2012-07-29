@@ -1,0 +1,42 @@
+<apex:component id="pc" controller="cms.PanelController" access="global" >
+
+  <apex:attribute name="panelName" type="String" description="The panel unique identifier" assignTo="{!name}" access="global" />
+  <apex:attribute name="panelController" type="cms.CoreController" description="The executing page controller" assignTo="{!pController}" access="global" />
+  <apex:attribute name="panelHeight" type="String" description="The panel unique identifier" assignTo="{!height}" access="global" />
+  <apex:attribute name="panelWidth" type="String" description="The panel unique identifier" assignTo="{!width}" access="global" />
+  <apex:attribute name="panelContentLayouts" type="String" description="comma seperated list of acceptable templates" assignTo="{!contentLayouts}" default="cms.Breadcrumb" />
+  <apex:attribute name="sizeLimit" type="Integer" description="comma seperated list of acceptable templates" assignTo="{!sizeLimit}" default="1" />
+
+  <apex:outputText escape="false" value="{!EditSource}" />
+  <apex:outputText escape="false" rendered="{!showView}">
+
+    <apex:outputText escape="false" rendered="{!propertiesVisible}">
+        <div class="debugProperties" style="background-color: rgba(200,200,200,0.5);">
+            <img src="{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}" border="0" />
+                <div class="debugPropertiesDetails" style="text-align: left; padding: 10px; position: absolute; top: 25px; right 0px; display: none; width: 350px; background-color: rgba(200,200,200,0.5);">
+                    <strong>Version:</strong> {!singlePanelContent.version}<br />
+                    <strong>Properties Count:</strong> {!singlePanelContent.properties_size}<br />
+                    <strong>Properties:</strong> <br />
+                    <apex:repeat value="{!singlePanelContent.properties}" var="property" >
+                    <div>
+                        <apex:outputText value="{!property.cms__Name__c}" /> : <apex:outputText value="{!property.cms__Value__c}" /><br />
+                    </div>
+                    </apex:repeat>
+                </div>
+            </div>  
+        </apex:outputText>
+            
+        <apex:outputText rendered="{!IF(pController.router.page_show_controls && !ISNULL(singlePanelContent), true, false)}" >
+            <div class="previewControls">
+                <div class="previewControlButtons">
+                  <span style="{!IF(singlePanelContent.content.Published__c == true,'display:none;', 'display:inline;')}"><img src="{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}" title="Not Published" border="0" /></span> <span style="{!IF((pController.router.site_info.ApprovalProcess__c == true) &&(singlePanelContent.content.Approval__c != null && singlePanelContent.approvalStatus == 'Pending' ), 'display:inline;','display:none;')}"><img src="{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}" title="Pending Approval" alt="Pending Approval" border="0" /></span><a href="#" onclick="openPageTab('{!singlePanelContent.editLabel}', '{!singlePanelContent.version}', '{!singlePanelContent.editUrl}&sname={!pcontroller.router.site_name}', '{!singlePanelContent.content_layout_instance.Id}'); return false;"><img src="{!URLFOR($Resource.CmsImages,'/btn_edit.png')}" title="Edit" border="0" /></a>
+                </div>
+            </div>
+        </apex:outputText>
+        
+		<apex:outputText escape="false" value="{!SinglePanelData}" />
+
+
+  </apex:outputText>
+
+</apex:component>

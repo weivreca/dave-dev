@@ -1,0 +1,78 @@
+<apex:component controller="cms.MediaLookup" allowDML="true" access="global">
+
+    <apex:attribute name="record" type="sObject" description="The object that we're lookup up media files for." assignTo="{!record}" access="global" />
+    <apex:attribute name="fields" type="String" description="The comma separated list of fields" assignTo="{!fields}" access="global" />
+	<apex:attribute name="sites" type="String" description="The comma separated list of sites" assignTo="{!sites}" access="global" />
+	<apex:attribute name="useEditButton" type="Boolean" description="Whether or not to show the edit button." assignTo="{!useEditButton}" access="global" />
+
+
+		<apex:includeScript value="{!URLFOR($Resource.cms__CmsLocalization, '/localization/CmsLocalization_en.js')}" />
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+	    <apex:outputPanel rendered="{!showEdit}">
+			
+			
+			
+			<script type="text/javascript">
+
+				var cms = $(document).data('cms');
+				if(cms == null || cms === undefined){
+					$(document).data('cms', {
+						'context' 	: 'salesforce',
+						'namespace' : '{!namespace}',
+						'csrf_token': '{!token}'
+					});			  	
+				}
+				
+  			</script> 
+
+			<apex:sectionHeader title="Edit Images" subtitle="{!name}"/>
+
+			<apex:form id="f">
+			
+				<apex:pageBlock title="Details">
+
+				  <apex:pageBlockButtons location="top">
+					<apex:commandButton value="Save" action="{!save}" />
+					<apex:commandButton value="Cancel" action="{!cancel}" />
+			      </apex:pageBlockButtons>
+			      
+			      <table border="0" cellspacing="0" cellpadding="5" style="margin-top: 10px;">    		
+				  <apex:repeat value="{!selectedMedia}" var="sm">
+				    <tr style="font-weight: bold; border-top: 1px solid #ABABAB;">
+				      <td style="font-weight: bold; border-top: 1px solid #ABABAB;" valign="top"><apex:outputText value="{!sm.label}" /></td>
+				      <td style="border-top: 1px solid #ABABAB;">
+				      	<apex:inputHidden id="mediaId" value="{!sm.selected}" />
+				      	<c:ImageSelector cPassThroughId="{!$Component.mediaId}" cImage="{!sm.url}" type="{!sm.types}" dialogId="{!sm.field_id}" sname="{!sites}" mode="id" />
+				      </td>				    
+				  	</tr>
+				  </apex:repeat>
+				  </table>
+				</apex:pageBlock>
+
+			</apex:form>
+
+	    </apex:outputPanel>
+	
+		<apex:outputPanel rendered="{!showView}">
+
+			<apex:outputText rendered="{!useEditButton}">
+				<form id="editForm" action="{!editUrl}" target="_top" method="GET">
+					<input type="hidden" name="id" value="{!record.Id}" />
+					<input type="hidden" name="edit" value="1" /> 
+					<input class="btn" type="submit" name="submit" value="Edit Images" />
+				</form>
+			</apex:outputText>
+			
+			<table border="0" cellspacing="0" cellpadding="5" style="margin-top: 10px;" width="100%">    
+				<apex:repeat value="{!selectedMedia}" var="sm">
+					<tr>
+						<td style="font-weight: bold; border-top: 1px solid #ABABAB;" valign="top"><apex:outputText value="{!sm.label}" /></td>
+						<td style="border-top: 1px solid #ABABAB;"><img src="{!sm.url}" /></td>
+					</tr>
+				</apex:repeat>
+			</table>
+			
+		</apex:outputPanel>
+
+</apex:component>

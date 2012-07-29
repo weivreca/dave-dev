@@ -1,0 +1,73 @@
+<apex:page label="">
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'jquery-1.5.2.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'jquery.sheet.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'parser.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Sheet, 'jquery.sheet.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.Sheet, 'jquery-ui/theme/jquery-ui.css')}"/>
+     
+<head>
+
+    <script>
+       $(document).ready(function() {
+            $('#jQuerySheet').sheet({
+                     title: 'Inline Spreadsheet demo',
+                     buildSheet: '10x10',
+                     editable: true,
+                     calcOff: true,
+                     fnSave: function() { parent.getSheet().saveSheet(); alert('Save'); }
+              });
+         
+         
+             $('#btn').click(function() {
+                  var sht = $('[id$=jQuerySheet]').getSheet(); // get the sheet
+                  console.log(sht);
+                  alert("Handler for .click() called.");
+                  var mydata = sht.exportSheet.json();
+                  console.log(mydata);
+                  alert(JSON.stringify(mydata));
+              });
+         
+         
+         });
+    
+        
+        //This function builds the inline menu to make it easy to interact with each sheet instance
+            function inlineMenu(I){
+                I = (I ? I.length : 0);
+                
+                //we want to be able to edit the html for the menu to make them multi-instance
+                var html = $('[id$=inlineMenu]').html().replace(/sheetInstance/g, "$.sheet.instance[" + I + "]");
+                
+                var menu = $(html);
+                
+                
+                
+                return menu;
+            }
+
+        
+        
+    </script>
+</head>    
+<body>
+
+<table width="95%" id="theTable">
+    <tr>
+        <td width="100px">
+        
+            <!--<apex:commandButton value="Load Data" action="{!loaddata}" title="Load Data"/>-->
+            <button id="btn">Show table</button>
+        
+        </td>
+        <td>
+            <div id="jQuerySheet"></div>
+        </td>
+    </tr>
+</table>
+
+
+
+
+</body>
+</apex:page>

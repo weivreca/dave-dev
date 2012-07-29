@@ -1,0 +1,933 @@
+<apex:page controller="cms.SetupProfileController" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+    <title>Manage Licenses</title>
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+	<c:CmsScripts />
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    			$('#saveButton').button().click(function(){
+    				save();
+    			});
+    			$('#saveButtonBottom').button().click(function(){
+    				save();
+    			});
+    			if({!IF(profile.Id != null, true, false)}){
+	    			$('#manageUsersButton').button().click(function(){
+	    				manageUsers();
+	    			});
+    			}
+    			$('#cancelButton').button().click(function(){
+    				cancel();
+    			});
+    			$('#cancelButtonBottom').button().click(function(){
+    				cancel();
+    			});
+    		});
+    </script>
+  </head>
+
+
+  <body>
+
+  	<c:SetupMenu sname="{!site_name}" activeitem="profiles" />
+
+  	<div style="margin-left: 210px; padding: 10px;">
+
+  		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator"></div>
+		  <div class="ocms-setup-breadcrumb-item">Manage Profiles</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>
+		  <div class="ocms-setup-breadcrumb-item-active">{!IF(profile.Id != null, 'Edit', 'New')} OrchestraCMS Profile</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+
+  		<br />
+
+  		<apex:outputText style="color: #990000;" escape="false" value="{!message + '<br /><br />'}" rendered="{!IF(message != '', true, false)}" />
+
+		<apex:form >
+
+			<apex:actionFunction action="{!save}" name="save" />
+			<apex:actionFunction action="{!cancel}" name="cancel" />
+			<apex:actionFunction action="{!manageUsers}" name="manageUsers" />
+
+			<apex:actionFunction action="{!updatePermissions}" name="updatePermissions" oncomplete="initPermissions()" rerender="permission_container" status="permission_status"></apex:actionFunction>
+            <apex:actionFunction action="{!ShowAutoSave}" name="ShowAutoSave" status="permission_status"></apex:actionFunction>
+            
+			<script type="text/javascript">
+		      $(document).ready(function(){
+		        if({!showPermissions}){
+		        	initPermissions();
+		        }
+		      });
+		    </script>
+
+			<table border="0" cellspacing="0" cellpadding="0">
+			  <tr>
+			    <td>
+
+			    	<div id="saveButton" style="float: left">Save</div>
+
+			    	&nbsp;
+
+			    	<apex:outputText rendered="{!IF(profile.Id != null, true, false)}">
+			    		<div id="manageUsersButton">Manage Users</div>
+			    		&nbsp;
+			    	</apex:outputText>
+
+			    	<div id="cancelButton">Cancel</div>
+
+			    </td>
+			  </tr>
+			</table>
+
+			<br />
+
+			<table border="0" cellspacing="0" cellpadding="5" style="width: 589px;">
+			  <tr>
+				<td style="height: 30px">Name</td>
+				<td colspan="2"><apex:inputText value="{!profile.cms__Name__c}" disabled="{!disableEdit}" style="width: 375px;" /></td>
+			  </tr>
+			  <tr>
+				<td style="height: 30px" valign="top">Description</td>
+				<td colspan="2"><apex:inputTextarea value="{!profile.cms__Description__c}" disabled="{!disableEdit}" rows="2" style="width: 375px;" styleClass="ocms-textarea" /></td>
+			  </tr>
+			  <tr>
+				<td valign="top">Salesforce Profile<br /><span style="font-size: 10px;">Only users belonging to this Salesforce profile can be added to this OrchestraCMS profile.</span></td>
+				<td colspan="2" valign="top">
+					<apex:selectList value="{!salesforce_profile_ids}" size="5" disabled="{!disableEdit}" multiselect="true" style="width: 300px;">
+            			<apex:selectOptions value="{!salesforceProfiles}" />
+        			</apex:selectList>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="height: 30px">OrchestraCMS License</td>
+				<td>
+					<apex:outputPanel rendered="{!showLicenseSelector}">
+					  <apex:selectList value="{!profile.cms__License_Identifier__c}" size="1" onchange="updatePermissions();" multiselect="false">
+            			<apex:selectOptions value="{!licenses}"/>
+        			  </apex:selectList>
+        			</apex:outputPanel>
+        			<apex:outputPanel rendered="{!showLicenseRemaining}">
+        				{!license_obj.cms__Name__c} (Remaining: <strong>{!totalRemainingLicenses}</strong>)
+        			</apex:outputPanel>
+        			<apex:outputPanel rendered="{!showNoLicenses}">
+        				No licenses available.
+        			</apex:outputPanel>
+				</td>
+				<td style="text-align: right;">
+        			<apex:actionStatus id="permission_status">
+        				<apex:facet name="start"><img src="{!$Resource.ajaxLoader}" height="20" width="20" /></apex:facet>
+        				<apex:facet name="stop"></apex:facet>
+    				</apex:actionStatus>
+				</td>
+			  </tr>
+			</table>
+
+			<apex:outputPanel id="permission_container" style="padding: 2px;">
+			  <apex:outputPanel id="permission_list" style="padding: 2px;" rendered="{!showPermissions}">
+				<script type="text/javascript">
+			      function initPermissions(){
+
+					var perm_setup 							= $('#perm_setup').ocmsCheckbox({
+													      		'active' 		: {!perm_setup.active},
+													      		'disabled' 		: {!perm_setup.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup}'))
+															  });
+					var perm_setup_sitesnapshots 			= $('#perm_setup_sitesnapshots').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_sitesnapshots.active},
+													      		'disabled' 		: {!perm_setup_sitesnapshots.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_sitesnapshots}'))
+															  });
+					var perm_setup_sitedetails 				= $('#perm_setup_sitedetails').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_sitedetails.active},
+													      		'disabled' 		: {!perm_setup_sitedetails.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_sitedetails}'))
+															  });
+					var perm_setup_siteupgrade 				= $('#perm_setup_siteupgrade').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_siteupgrade.active},
+													      		'disabled' 		: {!perm_setup_siteupgrade.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_siteupgrade}'))
+															  });
+					var perm_setup_siteimport 				= $('#perm_setup_siteimport').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_siteimport.active},
+													      		'disabled' 		: {!perm_setup_siteimport.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_siteimport}'))
+															  });
+					var perm_setup_siteexport 				= $('#perm_setup_siteexport').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_siteexport.active},
+													      		'disabled' 		: {!perm_setup_siteexport.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_siteexport}'))
+															  });
+					var perm_setup_tags 					= $('#perm_setup_tags').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_tags.active},
+													      		'disabled' 		: {!perm_setup_tags.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_tags}'))
+															  });
+					var perm_setup_cache_page 				= $('#perm_setup_cache_page').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_cache_page.active},
+													      		'disabled' 		: {!perm_setup_cache_page.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_cache_page}'))
+															  });
+					var perm_setup_cache_content 			= $('#perm_setup_cache_content').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_cache_content.active},
+													      		'disabled' 		: {!perm_setup_cache_content.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_cache_content}'))
+															  });
+					var perm_setup_pagelayouts 				= $('#perm_setup_pagelayouts').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_pagelayouts.active},
+													      		'disabled' 		: {!perm_setup_pagelayouts.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_pagelayouts}'))
+															  });
+					var perm_setup_contenttemplates			= $('#perm_setup_contenttemplates').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_contenttemplates.active},
+													      		'disabled' 		: {!perm_setup_contenttemplates.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_contenttemplates}'))
+															  });
+					var perm_setup_contenttype				= $('#perm_setup_contenttype').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_contenttype.active},
+													      		'disabled' 		: {!perm_setup_contenttype.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_contenttype}'))
+															  });
+					var perm_setup_customerportal			= $('#perm_setup_customerportal').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_customerportal.active},
+													      		'disabled' 		: {!perm_setup_customerportal.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_customerportal}'))
+															  });
+					var perm_setup_errorpages		 		= $('#perm_setup_errorpages').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_errorpages.active},
+													      		'disabled' 		: {!perm_setup_errorpages.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_errorpages}'))
+															  });
+					var perm_setup_libraries		 		= $('#perm_setup_libraries').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_libraries.active},
+													      		'disabled' 		: {!perm_setup_libraries.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_libraries}'))
+															  });
+					var perm_setup_licenses	 				= $('#perm_setup_licenses').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_licenses.active},
+													      		'disabled' 		: {!perm_setup_licenses.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_licenses}'))
+															  });
+					var perm_setup_profiles	 				= $('#perm_setup_profiles').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_profiles.active},
+													      		'disabled' 		: {!perm_setup_profiles.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_profiles}'))
+															  });
+					var perm_setup_scheduler	 			= $('#perm_setup_scheduler').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_scheduler.active},
+													      		'disabled' 		: {!perm_setup_scheduler.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_scheduler}'))
+															  });
+					var perm_setup_access_levels			= $('#perm_setup_access_levels').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_access_levels.active},
+													      		'disabled' 		: {!perm_setup_access_levels.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_access_levels}'))
+															  });
+					var perm_setup_approval_process	 		= $('#perm_setup_approval_process').ocmsCheckbox({
+													      		'active' 		: {!perm_setup_approval_process.active},
+													      		'disabled' 		: {!perm_setup_approval_process.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_setup_approval_process}'))
+															  });
+					var perm_approval_override	 		   = $('#perm_approval_override').ocmsCheckbox({
+													      		'active' 		: {!perm_approval_override.active},
+													      		'disabled' 		: {!perm_approval_override.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_approval_override}'))
+															  });
+
+					var perm_page_manage			 		= $('#perm_page_manage').ocmsCheckbox({
+													      		'active' 		: {!perm_page_manage.active},
+													      		'disabled' 		: {!perm_page_manage.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_page_manage}'))
+															  });
+					var perm_page_manage_create		 		= $('#perm_page_manage_create').ocmsCheckbox({
+													      		'active' 		: {!perm_page_manage_create.active},
+													      		'disabled' 		: {!perm_page_manage_create.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_page_manage_create}'))
+															  });
+					var perm_page_manage_edit		 		= $('#perm_page_manage_edit').ocmsCheckbox({
+													      		'active' 		: {!perm_page_manage_edit.active},
+													      		'disabled' 		: {!perm_page_manage_edit.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_page_manage_edit}'))
+															  });
+					var perm_page_manage_publish	 		= $('#perm_page_manage_publish').ocmsCheckbox({
+													      		'active' 		: {!perm_page_manage_publish.active},
+													      		'disabled' 		: {!perm_page_manage_publish.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_page_manage_publish}'))
+															  });
+
+					  var perm_page_manage_sitemap_edit	 	= $('#perm_page_manage_sitemap_edit').ocmsCheckbox({
+																'active' 		: {!perm_page_manage_sitemap_edit.active},
+																'disabled' 		: {!perm_page_manage_sitemap_edit.locked},
+																'valueElement' 	: $(jq('{!$Component.perm_page_manage_sitemap_edit}'))
+																});
+					  var perm_page_manage_sitemap_publish	= $('#perm_page_manage_sitemap_publish').ocmsCheckbox({
+																'active' 		: {!perm_page_manage_sitemap_publish.active},
+																'disabled' 		: {!perm_page_manage_sitemap_publish.locked},
+																'valueElement' 	: $(jq('{!$Component.perm_page_manage_sitemap_publish}'))
+																});
+
+
+
+					var perm_menu_manage			 		= $('#perm_menu_manage').ocmsCheckbox({
+													      		'active' 		: {!perm_menu_manage.active},
+													      		'disabled' 		: {!perm_menu_manage.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_menu_manage}'))
+															  });
+					var perm_menu_manage_create		 		= $('#perm_menu_manage_create').ocmsCheckbox({
+													      		'active' 		: {!perm_menu_manage_create.active},
+													      		'disabled' 		: {!perm_menu_manage_create.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_menu_manage_create}'))
+															  });
+					var perm_menu_manage_edit		 		= $('#perm_menu_manage_edit').ocmsCheckbox({
+													      		'active' 		: {!perm_menu_manage_edit.active},
+													      		'disabled' 		: {!perm_menu_manage_edit.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_menu_manage_edit}'))
+															  });
+					var perm_menu_manage_publish	 		= $('#perm_menu_manage_publish').ocmsCheckbox({
+													      		'active' 		: {!perm_menu_manage_publish.active},
+													      		'disabled' 		: {!perm_menu_manage_publish.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_menu_manage_publish}'))
+															  });
+					var perm_content_manage			 		= $('#perm_content_manage').ocmsCheckbox({
+													      		'active' 		: {!perm_content_manage.active},
+													      		'disabled' 		: {!perm_content_manage.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_content_manage}'))
+															  });
+					var perm_content_manage_all		 		= $('#perm_content_manage_all').ocmsCheckbox({
+													      		'active' 		: true,
+													      		'disabled' 		: false
+															  });
+					var perm_content_manage_create			= $('#perm_content_manage_create').ocmsCheckbox({
+													      		'active' 		: {!perm_content_manage_create.active},
+													      		'disabled' 		: {!perm_content_manage_create.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_content_manage_create}'))
+															  });
+					var perm_content_manage_edit			= $('#perm_content_manage_edit').ocmsCheckbox({
+													      		'active' 		: {!perm_content_manage_edit.active},
+													      		'disabled' 		: {!perm_content_manage_edit.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_content_manage_edit}'))
+															  });
+					var perm_content_manage_publish	 		= $('#perm_content_manage_publish').ocmsCheckbox({
+													      		'active' 		: {!perm_content_manage_publish.active},
+													      		'disabled' 		: {!perm_content_manage_publish.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_content_manage_publish}'))
+															  });
+					var perm_library_manage			 		= $('#perm_library_manage').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage.active},
+													      		'disabled' 		: {!perm_library_manage.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage}'))
+															  });
+					var perm_library_manage_all		 		= $('#perm_library_manage_all').ocmsCheckbox({
+													      		'active' 		: true,
+													      		'disabled' 		: false
+															  });
+					var perm_library_manage_view			= $('#perm_library_manage_view').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage_view.active},
+													      		'disabled' 		: {!perm_library_manage_view.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage_view}'))
+															  });
+					var perm_library_manage_upload			= $('#perm_library_manage_upload').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage_upload.active},
+													      		'disabled' 		: {!perm_library_manage_upload.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage_upload}'))
+															  });
+					var perm_library_manage_createfolder	= $('#perm_library_manage_createfolder').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage_createfolder.active},
+													      		'disabled' 		: {!perm_library_manage_createfolder.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage_createfolder}'))
+															  });
+					var perm_library_manage_edit			= $('#perm_library_manage_edit').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage_edit.active},
+													      		'disabled' 		: {!perm_library_manage_edit.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage_edit}'))
+															  });
+					var perm_library_manage_delete	 		= $('#perm_library_manage_delete').ocmsCheckbox({
+													      		'active' 		: {!perm_library_manage_delete.active},
+													      		'disabled' 		: {!perm_library_manage_delete.locked},
+													      		'valueElement' 	: $(jq('{!$Component.perm_library_manage_delete}'))
+															  });
+
+					// CONTENT TYPES
+					var perm_content_type_create_list = new Array();
+					var perm_content_type_edit_list = new Array();
+					var perm_content_type_publish_list = new Array();
+
+					var perm_content_type_all_list = new Array();
+
+					$('.ocms-content-type').each(function(){
+
+						var self = $(this);
+						var allPermContainer 		= self.find('.ocms-contenttype-all-perm');
+						var allPermCheckbox			= allPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (allPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (allPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: allPermContainer.find('input')
+						});
+
+						var createPermContainer 	= self.find('.ocms-contenttype-create-perm');
+						var createPermCheckbox		= createPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (createPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (createPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: createPermContainer.find('input')
+						});
+
+						perm_content_type_create_list[perm_content_type_create_list.length] = { 'checkbox' : createPermCheckbox };
+
+						var editPermContainer 		= self.find('.ocms-contenttype-edit-perm');
+						var editPermCheckbox		= editPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (editPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (editPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: editPermContainer.find('input')
+						});
+
+						perm_content_type_edit_list[perm_content_type_edit_list.length] = { 'checkbox' : editPermCheckbox };
+
+						var publishPermContainer 	= self.find('.ocms-contenttype-publish-perm');
+						var publishPermCheckbox		= publishPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (publishPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (publishPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: publishPermContainer.find('input')
+						});
+
+						perm_content_type_publish_list[perm_content_type_publish_list.length] = { 'checkbox' : publishPermCheckbox };
+
+						perm_content_type_all_list[perm_content_type_all_list.length] = { 'checkbox' : allPermCheckbox,
+																						  'subcheckboxes' : [
+																						  		{ 'checkbox' : createPermCheckbox },
+																						  		{ 'checkbox' : editPermCheckbox },
+																						  		{ 'checkbox' : publishPermCheckbox }
+																						  	]}
+					});
+
+					perm_content_type_all_list[perm_content_type_all_list.length] = {
+			      								'checkbox' : perm_content_manage_create,
+			      								'subcheckboxes' : perm_content_type_create_list
+			      							};
+
+					perm_content_type_all_list[perm_content_type_all_list.length] = {
+			      								'checkbox' : perm_content_manage_edit,
+			      								'subcheckboxes' : perm_content_type_edit_list
+			      							};
+					perm_content_type_all_list[perm_content_type_all_list.length] = {
+			      								'checkbox' : perm_content_manage_publish,
+			      								'subcheckboxes' : perm_content_type_publish_list
+			      							};
+
+					// LIBRARIES
+
+					var perm_library_view_list 			= new Array();
+					var perm_library_upload_list 		= new Array();
+					var perm_library_createfolder_list 	= new Array();
+					var perm_library_edit_list 			= new Array();
+					var perm_library_delete_list 		= new Array();
+
+					var perm_library_all_list = new Array();
+
+					$('.ocms-library-type').each(function(){
+
+						var self = $(this);
+						var allPermContainer 		= self.find('.ocms-library-all-perm');
+						var allPermCheckbox			= allPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (allPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (allPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: allPermContainer.find('input')
+						});
+
+						var viewPermContainer 		= self.find('.ocms-library-view-perm');
+						var viewPermCheckbox		= viewPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (viewPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (viewPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: viewPermContainer.find('input')
+						});
+
+						perm_library_view_list[perm_library_view_list.length] = { 'checkbox' : viewPermCheckbox };
+
+						var uploadPermContainer 	= self.find('.ocms-library-upload-perm');
+						var uploadPermCheckbox		= uploadPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (uploadPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (uploadPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: uploadPermContainer.find('input')
+						});
+
+						perm_library_upload_list[perm_library_upload_list.length] = { 'checkbox' : uploadPermCheckbox };
+
+						var createfolderPermContainer 	= self.find('.ocms-library-createfolder-perm');
+						var createfolderPermCheckbox	= createfolderPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (createfolderPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (createfolderPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: createfolderPermContainer.find('input')
+						});
+
+						perm_library_createfolder_list[perm_library_createfolder_list.length] = { 'checkbox' : createfolderPermCheckbox };
+
+						var editPermContainer 	= self.find('.ocms-library-edit-perm');
+						var editPermCheckbox	= editPermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (editPermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (editPermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: editPermContainer.find('input')
+						});
+
+						perm_library_edit_list[perm_library_edit_list.length] = { 'checkbox' : editPermCheckbox };
+
+						var deletePermContainer = self.find('.ocms-library-delete-perm');
+						var deletePermCheckbox	= deletePermContainer.find('.ocms-checkbox').ocmsCheckbox({
+							'active' 		: (deletePermContainer.find('input').val()=='true')?true:false,
+							'disabled' 		: (deletePermContainer.find('.ocms-checkbox').hasClass('ocms-checkbox-disabled'))?true:false,
+							'valueElement' 	: deletePermContainer.find('input')
+						});
+
+						perm_library_delete_list[perm_library_delete_list.length] = { 'checkbox' : deletePermCheckbox };
+
+						perm_library_all_list[perm_library_all_list.length] = { 'checkbox' : allPermCheckbox,
+																					 'subcheckboxes' : [
+																					 			{ 'checkbox' : viewPermCheckbox },
+																						  		{ 'checkbox' : uploadPermCheckbox },
+																						  		{ 'checkbox' : createfolderPermCheckbox },
+																						  		{ 'checkbox' : editPermCheckbox },
+																						  		{ 'checkbox' : deletePermCheckbox }
+																						  	]}
+					});
+
+					perm_library_all_list[perm_library_all_list.length] = {
+			      								'checkbox' : perm_library_manage_view,
+			      								'subcheckboxes' : perm_library_view_list
+			      							};
+
+					perm_library_all_list[perm_library_all_list.length] = {
+			      								'checkbox' : perm_library_manage_upload,
+			      								'subcheckboxes' : perm_library_upload_list
+			      							};
+
+					perm_library_all_list[perm_library_all_list.length] = {
+			      								'checkbox' : perm_library_manage_createfolder,
+			      								'subcheckboxes' : perm_library_createfolder_list
+			      							};
+
+					perm_library_all_list[perm_library_all_list.length] = {
+			      								'checkbox' : perm_library_manage_edit,
+			      								'subcheckboxes' : perm_library_edit_list
+			      							};
+
+					perm_library_all_list[perm_library_all_list.length] = {
+			      								'checkbox' : perm_library_manage_delete,
+			      								'subcheckboxes' : perm_library_delete_list
+			      							};
+
+
+					// CHECKBOX TREE
+					// Setup
+					var setupSubcheckboxes = [];
+					
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_sitedetails }; 
+					
+					if({!showSnapshots})
+						setupSubcheckboxes[setupSubcheckboxes.length] = { 'checkbox' : perm_setup_sitesnapshots };
+					
+					if({!showImportExport}){
+						setupSubcheckboxes[setupSubcheckboxes.length] = { 'checkbox' : perm_setup_siteexport };
+						setupSubcheckboxes[setupSubcheckboxes.length] = { 'checkbox' : perm_setup_siteimport };
+					} 
+					
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_siteupgrade };					
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_tags };
+
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_cache_page };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_cache_content };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_pagelayouts };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_contenttemplates };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_contenttype };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_customerportal };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_errorpages };										
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_libraries };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_licenses };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_profiles };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_scheduler };
+					if({!showAccessLevels})
+						setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_access_levels };
+					setupSubcheckboxes[setupSubcheckboxes.length] = 	{ 'checkbox' : perm_setup_approval_process };
+					
+
+
+			      	$('#ocmsPermissions').ocmsCheckboxTree({
+			      		'top' : [
+			      			{
+			      				'checkbox' : perm_setup,
+			      				'subcheckboxes' : setupSubcheckboxes
+			      			},
+			      			{
+			      				'checkbox' : perm_page_manage,
+			      				'subcheckboxes' : [
+			      					{ 'checkbox' : perm_page_manage_create },
+			      					{ 'checkbox' : perm_page_manage_edit },
+									{ 'checkbox' : perm_page_manage_publish },
+									{ 'checkbox' : perm_page_manage_sitemap_edit },
+									{ 'checkbox' : perm_page_manage_sitemap_publish }
+			      				]
+			      			},
+			      			{
+			      				'checkbox' : perm_menu_manage,
+			      				'subcheckboxes' : [
+			      					{ 'checkbox' : perm_menu_manage_create },
+			      					{ 'checkbox' : perm_menu_manage_edit },
+			      					{ 'checkbox' : perm_menu_manage_publish }
+			      				]
+			      			},
+			      			{
+			      				'checkbox' : perm_content_manage,
+			      				'subcheckboxes' : [
+			      					{
+			      						'checkbox' : perm_content_manage_all,
+			      						'subcheckboxes' : perm_content_type_all_list
+			      					}
+			      				]
+			      			},
+			      			{
+			      				'checkbox' : perm_library_manage,
+			      				'subcheckboxes' : [
+			      					{
+			      						'checkbox' : perm_library_manage_all,
+			      						'subcheckboxes' : perm_library_all_list
+			      					}
+			      				]
+			      			},
+			      			{
+			      				'checkbox' : perm_approval_override,
+			      				'subcheckboxes' : [
+			      				]
+			      			}
+			      		]
+
+			      	});
+
+			      }
+			    </script>
+
+			  <div id="ocmsPermissions"></div>
+
+			  <table border="0" cellspacing="0" cellpadding="3">
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Select OrchestraCMS Workspace</strong></td>
+			    </tr>
+			    <tr><td colspan="9" >Select a customized OrchestraCMS workspace for users with this profile.</td></tr>
+			     <tr> 
+					<td colspan="3">Workspace &nbsp;</td>
+					<td colspan="6">
+						<apex:selectList id="interface" value="{!profile.cms__Interface__c}" multiselect="false" size="1" onchange="ShowAutoSave();">
+							<apex:selectOptions value="{!interfaceOptions}"></apex:selectOptions>
+						</apex:selectList>
+            			<script>document.getElementById('{!$Component.interface}').disabled = {!disableEdit};</script>
+ 					</td>
+ 					</tr>
+ 					<tr>
+ 						<td colspan="3" style="width: 120px;">Disable Page Editor Panel Tooltips &nbsp;</td>
+ 						<td colspan="6"><apex:inputField value="{!ocms_user.cms__DisablePanelTooltips__c}" id="disablePanelTooltips" /></td>
+ 					</tr>
+ 					<apex:outputText rendered="{!showAutoSaveInput}" >
+ 					 <tr>
+ 						<td colspan="3" style="width: 120px;">Auto Save (in seconds) &nbsp;</td>
+ 						<td colspan="6"><apex:inputField value="{!ocms_user.cms__AutoSave__c}" id="autoSave" style="width:80px;" /></td>
+ 					</tr>
+ 					</apex:outputText>
+			     <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Administrative Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td><div id="perm_setup" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup" value="{!perm_setup.active}" /></td>
+			      <td colspan="8">Setup</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_sitedetails" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_sitedetails" value="{!perm_setup_sitedetails.active}" /></td>
+			      <td colspan="7">Site Details</td>
+			    </tr>
+			    <apex:outputText rendered="{!showSnapshots}">
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_sitesnapshots" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_sitesnapshots" value="{!perm_setup_sitesnapshots.active}" /></td>
+			      <td colspan="7">Site Snapshots</td>
+			    </tr>
+			    </apex:outputText>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_siteupgrade" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_siteupgrade" value="{!perm_setup_siteupgrade.active}" /></td>
+			      <td colspan="7">Site Upgrade</td>
+			    </tr>
+			    <apex:outputText rendered="{!showImportExport}">
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_siteexport" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_siteexport" value="{!perm_setup_siteexport.active}" /></td>
+			      <td colspan="7">Site Export</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_siteimport" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_siteimport" value="{!perm_setup_siteimport.active}" /></td>
+			      <td colspan="7">Site Import</td>
+			    </tr>
+			    </apex:outputText>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_tags" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_tags" value="{!perm_setup_tags.active}" /></td>
+			      <td colspan="7">Tags</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_cache_page" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_cache_page" value="{!perm_setup_cache_page.active}" /></td>
+			      <td colspan="7">Cache Page</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_cache_content" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_cache_content" value="{!perm_setup_cache_content.active}" /></td>
+			      <td colspan="7">Cache Content</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_pagelayouts" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_pagelayouts" value="{!perm_setup_pagelayouts.active}" /></td>
+			      <td colspan="7">Manage Page Templates</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_contenttemplates" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_contenttemplates" value="{!perm_setup_contenttemplates.active}" /></td>
+			      <td colspan="7">Manage Content Templates</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_contenttype" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_contenttype" value="{!perm_setup_contenttype.active}" /></td>
+			      <td colspan="7">Manage Content Types</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_customerportal" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_customerportal" value="{!perm_setup_customerportal.active}" /></td>
+			      <td colspan="7">Manage Customer Portal</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_errorpages" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_errorpages" value="{!perm_setup_errorpages.active}" /></td>
+			      <td colspan="7">Error Pages</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_libraries" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_libraries" value="{!perm_setup_libraries.active}" /></td>
+			      <td colspan="7">Libraries</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_licenses" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_licenses" value="{!perm_setup_licenses.active}" /></td>
+			      <td colspan="7">Manage Licenses</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_profiles" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_profiles" value="{!perm_setup_profiles.active}" /></td>
+			      <td colspan="7">Manage Profiles</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_scheduler" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_scheduler" value="{!perm_setup_scheduler.active}" /></td>
+			      <td colspan="7">Manage Scheduler</td>
+			    </tr>
+			    <apex:outputText rendered="{!showAccessLevels}">
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_access_levels" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_access_levels" value="{!perm_setup_access_levels.active}" /></td>
+			      <td colspan="7">Manage Access Levels</td>
+			    </tr>
+			    </apex:outputText>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_setup_approval_process" class="ocms-checkbox"></div><apex:inputHidden id="perm_setup_approval_process" value="{!perm_setup_approval_process.active}" /></td>
+			      <td colspan="7">Manage Workflow</td>
+			    </tr>			    
+			    <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Page Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td><div id="perm_page_manage" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage" value="{!perm_page_manage.active}" /></td>
+			      <td colspan="8">Manage Pages</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_page_manage_create" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage_create" value="{!perm_page_manage_create.active}" /></td>
+			      <td colspan="7">Create pages</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_page_manage_edit" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage_edit" value="{!perm_page_manage_edit.active}" /></td>
+			      <td colspan="7">Edit pages</td>
+			    </tr>
+				<tr>
+				  <td>&nbsp;</td>
+				  <td><div id="perm_page_manage_publish" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage_publish" value="{!perm_page_manage_publish.active}" /></td>
+				  <td colspan="7">Publish pages</td>
+				</tr>
+
+				<tr>
+				  <td>&nbsp;</td>
+				  <td><div id="perm_page_manage_sitemap_edit" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage_sitemap_edit" value="{!perm_page_manage_sitemap_edit.active}" /></td>
+				  <td colspan="7">Edit Site Map</td>
+				</tr>
+				<tr>
+				  <td>&nbsp;</td>
+				  <td><div id="perm_page_manage_sitemap_publish" class="ocms-checkbox"></div><apex:inputHidden id="perm_page_manage_sitemap_publish" value="{!perm_page_manage_sitemap_publish.active}" /></td>
+				  <td colspan="7">Publish Site Map</td>
+				</tr>
+
+			    <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Menu Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td><div id="perm_menu_manage" class="ocms-checkbox"></div><apex:inputHidden id="perm_menu_manage" value="{!perm_menu_manage.active}" /></td>
+			      <td colspan="8">Manage Menus</td>
+			    </tr>
+		   		<tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_menu_manage_create" class="ocms-checkbox"></div><apex:inputHidden id="perm_menu_manage_create" value="{!perm_menu_manage_create.active}" /></td>
+			      <td colspan="7">Create menus</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_menu_manage_edit" class="ocms-checkbox"></div><apex:inputHidden id="perm_menu_manage_edit" value="{!perm_menu_manage_edit.active}" /></td>
+			      <td colspan="7">Edit menus</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td><div id="perm_menu_manage_publish" class="ocms-checkbox"></div><apex:inputHidden id="perm_menu_manage_publish" value="{!perm_menu_manage_publish.active}" /></td>
+			      <td colspan="7">Publish menus</td>
+			    </tr>
+			    <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Content Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td><div id="perm_content_manage" class="ocms-checkbox"></div><apex:inputHidden id="perm_content_manage" value="{!perm_content_manage.active}" /></td>
+			      <td colspan="8">Manage Content</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td>&nbsp;</td>
+			      <td colspan="2">&nbsp;</td>
+			      <td style="text-align: center;">Create</td>
+			      <td style="text-align: center;">Edit</td>
+			      <td style="text-align: center;">Publish</td>
+			      <td colspan="2">&nbsp;</td>
+			    </tr>
+			    <tr style="background-color: #EFEFEF;">
+			      <td>&nbsp;</td>
+			      <td><div id="perm_content_manage_all" class="ocms-checkbox"></div></td>
+			      <td colspan="2">All Types</td>
+			      <td style="text-align: center;"><div id="perm_content_manage_create" class="ocms-checkbox"></div><apex:inputHidden id="perm_content_manage_create" value="{!perm_content_manage_create.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_content_manage_edit" class="ocms-checkbox"></div><apex:inputHidden id="perm_content_manage_edit" value="{!perm_content_manage_edit.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_content_manage_publish" class="ocms-checkbox"></div><apex:inputHidden id="perm_content_manage_publish" value="{!perm_content_manage_publish.active}" /></td>
+				  <td colspan="2">&nbsp;</td>
+			    </tr>
+			    <apex:repeat value="{!contentTypePerms}" var="contentTypePerm">
+			    <tr class="ocms-content-type">
+			      <td>&nbsp;</td>
+			      <td>&nbsp;</td>
+			      <td><div class="ocms-contenttype-all-perm"><div class="ocms-checkbox"></div><apex:inputHidden value="{!contentTypePerm.allAction.active}" /></div></td>
+			      <td>{!contentTypePerm.contentType.Name__c}</td>
+			      <td style="text-align: center;"><div class="ocms-contenttype-create-perm"><div class="ocms-checkbox {!IF(contentTypePerm.createAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!contentTypePerm.createAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-contenttype-edit-perm"><div class="ocms-checkbox {!IF(contentTypePerm.editAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!contentTypePerm.editAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-contenttype-publish-perm"><div class="ocms-checkbox {!IF(contentTypePerm.publishAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!contentTypePerm.publishAction.active}" /></div></td>
+				  <td colspan="2">&nbsp;</td>
+			    </tr>
+			    </apex:repeat>
+			    <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Library Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td><div id="perm_library_manage" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage" value="{!perm_library_manage.active}" /></td>
+			      <td colspan="8">Manage Libraries</td>
+			    </tr>
+			    <tr>
+			      <td>&nbsp;</td>
+			      <td>&nbsp;</td>
+			      <td colspan="2">&nbsp;</td>
+			      <td style="text-align: center;">View</td>
+			      <td style="text-align: center;">Upload</td>
+			      <td style="text-align: center;">Create Folder</td>
+			      <td style="text-align: center;">Edit</td>
+			      <td style="text-align: center;">Delete</td>
+			    </tr>
+			    <tr style="background-color: #EFEFEF;">
+			      <td>&nbsp;</td>
+			      <td><div id="perm_library_manage_all" class="ocms-checkbox"></div></td>
+			      <td colspan="2">All Libraries</td>
+			      <td style="text-align: center;"><div id="perm_library_manage_view" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage_view" value="{!perm_library_manage_view.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_library_manage_upload" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage_upload" value="{!perm_library_manage_upload.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_library_manage_createfolder" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage_createfolder" value="{!perm_library_manage_createfolder.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_library_manage_edit" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage_edit" value="{!perm_library_manage_edit.active}" /></td>
+			      <td style="text-align: center;"><div id="perm_library_manage_delete" class="ocms-checkbox"></div><apex:inputHidden id="perm_library_manage_delete" value="{!perm_library_manage_delete.active}" /></td>
+			    </tr>
+			    <apex:repeat value="{!libraryPerms}" var="libraryPerm">
+			    <tr class="ocms-library-type">
+			      <td>&nbsp;</td>
+			      <td>&nbsp;</td>
+			      <td><div class="ocms-library-all-perm"><div class="ocms-checkbox"></div><apex:inputHidden value="{!libraryPerm.allAction.active}" /></div></td>
+			      <td>{!libraryPerm.library.Name}</td>
+			      <td style="text-align: center;"><div class="ocms-library-view-perm"><div class="ocms-checkbox {!IF(libraryPerm.viewAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!libraryPerm.viewAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-library-upload-perm"><div class="ocms-checkbox {!IF(libraryPerm.uploadAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!libraryPerm.uploadAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-library-createfolder-perm"><div class="ocms-checkbox {!IF(libraryPerm.createfolderAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!libraryPerm.createfolderAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-library-edit-perm"><div class="ocms-checkbox {!IF(libraryPerm.editAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!libraryPerm.editAction.active}" /></div></td>
+			      <td style="text-align: center;"><div class="ocms-library-delete-perm"><div class="ocms-checkbox {!IF(libraryPerm.deleteAction.locked, 'ocms-checkbox-disabled', '')}"></div><apex:inputHidden value="{!libraryPerm.deleteAction.active}" /></div></td>
+			    </tr>
+			    </apex:repeat>
+			    <tr><td colspan="9">&nbsp;</td></tr>
+			    <tr>
+			      <td colspan="9" style="background-color: #DEDEDE;"><strong>Approval Process Permissions</strong></td>
+			    </tr>
+			    <tr>
+			      <td colspan="9">
+			     By default, when the approval process is enabled, users can no longer publish but must send pages and content for approval.
+			     You can choose to allow specific profiles to publish independently of the approval process. </td>
+			     </tr>
+			     <tr class="perm_approval_override">
+			      <td><div id="perm_approval_override" class="ocms-checkbox "></div><apex:inputHidden id="perm_approval_override" value="{!perm_approval_override.active}" /></td>
+			      <td colspan="7">Allow users with this profile to publish independently of the approval process</td>
+			    </tr>
+			    <tr>
+			      <td style="width: 15px;"></td>
+			      <td style="width: 15px;"></td>
+			      <td style="width: 15px;"></td>
+			      <td style="width: 100px;"></td>
+			      <td style="width: 75px;"></td>
+			      <td style="width: 75px;"></td>
+			      <td style="width: 75px;"></td>
+			      <td style="width: 75px;"></td>
+			      <td style="width: 75px;"></td>
+			    </tr>
+			  </table>
+			  </apex:outputPanel>
+			</apex:outputPanel>
+
+			<table border="0" cellspacing="0" cellpadding="0">
+			  <tr>
+			    <td>
+
+			    	<div id="saveButtonBottom" style="float: left">Save</div>
+
+			    	&nbsp;
+
+			    	<div id="cancelButtonBottom">Cancel</div>
+
+			    </td>
+			  </tr>
+			</table>
+
+		</apex:form>
+
+    </div>
+
+  </body>
+
+</html>
+</apex:page>

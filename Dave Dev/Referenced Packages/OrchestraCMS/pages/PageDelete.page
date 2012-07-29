@@ -1,0 +1,27 @@
+<apex:page controller="cms.DeletePageWizardController" showHeader="false" sidebar="false" standardStylesheets="false" >
+
+	<head>
+		<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ 		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ 		<!-- This is the jquery cookie extension only -->
+  		<apex:includeScript value="{!$Resource.cms__jquery}" />
+  		<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+	</head>
+
+
+	<body style="font-size: 12px; font-family: arial; padding: 0px; margin: 0px;">
+		<div style="padding:10px;">
+			<apex:pageMessages />
+			<apex:form >
+
+				<div>Are you sure you want to delete {!pageutil.page.Name__c} <em>v {!pageutil.version} </em></div>
+				<br />
+				<div><apex:commandButton action="{!deletePage}" value="Yes" /> <apex:commandButton action="{!cancel}" value="Cancel" /></div>
+
+		    </apex:form>
+		</div>
+	</body>
+
+
+</apex:page>

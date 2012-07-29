@@ -1,0 +1,114 @@
+<apex:page id="installer" controller="cms.CustomerPortalInstaller" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+
+<head>
+	 <c:CmsScripts />
+     <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+	 <script type="text/javascript">
+		$(document).data('allowPublicTags', {!allowPublicTags});
+		$(document).data('allowPersonalTags', {!allowPersonalTags});
+		$(document).data('token', '{!token}');
+	 </script>
+     <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/SpecialPageCreate.js')}" />
+	  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="manage-customer-portal" />
+
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+
+	  <div class="ocms-setup-breadcrumb">
+		 <div class="ocms-setup-breadcrumb-start"></div>
+		 <div class="ocms-setup-breadcrumb-item">Setup</div>
+		 <div class="ocms-setup-breadcrumb-separator-active"></div>
+		 <div class="ocms-setup-breadcrumb-item-active">Customer Portal</div>
+		 <div class="ocms-setup-breadcrumb-end"></div>
+		 <div class="ocms-clear"></div>
+	  </div>
+
+	  <br />
+
+	<table border="0" cellspacing="0" cellpadding="0">
+
+        <tr>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">Default Login Page:</td>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+            <apex:outputText rendered="{!showDefaultLogin}">
+              <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(defaultLogin.Name__c)}','{!defaultLogin.Version_Number__c}','/apex/Edit?sname={!sname}&id={!defaultLoginIdText}', '{!defaultLoginIdText}'); return false;">{!HTMLENCODE(defaultLogin.Name__c)}</a>
+            </apex:outputText>
+            <apex:outputText rendered="{!showCreateDefaultLogin}">
+              <a href="#" class="setup-link create-link" title="Default Login">Create</a>
+            </apex:outputText>
+          </td>
+            <td style="width: 50px;"></td>
+            <td style="padding: 5px 5px 5px 0px;" valign="top">
+              Once you've created a Customer Portal from <strong>Customize > Customer Portal > Settings</strong> you must associate the customer portal with
+              your Salesforce Site.<br /><br />
+              1. Go to <strong>Develop > Sites > Login Settings</strong>.<br />
+              2. Select the customer portal from the <strong>Enable Login For</strong> picklist.<br /><br />
+            </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">Change Password Page:</td>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+            <apex:outputText rendered="{!showChangePassword}">
+              <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(changePassword.Name__c)}','{!changePassword.Version_Number__c}','/apex/Edit?sname={!sname}&id={!changePasswordIdText}', '{!changePasswordIdText}'); return false;">{!HTMLENCODE(changePassword.Name__c)}</a>
+            </apex:outputText>
+            <apex:outputText rendered="{!showCreateChangePassword}">
+              <a href="#" class="setup-link create-link" title="Change Password">Create</a>
+            </apex:outputText>
+          </td>
+          <td style="width: 50px;"></td>
+          <td style="padding: 5px 5px 5px 0px;" valign="top">
+            After associating the customer portal with your Salesforce Site as described above you can enable the Change Password page within OrchestraCMS, to be used in your portal.<br /><br />
+              1. Go to <strong>Develop > Sites > Login Settings</strong>.<br />
+              2. Select the OrchestraCMS <strong>ChangePassword</strong> Page from the Change Password Page lookup <br /><br />
+            Once these steps are complete launch the Create wizard using the link to the left. <br /><br />
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">My Profile Page:</td>
+          <td style="padding: 5px 5px 5px 0px; width: 150px;" valign="top">
+            <apex:outputText rendered="{!showMyProfile}">
+              <a href="#" class="setup-link" onclick="openPageTab('{!JSENCODE(myProfile.Name__c)}','{!myProfile.Version_Number__c}','/apex/Edit?sname={!sname}&id={!myProfileIdText}', '{!myProfileIdText}'); return false;">{!HTMLENCODE(myProfile.Name__c)}</a>
+            </apex:outputText>
+            <apex:outputText rendered="{!showCreateMyProfile}">
+              <a href="#" class="setup-link create-link" title="My Profile">Create</a>
+            </apex:outputText>
+          </td>
+            <td style="width: 50px;"></td>
+            <td style="padding: 5px 5px 5px 0px;" valign="top">
+                After associating the customer portal with your Salesforce Site as described above you can enable the My Profile page within OrchestraCMS, to be used in your portal.<br /><br />
+
+                  1. Go to <strong>Develop > Sites > Login Settings</strong>.<br />
+                  2. Select the OrchestraCMS <strong>MyProfile</strong> Page from the My Profile Page lookup<br /><br />
+
+              Once these steps are complete launch the Create wizard using the link to the left.<br /><br />
+            </td>
+        </tr>
+
+	</table>
+
+	</apex:outputPanel>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Customer Portal permission
+    	</div>
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

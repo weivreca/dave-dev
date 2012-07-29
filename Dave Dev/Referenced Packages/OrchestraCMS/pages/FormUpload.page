@@ -1,0 +1,12 @@
+<apex:page id="nform" controller="cms.FormAjax" showHeader="false" sidebar="false" standardStylesheets="false" cache="false">
+	
+	<apex:messages />
+	<div id="NewFile">
+		<apex:form id="NewAttachmentForm" target="test">
+			  <apex:inputFile value="{!attachment.body}" filename="{!attachment.name}" />
+			  <apex:inputHidden id="field_id" value="{!field_id}" />
+			  <apex:actionFunction name="uploadAttachment" action="{!uploadAttachment}" />
+		</apex:form>
+	</div>
+	
+</apex:page>

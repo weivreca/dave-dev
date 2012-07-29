@@ -1,0 +1,113 @@
+<apex:page controller="cms.CoreController" id="t" showHeader="false" sidebar="false" standardStylesheets="false">
+    <apex:composition template="{!page_template}">
+        <apex:define name="header">     
+        
+            <link rel="stylesheet" href="{!URLFOR($Resource.zen,'css/screen.css')}" type="text/css" media="screen" charset="utf-8" />
+            <link rel="stylesheet" href="{!URLFOR($Resource.zen,'css/print.css')}" type="text/css" media="print" charset="utf-8" />
+            <!--[if lte IE 6]><link rel="stylesheet" href="{!URLFOR($Resource.zen,'css/ie.css')}" type="text/css" media="screen" charset="utf-8" /><![endif]-->
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.zen,'css/superfish.css')}" media="screen" charset="utf-8" />
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.zen,'css/superfish-vertical.css')}" media="screen" charset="utf-8" />
+            
+            <style type="text/css">
+            
+            	table.ui-superform {
+            		border: none; 	
+            	}
+            	
+            	table.ui-superform td {
+            		vertical-align: top;
+            		padding: 5px;
+            	}
+            	
+            	table.ui-superform td span{
+            		margin: 0;
+            		padding: 0; 
+            	}
+            	
+            	table.ui-superform div.ui-superform {
+            	
+            	}	
+				
+				table.dt-table{
+					padding: 0px; 
+					margin: 0px;
+					border: none;
+					border-spacing: none;  
+				}
+				
+				table.dt-table tr.dt-row td{
+					padding: 0px 0px 0px 0px;
+					vertical-align: top;
+				}
+          
+          		.ui-superform-input div{
+          			padding:0px;
+          			margin: 0px;
+          		}
+            
+            </style>
+
+
+			<apex:includeScript value="{!URLFOR($Resource.OrchestraCMSPublic, 'subscriptions/OCMSSubscription.js')}"/>            
+            <apex:includeScript value="{!URLFOR($Resource.zen,'js/hoverIntent.js')}" />
+            <apex:includeScript value="{!URLFOR($Resource.zen,'js/superfish.js')}" />
+            <apex:includeScript value="{!URLFOR($Resource.zen,'js/global.js')}" />                                 
+
+        </apex:define>
+        <apex:define name="body">
+
+            <div id="header-contain">
+            <div id="header">
+            
+            <div id="mission-statement"><c:SinglePlainTextPanel id="slogan" panelName="slogan" panelController="{!controller}" panelHeight="25px" panelWidth="400px" /></div>
+            <div id="social-net">
+               <c:Panel id="social" panelName="social" panelController="{!controller}" panelHeight="25px" panelWidth="300px" />
+            </div>
+            <!--<div id="site-search">
+                 <form id="FormName" action="" method="get" name="FormName">
+                  <input class="search" type="text" name="textfieldName" size="24"/><input class="search-btn" type="submit" name="submitButtonName" value="Search"/>
+                 </form>
+                </div>-->
+            <div id="logo-wordmark">
+                <c:SingleImagePanel id="logo" panelName="logo" panelController="{!controller}" panelHeight="110px" panelWidth="400px" />
+            </div>
+            
+            <div id="main-menu">
+                <c:SingleClassStyledMenuPanel id="main-menu" panelName="main-menu" panelController="{!controller}" panelHeight="30px" panelWidth="953px" />
+            </div>
+            
+            </div>
+            </div>
+            
+            
+            <div id="contentArea">
+            <div class="container">
+            
+			<div id="internal-pagetitle"><div id="internal-pagetitle-align"><c:SingleRichTextPanel id="pg-title" panelName="pg-title" panelController="{!controller}" panelHeight="25px" panelWidth="953px" /></div></div>  
+               
+            <div class="twocol-leftcol">
+            <c:Panel id="left1" panelName="left1" panelController="{!controller}" panelHeight="200px" panelWidth="250px" />
+            <c:SingleSimpleFormPanel id="form" panelName="form" panelController="{!controller}" panelHeight="30px" panelWidth="250px" />
+            <c:Panel id="left2" panelName="left2" panelController="{!controller}" panelHeight="200px" panelWidth="250px" />                                  
+            </div>
+            
+            <div class="twocol-rightcol last">
+              <c:Panel id="right1" panelName="right1" panelController="{!controller}" panelHeight="200px" panelWidth="668px" />
+          	  <c:SingleFormPanel id="form2" panelName="form2" panelController="{!controller}" panelHeight="30px" panelWidth="668px" />
+          	  <c:Panel id="right2" panelName="right2" panelController="{!controller}" panelHeight="200px" panelWidth="668px" /> 
+              <div class="clear">&nbsp;</div> 
+            </div>    
+
+            </div>
+            </div>
+            
+            <div id="footer_contain">
+            <div id="footer">
+            <div id="footer-your-logo"><c:SingleImagePanel id="footer-logo" panelName="footer-logo" panelController="{!controller}" panelHeight="50px" panelWidth="250px" /></div>
+            <div id="footer-links"><c:SingleRichTextPanel id="footer" panelName="footer" panelController="{!controller}" panelHeight="30px" panelWidth="400px" /></div>
+            </div>
+            </div>
+        	<site:googleAnalyticsTracking />
+        </apex:define>
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,109 @@
+<apex:component controller="cms.SimpleHorizontalMenu" allowDml="true">
+
+	<apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<apex:includeScript value="{!URLFOR($Resource.cms__colorpicker, '/js/colorpicker.js')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__colorpicker, '/css/colorpicker.css')}" />
+
+	<script type="text/javascript" language="javascript" >
+		function saveLookAndFeel(cb) {
+			var attributes = new Array(); 
+			attributes.push({"name":"LinkColor", "value":$('#LinkColor').val(), "type":"Text"});
+			attributes.push({"name":"LinkHoverColor", "value":$('#LinkHoverColor').val(), "type":"Text"});
+			attributes.push({"name":"LinkFontSize", "value":$('#LinkFontSize').val(), "type":"Text"});
+			attributes.push({"name":"Divider", "value":$('#Divider').val(), "type":"Text"});
+
+			$.ocms.saveContentLayoutInstance({"id":"{!layout_instance.Id}","content_layout_id":"{!layout_instance.Content_Layout__c}","content_id":"{!content.Id}"},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			); 				 			
+ 		}
+ 		
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb); 
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	
+		$(document).ready(function(){
+			
+			$('#LinkColor, #LinkHoverColor').ColorPicker({
+				onSubmit: function(hsb, hex, rgb, el) {
+					$(el).val(hex);
+					$(el).change();
+					$(el).ColorPickerHide(); 
+				},
+				
+				onBeforeShow: function() {
+					$(this).ColorPickerSetColor(this.value);	
+				}	
+			
+			
+			}).bind('keyup', function() {
+				$(this).ColorPickerSetColor(this.value); 
+			}); 
+		
+		}); 
+	</script>
+	
+	<form>
+
+		<table>
+			<tr>
+				<td style="font-size: 12px; font-family: arial;">Link Color</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="LinkColor" id="LinkColor" value="{!LinkColor}" size="6" onchange="$('#LinkColorBox').css('background-color','#' + $('#LinkColor').val());" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="LinkColor" id="LinkColor" value="{!LinkColor}" size="6" onchange="$('#LinkColorBox').css('background-color','#' + $('#LinkColor').val());" />
+					</apex:outputText>
+				</td>
+				<td><div id="LinkColorBox" style="width: 20px; height: 20px; border: 1px solid rgb(235,235,235); background-color: #{!LinkColor};"></div></td>
+			</tr>
+			<tr>
+				<td style="font-size: 12px; font-family: arial;">Link Hover Color</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="LinkHoverColor" id="LinkHoverColor" value="{!LinkHoverColor}" size="6" onchange="$('#LinkHoverColorBox').css('background-color','#' + $('#LinkHoverColor').val());" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="LinkHoverColor" id="LinkHoverColor" value="{!LinkHoverColor}" size="6" onchange="$('#LinkHoverColorBox').css('background-color','#' + $('#LinkHoverColor').val());" />
+					</apex:outputText>
+				</td>
+				<td><div id="LinkHoverColorBox" style="width: 20px; height: 20px; border: 1px solid rgb(235,235,235); background-color: #{!LinkHoverColor};"></div></td>				
+			</tr>
+			<tr>
+				<td>Link Font Size</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="LinkFontSize" id="LinkFontSize" value="{!LinkFontSize}" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="LinkFontSize" id="LinkFontSize" value="{!LinkFontSize}" />
+					</apex:outputText>					
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size: 12px; font-family: arial;">Divider Character</td>
+				<td>
+					<apex:outputText escape="false" rendered="{!layout_disabled}">
+						<input type="text" name="Divider" id="Divider" value="{!Divider}" size="6" disabled="disabled" />
+					</apex:outputText>
+					<apex:outputText escape="false" rendered="{!!layout_disabled}">
+						<input type="text" name="Divider" id="Divider" value="{!Divider}" size="6" />
+					</apex:outputText>
+				</td>
+				<td></td>					
+			</tr>
+		</table>
+				
+	</form>
+	
+</apex:component>

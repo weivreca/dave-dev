@@ -1,0 +1,221 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.EditPageController" showHeader="false" sidebar="false" standardStylesheets="false" cache="false">
+
+<head>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+  <c:CmsScripts debug="false" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TagEditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/EditPage.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/content/ContentSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomySelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/QueueDialogs.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryFullDialog.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTDynamicLoad.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTTaxonomyLoad.js')}" />
+
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.pageeditor.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.uilayout.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.breadcrumb.css')}" />
+  <link class="user" type="text/css" rel="stylesheet" href="{!URLFOR($Resource.jqueryui, '/css/ocms.list.css')}" />
+
+  <script type="text/javascript">
+      $(document).data('cms', {!API.serialize});
+
+	  var pageContextMenu;
+	  var pageToolbar;
+
+      function showOcmsPreviewMessage(sMsg, element) {
+          // Do nothing in edit mode, use showOcmsEditMessage(...); instead.
+          showOcmsEditMessage(sMsg, element);
+      }
+      function showOcmsEditMessage(sMsg, element) {
+          $('#ocmsEditMsgBoxMsg').html(sMsg);
+          $('#ocmsEditMsgBox').show();
+          if(element != null && element != 'undefined')
+          {
+              var ele = $(element);
+              var pos = ele.position();
+              $('#ocmsEditMsgBox').css('top', pos.top + ele.height()+5).css('left',pos.left + ele.width()+5).css('right',10);
+          }
+          else
+          {
+              var xPos = ($(window).width() / 2) - ($('#ocmsEditMsgBox').width() / 2) + $(window).scrollLeft();
+              var yPos = ($(window).height() / 2) - ($('#ocmsEditMsgBox').height() / 2) + $(window).scrollTop();
+              $('#ocmsEditMsgBox').css('top', yPos).css('left', xPos);
+          }
+      }
+
+  	$(document).ready(function(){
+
+		// This nifty peice of goodness grabs the session token for generating caches in intranets without making a trip to the website
+
+		// No longer need this thanks to job executor
+
+		updateTab("{!JSENCODE(tab)}", "{!router.page.Name__c+' - v'+TEXT(router.page.Version_Number__c)+'.0'}", "{!router.page.Id}");
+
+		var handlesrc = '{!URLFOR($Resource.CmsImages,'/handle.png')}';
+		var removesrc = '{!URLFOR($Resource.CmsImages,'/btn_remove.png')}';
+		var editsrc = '{!URLFOR($Resource.CmsImages,'/btn_edit.png')}';
+		var propertiessrc = '{!URLFOR($Resource.CmsImages,'/btn_page_properties.png')}';
+		var notpublishedsrc = '{!URLFOR($Resource.CmsImages,'/btn_unpublished.png')}';
+		var sentforapprovalsrc = '{!URLFOR($Resource.jqueryui,'/css/images/Icons/Icon_PendingApproval20.png')}';
+
+		$('img.unpublished').attr('src', notpublishedsrc);
+		$('img.lock').attr('src', sentforapprovalsrc);
+		$('img.properties').attr('src', propertiessrc);
+		$('img.edit').attr('src', editsrc);
+		$('img.remove').attr('src', removesrc);
+		$('img.handle').attr('src', handlesrc);
+
+		$(document).data('site', '{!router.site_name}');
+		$(document).data('page', '{!router.page.Id}');
+
+		// If Save and Close signal was sent then close the tab.
+		$('#edit-page-controls').editPageControls({
+			'siteName'					: '{!router.site_name}',
+			'pageId'					: '{!pageId}',
+			'disabled'					: {!disableAll},
+			'disablePanelTooltips'		: '{!user_preferences.disablePanelTooltips__c}',
+			'sentForApproval'			: {!sentForApproval},
+			'approvalId'				: '{!router.page.Approval__c}',
+			'workflowEnabled'			:  {!router.site_info.cms__ApprovalProcess__c},
+			'elementControls'			: $('#edit-header'),
+			'handleImage' 				: handlesrc,
+			'removeButtonImage' 		: removesrc,
+			'editButtonImage' 			: editsrc,
+			'propertiesButtonImage'		: propertiessrc,
+			'notPublishedImage'		    : notpublishedsrc,
+			'sentForApprovalImage'		: sentforapprovalsrc,
+			'onCreate'					: function() {
+		  									if({!close})
+												closeTab('{!JSENCODE(tab)}');
+										  },
+		    'onNewVersionCreate'		: function(){
+										    var newVersionId = '{!newVersionId}';
+										   	if(newVersionId != '') {
+
+										       	openPageTab('{!JSENCODE(newVersionName)}','{!newVersionNumber}', '/apex/Edit?sname={!router.site_name}&id='+newVersionId, newVersionId);
+
+	    								  	}
+	    								  }
+	    		
+
+		});
+
+      	pageContextMenu = $('.ocms-content-panel').ocmsContentSelector({
+           siteName				    : '{!router.site_name}'
+          ,pageId				    : '{!router.page.Id}'
+          ,disabled				    : {!disableAll}
+          ,sentForApproval		    : {!sentForApproval}
+          ,approvalId			    : '{!router.page.Approval__c}'
+          ,workflowEnabled		    : {!router.site_info.cms__ApprovalProcess__c}
+          ,elementControls		    : $('#edit-header')
+          ,handleImage 			    : handlesrc
+          ,removeButtonImage 	    : removesrc
+          ,editButtonImage 		    : editsrc
+          ,propertiesButtonImage	: propertiessrc
+          ,notPublishedImage		: notpublishedsrc
+          ,sentForApprovalImage	    : sentforapprovalsrc
+          ,onAddExisting			: function(){
+			$('#edit-page-controls').editPageControls('selectExistingMode');
+          }
+          ,onAddNew					: function(){
+			$('#edit-page-controls').editPageControls('selectNewMode');
+          }
+		  ,token					: '{!api.csrf_token}'
+		  ,taxonomies				: {!taxonomiesJSON}
+		  ,tags						: {!tagsJSON}
+		  ,onRemove					: $('#edit-page-controls').editPageControls('getRemoveCallback')
+		  ,onOpenProperties			: $('#edit-page-controls').editPageControls('getOpenPagePropertiesCallback')
+      	});
+
+      	$('#ocmsEditMsgBoxClose').click(function(){
+          $('#ocmsEditMsgBox').hide();
+      	});
+
+	});
+  </script>
+
+  <apex:insert name="header" />
+  
+</head>
+
+<body style="font-size: 12px; font-family: arial;">
+
+  <div id="edit-header" style="position: absolute; top: 0; left: 0; z-index: 999; width: 100%; color: #000;">
+    <apex:form id="f" style="margin: 0px; padding: 0px;">
+
+	  <c:EditMenu pageutil="{!pageutil}"
+			latestVersion="{!latestVersion}"
+			save="{!save}"
+			saveAndClose="{!saveAndClose}"
+			publish="{!publish}"
+			newVersion="{!newVersion}"
+			clonePage="{!clonePage}"
+			deletePage="{!deletePage}"
+			togglePreview="{!togglePreview}"
+			properties="{!properties}"
+			layout="{!layout}"
+			content="{!content}"
+			version="{!version}"
+			collaborator="{!collaborator}"
+			visitor="{!visitor}"
+			email="{!email}"
+			site_name="{!router.site_name}"
+			tabId="{!JSENCODE(tab)}"
+			approval_process="{!router.site_info.cms__ApprovalProcess__c}"
+			token="{!API.csrf_token}"
+			showEmail="{!!disableEmail}"
+			showQueueEmail="{!!disableQueueEmail}"
+			/>
+
+	  <apex:outputPanel layout="block" rendered="{!showMessages}" style="padding: 0px; background-color: rgb(255,235,235); border-bottom: 1px solid rgb(200,200,200);">
+	    <table border="0" cellspacing="0" cellpadding="5">
+	      <apex:repeat value="{!messages}" var="message">
+	        <tr>
+	          <td><img src="{!URLFOR($Resource.CmsImages,'btn_unpublished.png')}" border="0" /></td>
+	          <td style="font-size: 12px;">{!message.detail}</td>
+	        </tr>
+	      </apex:repeat>
+	    </table>
+	  </apex:outputPanel>
+
+      <apex:inputHidden value="{!tab}" />
+
+    </apex:form>
+
+    <div id="contentSelector" style="background-color: #FFFFFF; line-height: normal;">
+   	  <c:ContentSelector sname="{!router.site_name}" disabled="{!disableAll}" />
+    </div>
+
+  </div>
+
+  <div id="edit-page-controls"></div>
+  
+  <apex:insert name="body" />
+
+  <div id="alert-dialog" title="Alert" style="display: none;">
+	<div class="dialog-content"></div>
+  </div>
+  <div id="confirmation-dialog" title="Confirm" style="display: none;"></div>
+
+  <apex:outputPanel layout="block">
+      <div id="ocmsEditMsgBox" style="position:absolute;z-index: 9999;display:none;max-width: 50%">
+          <div class="ui-state-warn ui-corner-all" style="position:relative;min-height:30px;background-color:#FFFFE0;color:#000;border:2px solid #DAA520;">
+              <img id="ocmsEditMsgBoxClose" src="{!URLFOR($Resource.jqueryui, '/css/images/Icons/orange_close_button.png')}" style="cursor:pointer;position:absolute;top:2px;right:2px;"/>
+              <div style="padding:7px 40px 5px">
+                  <div id="ocmsEditMsgBoxMsg" style="overflow-y: hidden;overflow-x: auto;padding-bottom: 10px;"></div>
+              </div>
+          </div>
+      </div>
+  </apex:outputPanel>
+
+  <div class="ocms-floating-toolbar">
+  	<div class="ocms-action-icon"><img class="ocms-icon-20-info" src="{!URLFOR($Resource.jqueryui,'/css/images/cleardot.gif')}" align="top" /></div>
+  </div>
+
+</body>
+</apex:page>

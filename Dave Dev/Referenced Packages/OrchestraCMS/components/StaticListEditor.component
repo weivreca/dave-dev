@@ -1,0 +1,257 @@
+<apex:component id="c47" controller="cms.StaticListEditor" allowDml="true">
+	<apex:attribute name="disabled" type="Boolean" description="Current Disabled State" assignTo="{!disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+	<head>
+
+	<style type="text/css">
+
+		.content_table{
+			border: 1px solid #CCCCCC;
+			padding: 0px;
+			margin: 0px;
+			border-collapse: collapse;
+			border-spacing: 0px;
+			width: 540px;
+		}
+
+		.content_table input{
+			margin:0px !important;
+			padding:0px !important;
+		}
+
+		.content_table tr{
+			border: 1px solid #CCCCCC;
+		}
+
+		.content_table th{
+			border: 1px solid #CCCCCC;
+			padding: 5px;
+			background-color: #ECECEC;
+		}
+
+		.content_table td{
+			border: 1px solid #CCCCCC;
+			padding: 5px;
+			background-color: #fff;
+			height: 40px;
+		}
+
+	</style>
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/content/ContentSelector.js')}" />
+	<script type="text/javascript" language="javascript" >
+
+		$(document).ready(function(){
+
+			var itemCount = 0;
+			$(document).data('field_update', null);
+
+			var id_list = {!ContentIds};
+			var layouts = {!Layouts};
+			var name_list = {!ContentNames};
+			
+			for(var j=0; j < id_list.length; ++j) {
+				if(layouts.length > j) {
+					AddRow(id_list[j], name_list[j], layouts[j]);
+				} else {
+					AddRow(id_list[j], name_list[j], null);
+				}
+				++itemCount;
+			}
+
+			$('#content_dialog').dialog({
+					bgiframe: true,
+					autoOpen: false,
+					height: 350,
+					width: 500,
+					modal: true,
+					open: function() {
+					},
+
+					close: function() {
+					},
+
+					buttons: {
+						Add: function() {
+
+							if($(this).content_selector('validateSelected')) {
+
+								var selected_id = $(this).content_selector('getSelected');
+								var selected_name = $(this).content_selector('getSelectedName');
+
+								AddRow(selected_id, selected_name, null);
+								updateFields();
+								$(this).content_selector('reset');
+								$(this).dialog('close');
+							}
+
+						},
+
+						Cancel: function() {
+							$(this).content_selector('reset');
+							$(this).dialog('close');
+						}
+					}
+			}).content_selector({
+				sname: '{!content.Site_Name__c}',
+				ajaxLoaderImage: '{!$Resource.ajaxLoader}'
+			});
+
+			addBtn = $('<a href="#">Add</a>');
+			addBtn.button({disabled: {!disabled}});
+
+			if(!{!disabled}) {
+
+				addBtn.bind('click', function() {
+					$('#content_dialog').dialog('open');
+					return false;
+				});
+
+				$('#content_control').append(addBtn);
+
+
+				$('#content_list').sortable({
+					items: 'tr',
+					handle: '.handle',
+					appendTo: 'body',
+					helper: function(event, item){
+						var clone = item.clone();
+						var helperTable = $('<table class="content_table" style="width: 540px; height: 40px;"><tbody></tbody></table>');
+						helperTable.find('tbody').append(clone);
+						return helperTable;
+					},
+
+					stop: function() {
+						updateFields();
+					}
+				});
+			}
+
+
+			function AddRow(id, name, layout) {
+
+				var layouts = {!LayoutOptions};
+				var layout_select = $('<select class="layout_select"></select>');
+
+				if(!{!disabled}) {
+					layout_select = $('<select class="layout_select"></select>');
+				} else {
+					layout_select = $('<select class="layout_select" disabled></select>')
+				}
+
+				for(i=0; i < layouts.length; ++i) {
+					layout_select.append($('<option value="'+layouts[i]['{!prefix}Name__c']+'">'+layouts[i]['{!prefix}Label__c']+'</option>'));
+				}
+
+				layout_select.val(layout);
+
+				var removeBtn = $('<a href="#">Remove</a>');
+				removeBtn.bind('click', function() {
+					var item = $(this);
+					item.parent().parent().remove();
+					updateFields();
+					return false;
+				});
+
+				removeBtn.button({disabled:{!disabled}});
+
+				var newRow = $('<tr>'+
+								  '<td class="handle"><img src="{!URLFOR($Resource.CmsImages, '/handle.png')}" /></td>'+
+								  '<td align="left"><input class="row_id" type="hidden" value="'+id+'" />'+name+'</td>'+
+								  '<td align="left"></td>'+
+								  '<td align="left"></td>'+
+							   '</tr>');
+
+				newRow.find('td:eq(2)').append(layout_select);
+				if(!{!disabled}) {
+					newRow.find('td:last').append(removeBtn);
+				}
+
+				$('#content_list').append(newRow);
+
+			}
+
+			function updateFields() {
+				$(document).data('field_update', 'running');
+				var rows = $('#content_list').find('tr');
+				var ids = '';
+				var layouts = '';
+
+				var count = 0;
+				$.each(rows, function(index, row) {
+
+					ids += $($(row).find('.row_id')[0]).val();
+					layouts += $($(row).find('.layout_select')[0]).val();
+
+					if(count < rows.length - 1) {
+						ids += ',';
+						layouts += ',';
+					}
+					++count
+				});
+
+				$('#FixedListContentIds').val(ids);
+				$('#FixedListLayouts').val(layouts);
+				$(document).data('field_update', null);
+			}
+
+			ce.content_editor('registerSaveFunction', function() {
+				updateFields();
+				var data = $('#sf').serialize();
+
+				$.ajax({
+					url: '/apex/ListEditorAjaxResponse',
+					data: data,
+					async: false,
+					type: 'POST'
+        		});
+
+			});
+
+
+		});
+
+
+	</script>
+	</head>
+
+	<apex:outputPanel layout="block" style="padding: 5px;">
+		<form name="StaticListEditForm" id="sf">
+
+			<div id="content_dialog"></div>
+			<div id="target_dialog"></div>
+
+			<div>
+				<table class="content_table">
+					<thead>
+					  <tr>
+					  	<th></th>
+					    <th align="left">Content</th>
+					    <th align="left">Content Template</th>
+					    <th align="left">Action</th>
+					  </tr>
+					</thead>
+					<tbody	id="content_list" style="border: 1px solid #cccccc;">
+					</tbody>
+					<tfoot>
+						<tr>
+						  <td colspan="5"  id="content_control">
+						  </td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+
+			<input type="hidden" id="action" name="action" value="saveProperties" />
+			<input type="hidden" id="content_id" name="content_id" value="{!content.Id}" />
+			<input type="hidden" id="FixedListContentIds" name="FixedListContentIds" value="{!ContentIds}" />
+			<input type="hidden" id="FixedListLayouts" name="FixedListLayouts" value="{!Layouts}" />
+			<input type="hidden" id="ListType" name="ListType" value="Fixed" />
+
+		</form>
+	</apex:outputPanel>
+
+
+</apex:component>

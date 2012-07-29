@@ -1,0 +1,68 @@
+<apex:component controller="cms.BasicController">
+
+  	<apex:attribute name="debug" type="Boolean" description="Whether to enable debug logging" default="false"/>
+  	<apex:attribute name="lang" type="String" description="The language file to load" default="en"/>
+
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+
+	<apex:includeScript value="{!URLFOR($Page.cms__ocmsScriptLoader)}" />
+	<apex:includeScript value="{!URLFOR($Page.cms__ocmsImageLoader)}" />
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/IEScripts.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/json2.js')}" />
+    <!--<apex:includeScript value="{!URLFOR($Resource.jqueryui, '/js/jquery.js')}" />-->
+    <!--<apex:includeScript value="{!URLFOR($Resource.jqueryui, '/js/jquery-ui.js')}" />-->
+    <apex:includeScript value="{!URLFOR($Resource.cms__CmsLocalization, '/localization/CmsLocalization_'+lang+'.js')}" />
+ 	<!-- This is the jquery cookie extension only -->
+ 	<apex:includeScript value="{!$Resource.cms__jquery}" />
+ 	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSPublic, '/RESTProxy.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/OCMSScripts.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/filters.js')}" />    
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/JQueryInheritance.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/JQueryDebug.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/layout/JQueryUILayout.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/JQueryGeneral.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryInlineEditor.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryComboBox.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryMessagePane.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryDialogs.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryMenu.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryCheckbox.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryFullDialog.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/ToolTip.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUtil, '/content.utils.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQuerySearchBar.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryTree.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryList.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryActionBar.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryInput.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/JQuerySelector.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/DateTimeSelector.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryWizard.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/page/PageSelectorInput.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/page/PageUrlSelector.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomyManager.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomyManagerDlgs.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryBrowser.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/page/PageSelector.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/link/LinkSelector.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/link/LinkSelectorDialog.js')}" />
+
+	<script type="text/javascript">
+		{!IF(debug, 'turnOnDebug();', '')}
+        $(document).data('sname', '{!JSENCODE(sname)}');
+        $(document).data("notfound_icon",               "{!URLFOR($Resource.jqueryui,'/css/images/notfound48.png')}");
+        $(document).data("help_icon",                   "{!URLFOR($Resource.jqueryui,'/css/images/Toolbar/IconToolbarHelp48.png')}");
+	    $(document).data("loading_indicator",           "{!URLFOR($Resource.jqueryui, '/css/images/General/32px_AnimatedIndeterminateProgress.gif')}");
+	    $(document).data("loading_indicator_text",      "{!URLFOR($Resource.jqueryui, '/css/images/General/80px_AnimatedIndeterminateProgress.gif')}");
+	    $(document).data("clear_dot_image",             "{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}");
+	    $(document).data("btn_close_active",            "{!URLFOR($Resource.jqueryui, '/css/images/Icons/btnCloseActive.png')}");
+	    $(document).data("btn_close_inactive",          "{!URLFOR($Resource.jqueryui, '/css/images/Icons/btnCloseInactive.png')}");
+		$(document).data("layout_selected",				"{!URLFOR($Resource.CmsImages,'/layout_selected.png')}");
+		$(document).data("layout",				        "{!URLFOR($Resource.CmsImages,'/layout.png')}");
+		$(document).data("cms_localization",            "{!URLFOR($Resource.CmsLocalization)}");
+	</script>
+
+</apex:component>

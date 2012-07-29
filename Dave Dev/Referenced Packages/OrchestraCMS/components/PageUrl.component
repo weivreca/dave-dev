@@ -1,0 +1,21 @@
+<apex:component controller="cms.PageUrlController">
+
+  <apex:attribute name="cDisable" type="Boolean" description="Disable control" assignTo="{!isDisabled}" />
+  <apex:attribute name="cPage" 	type="cms__Page__c" description="Passthrough Id" assignTo="{!page}" />
+  <apex:attribute name="cPageUrls" 	type="cms__Attribute__c[]" description="Passthrough Id" assignTo="{!pageUrls}" />
+
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/page/PageUrlSelector.js')}" />
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#urlSelector').page_url_selector({
+				disabled: {!cDisable},
+				pageId : '{!page.Id}',
+				removeButtonImage : '{!URLFOR($Resource.CmsImages,'/btn_remove.png')}'
+			});
+		});
+	</script>
+
+  <div id="urlSelector"></div>
+
+</apex:component>

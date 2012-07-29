@@ -1,0 +1,20 @@
+<apex:component controller="cms.EditTagsController">
+
+  <apex:attribute name="objectType" type="String" description="Type refers to content or page" assignTo="{!objectType}" />
+  <apex:attribute name="objectId" type="String" description="Type refers to content or page" assignTo="{!objectId}" />
+  <apex:attribute name="readOnly" type="Boolean" description="Type refers to content or page" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TagEditor.js')}" />
+
+  <script type="text/javascript">
+	$(document).ready(function(){
+       $('.tagEditor').tag_editor({
+		 readOnly		: {!readOnly},
+         objectType		: '{!objectType}',
+         objectId		: '{!objectId}',
+         onSaveSuccess  : function(){  }
+       })
+    });
+  </script>
+
+</apex:component>

@@ -1,0 +1,91 @@
+<apex:page controller="cms.ManageProfileController" showHeader="false" sidebar="false">
+<html>
+
+  <head>
+  
+    <title>Manage Profiles</title>
+ 	
+    <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" /> 	
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+	<script type="text/javascript">
+	  $(document).ready(function(){
+	  
+	  	$('#newProfile').button().click(function(){
+			newProfile();
+		});
+	  
+	  });
+	
+	</script>
+
+  </head>
+
+  <body>
+  
+  <apex:outputPanel rendered="{!hasAccess}">
+  
+  	<c:SetupMenu sname="{!site_name}" activeitem="profiles" />
+  
+  	<div style="margin-left: 210px; padding: 10px;">     
+
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		  <div class="ocms-setup-breadcrumb-item-active">Manage Profiles</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+		
+		<br />
+  
+  		<apex:outputText escape="false" value="{!message + '<br /><br />'}" rendered="{!IF(message != '', true, false)}" />
+  				
+		<apex:form >
+		
+			<apex:actionFunction action="{!newProfile}" name="newProfile" />
+			<apex:actionFunction action="{!deleteProfile}" name="deleteProfile" rerender="profileList">
+			  <apex:param name="profileid" value="" />
+			</apex:actionFunction>
+
+		</apex:form>
+
+		<div id="newProfile">New Profile</div>
+		
+		<br /><br />
+		<apex:outputPanel id="profileList">
+			<table border="0" cellspacing="0" cellpadding="5" style="width: 600px;">
+			<tr style="background-color: #E7E7E8;">
+			  <td style="padding: 2px; width: 60px;"></td>
+			  <td style="padding: 2px;">Name</td>
+			  <td style="padding: 2px;">Description</td>
+			  <td style="padding: 2px;">License</td>
+			</tr>
+			<apex:repeat value="{!profiles}" var="profile">
+			 <tr>
+				<td style="padding: 5px 2px 5px 2px;"><a href="/apex/SetupProfile?sname={!URLENCODE(site_name)}&pid={!profile.id}" class="setup-link">Edit</a> <apex:outputText rendered="{!profile.allowDelete}">| <a href="#" onclick="deleteProfile('{!profile.id}'); return false;" class="setup-link">Del</a></apex:outputText></td>
+				<td style="padding: 5px 2px 5px 2px;">{!profile.name}</td>
+				<td style="padding: 5px 2px 5px 2px;">{!profile.description}</td>
+				<td style="padding: 5px 2px 5px 2px;">{!profile.license_name}</td>			 
+			 </tr>
+			</apex:repeat>
+			</table>
+		</apex:outputPanel>
+				
+    </div>
+
+  </apex:outputPanel>
+  
+  <apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Manage -> Profiles permission
+   	</div>
+  </apex:outputPanel>
+  
+  </body>
+
+</html>
+</apex:page>

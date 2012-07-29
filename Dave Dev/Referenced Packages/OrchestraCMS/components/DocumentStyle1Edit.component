@@ -1,0 +1,79 @@
+<apex:component controller="cms.DocumentStyle1" allowDml="true">
+
+ <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+ <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+ <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+ <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+ <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/ToolTip.js')}" />
+
+  <script type="text/javascript" language="javascript">
+
+		$(document).ready(function(){
+			$(document).data('sname', '{!SiteName}');
+	 		$(document).data('namespace', '{!Namespace}');
+	 		$(document).data('tooltipImage', '{!URLFOR($Resource.CmsImages,'/inline_help.png')}');
+	 		$(function() {
+				if(!{!layout_disabled}){
+					CKEDITOR.replace('DocumentContent',
+							{
+								enterMode : CKEDITOR.ENTER_BR
+				});
+				}
+			});
+		});
+
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array();
+			attributes.push({"name":"DocumentTitle", "value":$('#DocumentTitle').val(), "type":"Rich Text"});
+			attributes.push({"name":"DocumentContent", "value":CKEDITOR.instances.DocumentContent.getData(), "type":"Rich Text"});
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+
+	</script>
+
+  	<form>
+   		<table width="100%" border="0">
+			<tr>
+   				<td style="font-size: 12px;"><strong>Title</strong></td>
+   				<td>
+   					<apex:outputText escape="false" rendered="{!!layout_disabled}" >
+   					  <input type="text" id="DocumentTitle" name="DocumentTitle" value="{!DocumentTitle}" size="100" />
+   					</apex:outputText>
+   					<apex:outputText value="{!DocumentTitle}" rendered="{!layout_disabled}" />
+   				</td>
+   			</tr>
+   			<tr>
+   				<td style="font-size: 12px;" colspan="2">
+		 			<strong>Document</strong><br />
+
+	     			<apex:outputText escape="false" rendered="{!!layout_disabled}">
+	     				<textarea id="DocumentContent" name="DocumentContent"><apex:outputText escape="false" value="{!DocumentContent}" /></textarea>
+	     			</apex:outputText>
+
+	     			<apex:outputPanel id="o3" layout="block" rendered="{!layout_disabled}" style="padding: 5px; border: 1px solid #DEDEDE;">
+	       				<apex:outputText escape="false" value="{!DocumentContent}" id="DocumentContentView" />
+		 			</apex:outputPanel>
+   				</td>
+   			</tr>
+   			<tr>
+    			<td colspan="2"></td>
+   			</tr>
+   		</table>
+   	</form>
+
+</apex:component>

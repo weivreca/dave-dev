@@ -1,0 +1,243 @@
+<apex:page action="{!initLibs}" controller="cms.LibrariesController" showHeader="false" sidebar="false" cache="false" title="Setup">
+<html>
+
+<head>
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+	 <!-- This is the jquery cookie extension only -->
+ 	<apex:includeScript value="{!$Resource.cms__jquery}" />
+ 	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryCheckbox.js')}" />
+
+	<c:CmsScripts />
+
+	<script type="text/javascript">
+		function confirmDelete() {
+		var isDelete = confirm("Removing this library may result in images and other content no longer being available on your public web site. This action cannot be undone. Are you sure you want to remove this library entry?");
+		if (isDelete)
+			return true;
+		return false;
+	}
+	</script>
+
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!site_name}" activeitem="libraries" />
+	<div style="margin-left: 210px; padding: 10px;">
+
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>
+		  <div class="ocms-setup-breadcrumb-item-active">Manage Libraries</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+
+		<br />
+
+  		<p>Add 3rd-party repositories and manage these OrchestraCMS Libraries.<br/>
+  		Whenever content is added to the other libraries using the the 3rd-party interface, you should manually synchronize.<br />
+  		Content updates to 3rd-party repositories through OrchestraCMS are automatically synchronized.<br /></p><br />
+  		<style> #message ul {border: 1px solid #DEDEDE;}</style>
+  		<div id="message">
+  			<apex:Messages />
+  		</div>
+  		<apex:outputPanel id="status"></apex:outputPanel>
+
+  		<apex:form rendered="{!isAwsEnabled}">
+  			<apex:outputPanel >
+	  			<div id="createLibraryButton">Add Library</div>
+	  			<apex:actionFunction action="{!CreateLibrary}" name="CreateLibrary" /> &nbsp;
+					<script type="text/javascript">
+						$(document).ready(function(){
+
+							$('#createLibraryButton').button().click(function(){
+							 		CreateLibrary();
+							});
+
+						});
+					</script>
+  	    	</apex:outputPanel>
+  	    	<br /><br />
+  	    </apex:form>
+
+		<apex:form id="testform" style="width: 500px;">
+         <apex:actionFunction action="{!EnableDisableLibrary}" name="enableDisableLibrary" rerender="status">
+         	<apex:param name="libId" value="" />
+			<apex:param name="action" value="" />                 
+		 </apex:actionFunction>
+		
+		<apex:actionFunction action="{!removeLibrary}" name="removeLibrary" />
+		<apex:actionFunction action="{!syncLib}" name="syncLib" /> 		
+ 		<apex:actionFunction action="{!editLibrary}" name="editLibrary" />
+
+		<apex:actionFunction action="{!setLibrary}" name="eSetLibrary" oncomplete="editLibrary();">
+ 			<apex:param name="library_id" value="" assignTo="{!libraryID}" />
+ 		</apex:actionFunction>
+
+		<apex:actionFunction action="{!setLibrary}" name="rSetLibrary" oncomplete="removeLibrary();">
+ 			<apex:param name="library_id" value="" assignTo="{!libraryID}" />
+ 		</apex:actionFunction>
+
+		<apex:actionFunction action="{!setLibrary}" name="sSetLibrary" oncomplete="syncLib();">
+ 			<apex:param name="library_id" value="" assignTo="{!libraryID}" />
+ 		</apex:actionFunction>
+ 		<!--  test -->
+ 		</apex:form>
+ 		 		
+ 		<apex:outputPanel id="hack_vf_sucks"></apex:outputPanel> 		
+ 		 		
+ 		<table border="0">
+  		 <apex:repeat var="a"  value="{!LibObj}" id="list">
+           	<tr><td style="width: 125px;"></td><td style="width: 10px;"></td><td></td><td></td></tr>
+           	<TR>
+            	<TD colspan="3" style="padding: 5px;"><span class="ocms-inline-block ocms-tree-icon {!IF(a.lib.Origin__c == 'Salesforce', 'ocms-icon-16-sf', 'ocms-icon-16-aws')}">&nbsp;</span>&nbsp;&nbsp;<strong>{!a.lib.Name}</strong>
+                  <apex:OutputPanel rendered="{!IF(a.lib.Sites__r.cms__Site_Name__c != site_name,true,false)}">  
+                   (Shared)
+                   </apex:OutputPanel>
+                </TD>
+                <TD>
+				                    
+                   <div id="ocmsToggleSwitch{!a.lib.Id}" style="float: left;"></div>
+					&nbsp;&nbsp;
+                   <div id="editButton{!a.lib.Id}">Edit</div>
+                    &nbsp;		
+                   <apex:OutputPanel rendered="{!IF(a.lib.Sites__r.cms__Site_Name__c = site_name,true,false)}" layout="block" style="float: left;">
+
+                   		<apex:OutputPanel rendered="{!IF(a.lib.cms__Origin__c != 'Salesforce', true, false)}" layout="block" style="float: left; margin-left: 12px;">
+                   			
+                   			<div id="removeButton{!a.lib.Id}">Remove</div>
+                   			
+                   			
+                   			&nbsp;
+                   			<div id="syncButton{!a.lib.Id}">Synchronize Now</div>
+                   			
+                   			
+                   			<script type="text/javascript">
+                   			  $(document).ready(function(){
+                   			  
+                   			  		$('#removeButton{!a.lib.Id}').button().click(function(){
+								 		if(confirmDelete()){
+									 		rSetLibrary('{!a.lib.Id}');
+								 		}
+									});
+									
+									$('#syncButton{!a.lib.Id}').button().click(function(){
+								 		sSetLibrary('{!a.lib.Id}');
+									});	
+                   			  
+                   			  }); 
+                   			</script>
+                   			
+                    	</apex:OutputPanel>
+                    </apex:OutputPanel> 
+
+					<script type="text/javascript">
+						$(document).ready(function(){
+							
+							$('#ocmsToggleSwitch{!a.lib.ID}').ocmsToggleSwitch({
+								'state'		: {!IF(a.enabled == 'Enabled', 'true', 'false')},
+								'disabled'  : {!IF(a.lib.Origin__c == 'Salesforce' && a.lib.Sites__r.Site_Name__c ==site_name, 'true', 'false')},
+								'onText'	: 'Enabled',
+								'offText'	: 'Disabled',
+								'width'		: 90,
+								'onChange'  : function(newvalue){
+									if(newvalue){
+										enableDisableLibrary('{!a.lib.Id}','Enable');
+									}else{
+										enableDisableLibrary('{!a.lib.Id}','Disable');
+									}
+									
+								} 
+							});
+	
+							$('#editButton{!a.lib.Id}').button().click(function(){							 		
+							 		eSetLibrary('{!a.lib.Id}');
+							});												
+				
+						});
+					</script>
+                   
+               
+                 </TD>
+                   </TR>  
+                   <TR> 
+                        <TD style="padding-left:10px">Origin</TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Origin__c}</TD>       
+                   </TR>
+                   <TR> 
+                        <TD style="padding-left:10px">Site Name</TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Sites__r.Site_Name__c}</TD>       
+                   </TR>
+                   <TR> 
+                        <apex:OutputPanel rendered="{!IF(a.lib.cms__Origin__c != 'Salesforce', true, false)}">
+                        <TD style="padding-left:10px"> Link
+                        	
+                        </TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Link__c}
+                        	</TD> 
+                        </apex:OutputPanel>      
+                   </TR>
+                   <TR> 
+                        <apex:OutputPanel rendered="{!IF(a.lib.cms__Origin__c == 'Amazon CloudFront', true, false)}">
+                        <TD style="padding-left:10px"> Origin Bucket
+                        	
+                        </TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Repository_Link__c}
+                        	</TD> 
+                        </apex:OutputPanel>      
+                   </TR>
+                    <TR> 
+                        <TD style="padding-left:10px">Description</TD>
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Description__c}</TD>       
+                   </TR>
+                   <TR> 
+                        <TD style="padding-left:10px;padding-right:30px;" >Allow Uploads</TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Can_Upload__c}</TD>       
+                   </TR>  
+            		<TR>
+            			<apex:OutputPanel rendered="{!IF(a.lib.Sites__r.cms__Site_Name__c ==site_name,true,false)}">
+                    	<TD style="padding-left:10px">Shared?</TD> 
+                        <td></td>
+                        <TD colspan="2">{!a.lib.Share__c}</TD>  
+                    	</apex:OutputPanel>
+                    </TR>
+                    
+                    <TR > 
+                        <TD colspan="4"></TD>
+                
+                    </TR>
+          		                   
+       </apex:repeat> 
+     </table>    
+     </div>          
+
+  </apex:outputPanel>
+
+  <apex:outputPanel rendered="{!!hasAccess}">
+    	<div style="padding: 10px;">
+    		You do not have Setup > Libraries permission
+    	</div>	
+  </apex:outputPanel>
+
+
+  </body>
+
+</html>
+
+
+</apex:page>

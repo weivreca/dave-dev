@@ -1,0 +1,89 @@
+<apex:page controller="cms.CoreController" id="t" showHeader="false" sidebar="false" standardStylesheets="false">
+    <apex:composition template="{!page_template}">
+        <apex:define name="header">     
+        
+        	
+            <link rel="stylesheet" href="{!URLFOR($Resource.urbansport,'css/screen.css')}" type="text/css" media="screen" charset="utf-8" />
+            <link rel="stylesheet" href="{!URLFOR($Resource.urbansport,'css/print.css')}" type="text/css" media="print" charset="utf-8" />
+            <!--[if lte IE 6]><link rel="stylesheet" href="{!URLFOR($Resource.urbansport,'css/ie.css')}" type="text/css" media="screen" charset="utf-8" /><![endif]-->
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.urbansport,'css/superfish.css')}" media="screen" charset="utf-8" />
+            <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.urbansport,'css/superfish-vertical.css')}" media="screen" charset="utf-8" />
+            
+            <apex:includeScript value="{!URLFOR($Resource.urbansport,'js/hoverIntent.js')}" />
+            <apex:includeScript value="{!URLFOR($Resource.urbansport,'js/superfish.js')}" />
+            <apex:includeScript value="{!URLFOR($Resource.urbansport,'js/global.js')}" />                                 
+
+        </apex:define>
+        <apex:define name="body">
+
+			<div class="header-contain">
+				<div class="header">
+
+					<div class="social-net">
+						<c:Panel id="social" panelName="social" panelController="{!controller}" panelHeight="25px" panelWidth="300px" />
+					</div>
+
+					<div class="homepage-mnbanner">				
+						
+						<div class="homepage-bannerimg">	
+							<c:SingleImagePanel id="logo" panelName="logo" panelController="{!controller}" panelHeight="421px" panelWidth="698px" />
+						</div>
+						
+						<div class="main-menu">
+							<c:SingleClassStyledMenuPanel id="main-menu" panelName="main-menu" panelController="{!controller}" panelHeight="386px" panelWidth="252px" />
+						</div>
+
+						<div style="clear: both;"></div>
+
+					</div>
+
+				</div>
+			</div>
+
+			<div class="contentArea">
+				<div class="container">
+
+				<div class="content-pad">
+					<c:Panel id="content1" panelName="content1" panelController="{!controller}" panelHeight="200px" panelWidth="880px" />
+				</div>
+
+				<div class="twocol-leftcol">
+					<c:Panel id="left1" panelName="left1" panelController="{!controller}" panelHeight="350px" panelWidth="410px" />
+
+					<div class="clear"></div>
+				</div>
+
+				<div class="twocol-rightcol last">
+
+					<div class="twocol-rightcol-2col latest-news">
+
+						<c:Panel id="right-1" panelName="right-1" panelController="{!controller}" panelHeight="200px" panelWidth="217px" />
+				
+						<img src="{!URLFOR($Resource.urbansport,'images/news_box_cap.jpg')}" alt="" /></div>
+
+						<div class="twocol-rightcol-2col last quick-links">
+
+							<c:Panel id="right2" panelName="right2" panelController="{!controller}" panelHeight="200px" panelWidth="217px" />							
+
+							<img src="{!URLFOR($Resource.urbansport,'images/quick_links_box_cap.jpg')}" alt="" />
+						
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<div class="footer_contain">
+
+				<div class="footer">
+            		<div class="footer-your-logo"><c:SingleImagePanel id="footer-logo" panelName="footer-logo" panelController="{!controller}" panelHeight="78px" panelWidth="443px" /></div>
+		            <div class="footer-links"><c:SingleRichTextPanel id="footer" panelName="footer" panelController="{!controller}" panelHeight="25px" panelWidth="950px" /></div>
+				</div>
+	
+			</div>
+        
+        
+        	<site:googleAnalyticsTracking />
+        	
+        </apex:define>
+    </apex:composition>
+</apex:page>

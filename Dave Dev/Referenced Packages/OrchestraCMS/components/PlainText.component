@@ -1,0 +1,3 @@
+<apex:component >
+	 <!-- @deprecated: This component is no longer used, PlainText.cls:getHTML() -->
+</apex:component>

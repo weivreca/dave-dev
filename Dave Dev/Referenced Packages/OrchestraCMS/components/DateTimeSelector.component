@@ -1,0 +1,34 @@
+<apex:component id="dt" controller="cms.DateTimeController" access="global">
+
+  <apex:attribute name="cName" 			type="String" 	description="Passthrough Id" 						assignTo="{!identity}"  				 access="global" />
+  <apex:attribute name="cDisable" 		type="Boolean" 	description="Passthrough Id" 						assignTo="{!isDisabled}"  				 access="global" />
+  <apex:attribute name="cPassthroughId" type="String" 	description="Passthrough Id" 						assignTo="{!cPassthrough}"  			 access="global" />
+  <apex:attribute name="cDateTime" 		type="String" 	description="The panel unique identifier" 			assignTo="{!originalTimelineText}"  	 access="global" />
+  <apex:attribute name="onChange" 		type="String" 	description="Javascript to execute" 				assignTo="{!onChange}" 	required="false" access="global" />
+  <apex:attribute name="cType" 			type="String" 	description="The type of datetime selector to use" 	assignTo="{!cType}" 	required="false" access="global" />
+  <apex:attribute name="cShowDateLabel" type="Boolean"	description="Whether or not to show the date label" default="true" 			required="false" access="global" />
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/DateTimeSelector.js')}" />
+
+  <script type="text/javascript">
+
+	$(document).ready(function(){
+
+		$(jq('{!identity}_selector')).datetime_selector({
+			passThruId: jq('{!cPassthroughId}'),
+			type: {!IF(cType == null, '"datetime"', '"'+cType+'"')},
+			date: '{!viewDate}',
+			time: '{!viewTime}',
+			ampm: '{!viewAmPM}',
+			disabled: '{!isDisabled}',
+			showlabel: {!cShowDateLabel},
+			timezone: '{!timezone}'
+		});
+
+	});
+
+  </script>
+
+  <div id="{!identity}_selector" ></div>
+
+</apex:component>

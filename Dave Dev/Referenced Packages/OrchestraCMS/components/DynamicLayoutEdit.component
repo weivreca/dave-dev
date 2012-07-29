@@ -1,0 +1,33 @@
+<apex:component id="dle" controller="cms.ContentLayoutController" extensions="cms.DynamicLayoutController" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+	  $(document).ready(function(){
+	    if({!close_tab} && '{!JSENCODE(tab)}' != '')
+	 	  closeTab('{!JSENCODE(tab)}');
+	 	});
+	</script>
+
+	<apex:outputPanel >
+        <apex:form id="EditForm">
+            <apex:actionFunction action="{!save}" name="saveLookAndFeel" />
+			<apex:actionFunction action="{!saveAndClose}" name="saveLookAndFeelClose" />
+			<table>
+			  <tr>
+			    <td>Content Layout</td>
+				<td>
+					<apex:selectList value="{!layout}" size="1" multiselect="false" disabled="{!layout_disabled}" >
+						<apex:selectOptions value="{!LayoutOptions}" />
+					</apex:selectList>
+				</td>
+			  </tr>
+			</table>
+		</apex:form>
+	</apex:outputPanel>
+
+</apex:component>

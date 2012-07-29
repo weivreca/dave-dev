@@ -1,0 +1,45 @@
+<apex:page controller="cms.CoreController" id="l">
+
+<apex:composition template="{!page_template}">
+
+  <apex:define name="header">
+  
+  </apex:define>
+
+  <apex:define name="body">
+
+  <table width="100%" cellspacing="1" cellpadding="0">
+
+    <tr>
+      <td height="100" style="background-color: #DEDEDE;" valign="top" colspan="4">
+        <c:Panel panelName="panel1" panelController="{!controller}" panelHeight="100px" />
+      </td>
+    </tr>
+    <tr>
+      <td height="100" width="50%" style="background-color: #DEDEDE;" valign="top">
+        <c:Panel panelName="panel2" panelController="{!controller}" panelHeight="100px" />
+      </td>
+      <td height="100" width="50%" style="background-color: #DEDEDE;" valign="top">
+        <c:Panel panelName="panel3" panelController="{!controller}" panelHeight="100px" />
+      </td>
+    </tr>
+    <tr>
+      <td height="100" width="50%" style="background-color: #DEDEDE;" valign="top">
+        <c:Panel panelName="panel4" panelController="{!controller}" panelHeight="100px" />
+      </td>
+      <td height="100" width="50%" style="background-color: #DEDEDE;" valign="top">
+        <c:Panel panelName="panel5" panelController="{!controller}" panelHeight="100px" />
+      </td>
+    </tr>
+    <tr>
+      <td height="100" style="background-color: #DEDEDE;" valign="top" colspan="4">
+        <c:Panel panelName="panel6" panelController="{!controller}" panelHeight="100px" />
+      </td>
+    </tr>
+
+  </table>
+
+</apex:define>
+</apex:composition>
+
+</apex:page>

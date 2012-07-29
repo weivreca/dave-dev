@@ -1,0 +1,40 @@
+<apex:page id="t" controller="cms.CoreController" standardStylesheets="false" showHeader="false" sidebar="false" >
+
+<head>
+  <title></title>
+  <meta name="description" content=""/>
+  <meta name="keywords" content=""/>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+  <!-- This is the jquery cookie extension only -->
+  <apex:includeScript value="{!$Resource.cms__jquery}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />  
+
+  <style type="text/css">
+    .sortable { background-color: rgb(195,195,195);}
+    .draggable { height: 20px; font-size: 12px; font-family: arial; background-color: rgb(235,235,235); border: 1px solid rgb(200,200,200); width: 250px;}
+    .sortable div { height: 20px; line-height: 20px; }
+  </style>
+
+  <script type="text/javascript">
+     function jq(myid){
+        return '#'+myid.replace(/:/g,"\\:").replace(/\./g,"\\.");
+      }
+  </script>
+
+  <apex:insert name="header" />
+  
+</head>
+
+<body>
+  
+  <apex:outputPanel id="m">
+
+  	<apex:insert name="body" />
+
+  </apex:outputPanel>
+
+</body>
+
+</apex:page>

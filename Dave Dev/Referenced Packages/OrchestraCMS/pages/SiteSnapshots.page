@@ -1,0 +1,127 @@
+<apex:page id="installer" controller="cms.SiteSnapshots" showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+
+<head>
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ 	<!-- This is the jquery cookie extension only -->
+	<apex:includeScript value="{!$Resource.cms__jquery}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__CmsLocalization, '/localization/CmsLocalization_en.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/SnapshotsList.js')}" />	
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/DateTimeSelector.js')}" />
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryCheckbox.js')}" />		
+ 	
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+ 	
+ 	<c:CmsScripts debug="true" />
+ 	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	<style type="text/css">
+	.ocms-list-title {
+		display: none;	
+	}
+	.ocms-list {
+		padding-top: 10px;
+	}
+	</style>
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="site-snapshots" />
+	
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+	
+		<div class="ocms-setup-breadcrumb">
+		  <div class="ocms-setup-breadcrumb-start"></div>
+		  <div class="ocms-setup-breadcrumb-item">Setup</div>
+		  <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		  <div class="ocms-setup-breadcrumb-item-active">Site Snapshots</div>
+		  <div class="ocms-setup-breadcrumb-end"></div>
+		  <div class="ocms-clear"></div>
+		</div>
+		<br />
+		
+		<script type="text/javascript">
+			$(document).ready(function(){
+				
+				$('#publicSnapshots').ocmsToggleSwitch({
+					'state'		: {!site.Public_Snapshots__c},
+					'disabled'  : false,
+					'onText'	: 'Enabled',
+					'offText'	: 'Disabled',
+					'width'		: 90,
+					'onChange'  : function(newvalue){
+
+						var data = {
+							'action' : 'togglePublicSnapshots',
+							'sname' : '{!site.Site_Name__c}',
+							'token' : '{!token}'
+						}
+						$.ajax({
+		                    async: false,
+		                    url: '/apex/OrchestraPrivateAjax',
+		                    data: data,
+		                    dataType: 'json',
+		                    type: 'POST',
+		                    success: function(json, status) {
+								               	  	                       
+		                    }
+		                });
+						
+					} 
+				});
+				
+				$('#snapshots').ocmsSnapshotList({
+					'snapshots' : {!snapshotsJSON},
+					'sname' : '{!sname}',
+					'token' : '{!token}'
+				});								
+	
+			});
+		</script>		
+		
+		<apex:form id="DetailForm">
+			<table border="0" cellspacing="0" cellpadding="0">
+			
+			<tr>
+			    <td colspan="2"><div style="font-size: 16px; padding-bottom: 8px; padding-right: 25px; float: left;">General</div></td>
+			</tr>
+			<tr>
+			  <td style="padding: 5px 5px 5px 0px;">Public Snapshots:</td>
+			  <td style="padding: 5px 5px 5px 0px;">
+			  	<div id="publicSnapshots"></div>
+			  </td>
+			</tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr>
+			    <td colspan="2"><div style="font-size: 16px; padding-bottom: 8px; padding-right: 25px; float: left;">Snapshots</div></td>
+			</tr>
+			<tr>
+			  <td colspan="2" style="padding: 5px 5px 5px 0px;">
+			  	
+				<div id="snapshots"></div>
+			  	
+			  </td>
+			</tr>
+			</table>
+		</apex:form>
+	
+	</apex:outputPanel>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Site Snapshots permission
+   	</div>
+</apex:outputPanel>  
+
+</body>
+
+</html>
+
+</apex:page>

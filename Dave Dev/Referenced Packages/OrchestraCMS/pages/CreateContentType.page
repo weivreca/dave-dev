@@ -1,0 +1,221 @@
+<apex:page controller="cms.CreateContentTypeController" sidebar="false" showHeader="false" standardStylesheets="false" cache="false">
+<html>
+<head>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+  <c:CmsScripts />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryContentTemplateOptions.js')}" />  
+
+
+  <style type="text/css">
+	.sortable { background-color: rgb(195,195,195);}
+	.draggable { height: 25px; padding: 3px; font-size: 12px; font-family: arial; background-color: rgb(235,235,235); border: 1px solid rgb(200,200,200); width: 250px;}
+	.sortable div { height: 25px; }
+  </style>
+
+  <script type="text/javascript">
+
+	$(document).ready(function() {
+
+		$(document).data('cms', {
+			'context' 	: 'orchestracms',
+			'namespace' : '{!namespace}'
+		});
+
+		$(document).data('type_id', '{!ctype.Id}');
+
+		//setup the buttons all ajax all the time no viewstate over head!! 
+		$('.btnSave, .btnSaveAndNew').button();
+		$('.btnSave, .btnSaveAndNew').click(function(){		
+			
+			$('.btnSave, .btnSaveAndNew').button();
+			$('.btnSave, .btnSaveAndNew').button('disable');
+
+			var popup = $('<div></div>').ocmsShowInfoPopup({
+				message: 'Saving'
+			});
+			
+			var data = {};
+			data['action'] = 'saveContentType';
+			
+			if($(document).data('type_id') != '') {
+				data['type_id'] = $(document).data('type_id');
+			}
+			
+			data['type_name'] = $('#typeName').val(); 
+			data['type_label'] = $('#typeLabel').val();
+			data['site_name'] = '{!sname}'; 
+			data['token'] = '{!token}';
+			
+			var templates = $('#content_templates').find('tr.list-item');
+			
+			data['template_count'] = templates.length;
+			
+			for(var i=0 ; i < templates.length; ++i) {
+				var id = $(templates[i]).attr('id');
+				data['template_id_'+i] = id;
+				data['autocreate_'+i] = $(templates[i]).find('.autocreate:checked').length > 0;
+				data['default_'+i] = $(templates[i]).find('#default_template:checked').val() == id; 
+				
+				var selectedPage = $(templates[i]).find('.page_lookup').page_selector_input('getSelected'); 
+				if(selectedPage !== undefined) {
+					if(selectedPage['id'] != '' && selectedPage['id'] != null) 
+						data['preview_page_id_'+i] = selectedPage['id']; 
+				}
+
+			}
+					
+			jQuery.ajax({
+                url: '/apex/OrchestraPrivateAjax',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function(json, textStatus){
+                
+                	popup.ocmsShowInfoPopup('closeMessage'); 
+                
+					if(json['success'] !== undefined){
+						$('#typeName').attr('disabled', true);
+						$(document).data('type_id', json['success']['message']['Id']);
+					} else if(json['error'] !== undefined) {
+						$('<div></div>').ocmsShowErrorPopup({
+							message: json['error']['message']
+						});
+					}
+					
+					$('.btnSave, .btnSaveAndNew').button('enable');
+                }
+            });
+
+		});
+
+		$('.btnSaveAndNew').click(function(){
+			window.location.href = '/apex/CreateContentType?sname={!sname}&mode=new';
+		});
+		
+		$('.btnCancel').button();
+		$('.btnCancel').click(function(){
+			window.location.href = '/apex/ManageContentType?sname={!sname}';
+		});			
+		
+		$('#content_templates').contentTemplateSetup({
+			sname: '{!sname}',
+			token: '{!token}',
+			state: {!SelectedTemplatesJSON},
+			templates: {!ContentTemplateOptions}
+		}); 
+	});
+   </script>
+  
+</head>
+
+<body style="padding: 0px; margin: 0px;">
+   
+  <apex:outputPanel id="create" rendered="{!showCreate}">
+  
+    <c:SetupMenu sname="{!sname}" activeitem="manage-content-type" />
+    
+    <div style="margin-left: 210px; padding: 10px;">   
+	
+		  <div class="ocms-setup-breadcrumb">
+			 <div class="ocms-setup-breadcrumb-start"></div>
+			 <div class="ocms-setup-breadcrumb-item">Setup</div>
+			 <div class="ocms-setup-breadcrumb-separator"></div>		  
+			 <div class="ocms-setup-breadcrumb-item">Content Types</div>
+			 <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+			 <div class="ocms-setup-breadcrumb-item-active">{!modeText} Content Type</div>
+			 <div class="ocms-setup-breadcrumb-end"></div>
+			 <div class="ocms-setup-clear"></div>
+		  </div>
+		  <br />
+    
+	
+	    <apex:outputPanel layout="block" style="background-color: rgb(255,255,255); font-family: Arial; font-size: 12px;"> 
+		
+		    <div style="font-size: 16px; padding-bottom: 8px;">{!modeText} Content Type</div>
+			  
+		    <apex:outputPanel id="saved" rendered="{!showSaved}">
+		
+			    <table border="0" cellspacing="0" cellpadding="5px;">
+		   		 <tr>
+		      		<td style="width: 300px;"><br />Content Type <strong>{!saved.Name__c}</strong> Saved.<br />&nbsp;</td>
+		    	  </tr>
+		    	</table>
+		    
+		    </apex:outputPanel>
+		  
+		    <table border="0" cellspacing="0" cellpadding="5px;" >
+			<tr>
+				<td></td>
+				<td></td>
+				<td>
+					<div class="btnSave" style="float:left; padding-right: 5px;">Save</div>
+					<apex:outputText rendered="{!showSaveAndNew}">
+						<div class="btnSaveAndNew" style="float: left; padding-right: 5px;">Save &amp; New</div>
+					</apex:outputText>
+					<div class="btnCancel" style="float:left;">Cancel</div>
+					<div style="clear: both;"></div>
+				</td>
+			</tr>		    
+		    <tr>
+		      <td style="width: 120px;">Name *</td>
+		      <td style="width: 15px;">&nbsp;</td>
+		     	
+		     	<td style="width: 175px;">
+		     		<apex:outputText rendered="{!ctype.cms__Name__c !=null}"> 
+		     			<input type="text" name="typeName"  id="typeName" disabled="disabled" value="{!ctype.cms__Name__c}" />
+		     		</apex:outputText>
+		     		<apex:outputText rendered="{!ctype.cms__Name__c}"> 
+		     			<input type="text" name="typeName"  id="typeName" value="{!ctype.cms__Name__c}" />
+		     		</apex:outputText>
+		     	</td>
+		    </tr>
+		    <tr>
+		      <td>Label</td>
+		      <td>&nbsp;</td>
+		      <td><input type="text" name="typeLabel" id="typeLabel" value="{!ctype.Label__c}" /></td>
+		      <td></td>
+		    </tr>
+		    <tr>
+		      <td valign="top">Enabled Content Templates</td>
+		      <td>&nbsp;</td>
+		      <td>
+		   	  	<table class="ocms-list" cellspacing="0" cellpadding="5">
+					<thead>
+						<tr class="list-header">
+							<td>Label</td>
+							<td>Auto Create</td>
+							<td>Default</td>
+							<td>Preview Page</td>
+							<td class="last"></td>
+						</tr>
+					</thead>
+					<tbody id="content_templates">
+					</tbody>
+					<tfoot>
+						<tr class="list-footer">
+							<td colspan="5" class="last">
+								<div class="btnSave" style="float:left; padding-right: 5px;">Save</div>
+								<apex:outputText rendered="{!showSaveAndNew}">
+									<div class="btnSaveAndNew" style="float: left; padding-right: 5px;">Save &amp; New</div>
+								</apex:outputText>
+								<div class="btnCancel" style="float:left;">Cancel</div>
+								<div style="clear: both;"></div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+		      </td>
+		    </tr>   
+		   </table>
+		    <br />
+
+	    </apex:outputPanel>
+    </div>
+
+  </apex:outputPanel>  
+</body>
+</html>
+</apex:page>

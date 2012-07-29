@@ -1,0 +1,79 @@
+<apex:component controller="cms.MyProfileController" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier"
+                    assignTo="{!layout_disabled}"/>
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}"/>
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_properties}"/>
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance}"/>
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance_properties}"/>
+
+    <script type="text/javascript" language="javascript">
+
+         function saveLookAndFeel(cb) {
+             var attributes = new Array();
+             attributes.push({"name":"ChangePwdPageLink", "value":$('#ChangePwdPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+             attributes.push({"name":"ChangeUserDetailsPageLink", "value":$('#ChangeUserDetailsPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+             attributes.push({"name":"AvailableSubscriptionsPageLink", "value":$('#AvailableSubscriptionsPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+             $.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+                     attributes,
+                     "{!JSENCODE(Content.Site_Name__c)}",
+                     cb,
+                     '{!token}'
+             );
+         }
+
+         function saveLookAndFeelClose(cb) {
+             saveLookAndFeel(cb);
+             closeTab('{!JSENCODE(tab)}');
+         }
+     </script>
+     <style>
+         .ocms-property-viewer {
+             height:inherit !important;
+         }
+     </style>
+
+     <div class="ocms-property-viewer">
+         <div class="ocms-property-viewer-header">Component Properties</div>
+         <div class="ocms-property-viewer-body ocms-property-form" >
+             <div class="ocms-property-form-panel-col" >
+                     <table cellspacing="1" class="ocms-property-table">
+                         <tbody>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Change Password Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="ChangePwdPageLink" id="ChangePwdPageLink" value="{!ChangePwdPageLink}"/>
+                                 <c:PageSelector cPassThroughId="ChangePwdPageLink" value="{!ChangePwdPageLink}" dialogId="ChangePwdPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that is the change password page.</div>
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Change User Details Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="ChangeUserDetailsPageLink" id="ChangeUserDetailsPageLink" value="{!ChangeUserDetailsPageLink}"/>
+                                 <c:PageSelector cPassThroughId="ChangeUserDetailsPageLink" value="{!ChangeUserDetailsPageLink}" dialogId="ChangeUserDetailsPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that is the change user details page.</div>
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         <tr class="ocms-property-marker ocms-data-info">
+                             <td class="ocms-param-key  ocms-param-key-top"><span class="">Available Subscriptions List Page</span></td>
+                             <td class="ocms-param-value">
+                                 <input type="hidden" name="AvailableSubscriptionsPageLink" id="AvailableSubscriptionsPageLink" value="{!AvailableSubscriptionsPageLink}"/>
+                                 <c:PageSelector cPassThroughId="AvailableSubscriptionsPageLink" value="{!AvailableSubscriptionsPageLink}" dialogId="AvailableSubscriptionsPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+                                 <div class="ocms-instructional-text">Reference to an Orchestra Page that has the Available Subscriptions content template.</div>
+                             </td>
+                             <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                         </tr>
+                         </tbody>
+                     </table>
+             </div>
+             <div style="clear:both"></div>
+         </div>
+     </div>
+</apex:component>

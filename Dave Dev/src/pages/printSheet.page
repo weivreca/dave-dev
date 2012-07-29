@@ -1,0 +1,5 @@
+<apex:page controller="printSheetController" showHeader="false" sidebar="false">
+  <h1>Header</h1><br/>
+  <apex:outputText escape="false" value="{!output}"/>
+  <br/><h1>footer</h1>
+</apex:page>

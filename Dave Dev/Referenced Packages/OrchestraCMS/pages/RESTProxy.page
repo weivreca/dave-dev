@@ -1,0 +1,1 @@
+<apex:page controller="cms.RESTProxy" action="{!loadResponse}" showHeader="false" sidebar="false" contentType="{!mimetype}"><apex:outputText escape="{!escape}" value="{!response}" /></apex:page>

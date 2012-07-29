@@ -1,0 +1,186 @@
+<apex:component controller="cms.TaxonomyMenuController" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier"
+                    assignTo="{!layout_disabled}"/>
+    <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}"/>
+    <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_properties}"/>
+
+    <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance}"/>
+    <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier"
+                    assignTo="{!content_layout_instance_properties}"/>
+	<apex:attribute name="disableEmail" type="Boolean" description="The panel unique identifier" />
+    <apex:includeScript value="{!URLFOR($Resource.cms__colorpicker, '/js/colorpicker.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.cms__colorpicker, '/css/colorpicker.css')}"/>
+
+    <script type="text/javascript" language="javascript">
+
+        function saveLookAndFeel(cb) {
+            var attributes = new Array();
+            if(!{!disableEmail}){
+	            attributes.push({"name":"NotificationType", "value":$("input:radio[name=NotificationType]:checked").val(), "type":"Text"});
+	            attributes.push({"name":"NotificationModel", "value":$("input:radio[name=NotificationModel]:checked").val(), "type":"Text"});
+	            attributes.push({"name":"PublicNotificationModel", "value":$("input:checkbox[name=PublicNotificationModel]").is(":checked"), "type":"Text"});
+	            attributes.push({"name":"EmailSubscriptionClientVerificationPageLink", "value":$('#EmailSubscriptionClientVerificationPageLinkDlg').page_selector_input('getSerializedLink'), "type":"Text"});
+            }
+
+            attributes.push({"name":"TargetPageLink", "value":$('#TaxonomyPageTarget').page_selector_input('getSerializedLink'), "type":"Text"});
+            attributes.push({"name":"StartingLevel", "value":$('#StartingLevel').val(), "type":"Integer"});
+            attributes.push({"name":"Depth", "value":$('#Depth').val(), "type":"Integer"});
+            $.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+                    attributes,
+                    "{!JSENCODE(Content.Site_Name__c)}",
+                    cb,
+                    '{!token}'
+            );
+            cb({});
+        }
+
+        function saveLookAndFeelClose(cb) {
+            saveLookAndFeel(cb);
+            closeTab('{!JSENCODE(tab)}');
+        }
+    </script>
+    <style>
+        .ocms-property-viewer {
+            height:inherit !important;
+        }
+    </style>
+	<script>
+		$(document).ready(function() {
+			if ($("input[name=NotificationType]:checked").val()== 'NONE') {
+				$('.notification-model').hide('fast');
+			}else if($("input:checkbox[name=PublicNotificationModel]")){
+
+				if($("input:checkbox[name=PublicNotificationModel]").is(":checked"))
+					$('.model-subscription-public-email-verification').show('fast');
+				else
+					$('.model-subscription-public-email-verification').hide('fast');
+			}
+
+			$("input[name=NotificationType]").change(function() {
+
+				if ($("input[name=NotificationType]:checked").val()== 'NONE') {
+					$('.notification-model').hide('fast');
+				} else {
+					$('.notification-model').show('fast');
+				}
+			});
+
+			$("input[name=NotificationModel]").change(function() {
+
+				if ($("input[name=NotificationModel]:checked").val()== 'ALERT') {
+
+					$('input[name=PublicNotificationModel]').attr('checked', false);
+					$('input[name=PublicNotificationModel]').attr('disabled', true);
+					$('.model-subscription-public-email-verification').hide('fast');
+				}else{
+					 $('input[name=PublicNotificationModel]').attr('disabled', false);
+					}
+			});
+
+			$("input:checkbox[name=PublicNotificationModel]").change(function() {
+				if($("input:checkbox[name=PublicNotificationModel]").is(":checked"))
+					$('.model-subscription-public-email-verification').show('fast');
+				else
+					$('.model-subscription-public-email-verification').hide('fast');
+
+			});
+		});
+
+	</script>
+    <div class="ocms-property-viewer">
+        <div class="ocms-property-viewer-header">Select Detail Page</div>
+        <div class="ocms-property-viewer-body ocms-property-form" >
+            <div class="ocms-property-form-panel-col" >
+                    <table cellspacing="1" class="ocms-property-table">
+                        <tbody>
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key  ocms-param-key-top"><span class="">Link</span></td>
+                            <td class="ocms-param-value">
+                                <input type="hidden" name="TargetPageLink" id="TargetPageLink" value="{!TargetPageLink}"/>
+                                <c:PageSelector cPassThroughId="TargetPageLink" value="{!TargetPageLink}" dialogId="TaxonomyPageTarget" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}"/>
+                                <div class="ocms-instructional-text">Page that the tagged content will appear on. Only one page can be selected per taxonomy.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+
+
+                        <apex:outputText rendered="{!!disableEmail}">
+                        <tr class="ocms-property-marker ocms-data-info">
+                            <td class="ocms-param-key  ocms-param-key-top"><span class="">Notification Type</span></td>
+                            <td class="ocms-param-value">
+                                <apex:outputText rendered="{!isTypeNone}">
+                                    <label for="type-none"><input type="radio" id="type-none" name="NotificationType" value="NONE" checked="checked"/> None</label><br/>
+                                    <label for="type-all"><input type="radio" id="type-all" name="NotificationType" value="ALL"/> All</label><br/>
+                                    <label for="type-leaf"><input type="radio" id="type-leaf" name="NotificationType" value="LEAF"/> Leaf</label>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!isTypeAll}">
+                                    <label for="type-none"><input type="radio" id="type-none" name="NotificationType" value="NONE"/> None</label><br/>
+                                    <label for="type-all"><input type="radio" id="type-all" name="NotificationType" value="ALL" checked="checked"/> All</label><br/>
+                                    <label for="type-leaf"><input type="radio" id="type-leaf" name="NotificationType" value="LEAF"/> Leaf</label>
+                                </apex:outputText>
+                                <apex:outputText rendered="{!isTypeLeaf}">
+                                    <label for="type-none"><input type="radio" id="type-none" name="NotificationType" value="NONE"/> None</label><br/>
+                                    <label for="type-all"><input type="radio" id="type-all" name="NotificationType" value="ALL"/> All</label><br/>
+                                    <label for="type-leaf"><input type="radio" id="type-leaf" name="NotificationType" value="LEAF" checked="checked"/> Leaf</label>
+                                </apex:outputText>
+
+                                <div class="ocms-instructional-text">Select whether notification model is applied to all or just leaf nodes.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.cms__jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                        <tr class="ocms-property-marker ocms-data-info notification-model">
+                            <td class="ocms-param-key  ocms-param-key-top"><span class="">Notification Model</span></td>
+                            <td class="ocms-param-value">
+                                <apex:outputText rendered="{!isModelAlert}">
+                                    <label for="model-alert"><input type="radio" id="model-alert" name="NotificationModel" value="ALERT" checked="checked"/> Email Alert Model</label><br/>
+                                    <label for="model-subscription"><input type="radio" id="model-subscription" name="NotificationModel" value="SUBSCRIPTION"/> Subscription Model</label>
+                                    <label class = "model-subscription-public"  style="padding-left:10px" for="model-subscription-public"><input disabled ="disabled" type="checkbox" id="model-subscription-public" name="PublicNotificationModel"  />Allow Guest Subscription</label>
+
+                                </apex:outputText>
+                                	<apex:outputText rendered="{!isModelSubscription}">
+                                    <label for="model-alert"><input type="radio" id="model-alert" name="NotificationModel" value="ALERT"/> Email Alert Model</label><br/>
+                                    <label for="model-subscription"><input type="radio" id="model-subscription" name="NotificationModel" value="SUBSCRIPTION" checked="checked"/> Subscription Model</label>
+                                     <apex:outputText rendered="{!IF(isPublicNotificationModel && isModelSubscription, true, false)}">
+                                     	<label class = "model-subscription-public" style="padding-left:10px;" for="model-subscription-public"><input type="checkbox" id="model-subscription-public" name="PublicNotificationModel"  checked="checked"/>Allow Guest Subscription</label><br/>
+                                 	</apex:outputText>
+                                   <apex:outputText rendered="{!!isPublicNotificationModel}">
+                                     	<label class = "model-subscription-public"  style="padding-left:10px;" for="model-subscription-public"><input type="checkbox" id="model-subscription-public" name="PublicNotificationModel"  />Allow Guest Subscription</label><br/>
+                                   </apex:outputText>
+
+                                </apex:outputText>
+
+                                <div class="ocms-instructional-text">Select a notification model for content tagged within this taxonomy.</div>
+                            </td>
+                            <span class=""><img class="ocms-input-error" src="{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}"/></span>
+                        </tr>
+                         <tr class="ocms-property-marker ocms-data-info model-subscription-public-email-verification" style="display:none">
+		                 	<td class="ocms-param-key  ocms-param-key-top"><span class="">Email Address Verification</span></td>
+		                 	<td class="ocms-param-value">
+                          		<table cellspacing="1" class="ocms-property-table">
+                        			<tbody>
+                        			<tr class="ocms-property-marker ocms-data-info">
+
+		                      			<td class="ocms-param-value">
+		                      				<input type="hidden" name="EmailSubscriptionClientVerificationPageLink" id="EmailSubscriptionClientVerificationPageLink" value="{!EmailSubscriptionClientVerificationPageLink}"/>
+		                          			<c:PageSelector cPassThroughId="EmailSubscriptionClientVerificationPageLink" value="{!EmailSubscriptionClientVerificationPageLink}" dialogId="EmailSubscriptionClientVerificationPageLinkDlg" sname="{!content.cms__Site_Name__c}" disabled="{!disabled}" token="{!token}"/>
+		                      				<div class="ocms-instructional-text">Reference to an Orchestra Page that will be sent to the client as the email verification page.<br/> This page MUST contain content of the type "Portal" with the content template "Email Verification Link" </div>
+		                      			</td>
+
+		                      		</tr>
+                                	</tbody>
+                    			</table>
+                    		</td>
+                    	</tr>
+                    </apex:outputText>
+
+                 </tbody>
+             </table>
+
+            </div>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+</apex:component>

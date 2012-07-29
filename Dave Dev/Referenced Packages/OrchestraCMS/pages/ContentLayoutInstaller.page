@@ -1,0 +1,140 @@
+<apex:page id="installer" controller="cms.ContentLayoutInstaller" showHeader="false" sidebar="false" cache="false" title="OrchestraCMS">
+
+<html style="padding: 0px; margin: 0px;">
+
+<head>
+ 	<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+	 <!-- This is the jquery cookie extension only -->
+	 <apex:includeScript value="{!$Resource.cms__jquery}" />
+	 <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />		
+	 <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+	<c:SetupMenu sname="{!sname}" activeitem="manage-content-layouts" />
+	
+	<apex:form style="margin: 0px; padding: 0px;" >
+		<apex:actionFunction id="fncEdit" action="{!edit}" name="edit" rerender="main">
+	  		<apex:param id="layoutEditId" name="layoutEditId" value="" />
+		</apex:actionFunction>
+	</apex:form>
+	
+	<apex:outputPanel id="main" layout="block" style="margin-left: 210px; padding: 10px;">
+	
+	  <div class="ocms-setup-breadcrumb">
+		 <div class="ocms-setup-breadcrumb-start"></div>
+		 <div class="ocms-setup-breadcrumb-item">Setup</div>
+		 <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+		 <div class="ocms-setup-breadcrumb-item-active">Content Templates</div>
+		 <div class="ocms-setup-breadcrumb-end"></div>
+		 <div class="ocms-clear"></div>
+	  </div>
+	
+	  <br />
+	
+	  <apex:outputPanel id="messages" layout="block" rendered="{!showMessages}">
+	  <div style="border: 1px solid #DEDEDE;">
+	    <apex:repeat value="{!messages}" var="message">
+		  <apex:outputPanel layout="block" style="padding: 5px;">{!message.detail}</apex:outputPanel>
+	    </apex:repeat>
+	  </div>
+	  <br />
+	  </apex:outputPanel>
+	
+	  <apex:outputPanel rendered="{!showHome}">
+	
+		<table cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td valign="top" style="font-size: 12px;">
+	
+					<span style="font-size: 16px; padding-bottom: 8px;">Installed Content Templates</span><br /><br />
+	
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr style="background-color: rgb(231, 231, 232);">
+						  <td style="width: 200px; padding: 2px;">Name</td>
+						  <td style="width: 100px; padding: 2px;">&nbsp;</td>
+						</tr>
+						
+						<apex:repeat value="{!available_layouts}" var="layout">
+							<tr>
+							  <td style="padding: 5px 2px;">
+							    {!layout.Label__c}<br />
+							  </td>
+							  <td style="padding: 5px 2px; text-align: center;">
+							    <a href="#" class="setup-link" onclick="edit('{!layout.Id}');">Edit</a>
+							  </td>
+							</tr>
+						</apex:repeat>
+					
+					</table>	
+				</td>
+			</tr>
+		</table>
+	
+	</apex:outputPanel>
+	
+	<apex:outputPanel rendered="{!showEdit}">
+	
+		<table border="0" cellspacing="0" cellpadding="5">
+		  	<tr>
+			    <td style="font-size: 12px;">Name:</td>
+			    <td style="font-size: 12px;">{!selectedLayout.Name__c}</td>
+		  </tr>
+		  <tr>
+			    <td style="font-size: 12px;">Label:</td>
+			    <td style="font-size: 12px;">{!selectedLayout.Label__c}</td>
+		  </tr>
+		  <tr>
+			    <td style="font-size: 12px;">Description:</td>
+			    <td style="font-size: 12px;">{!selectedLayout.Description__c}</td>
+		  </tr>
+	  </table>
+	  
+	  <table border="0" cellspacing="0" cellpadding="5">
+	    <tr>
+	      <td>
+	        <div style="display: block; width: 194px; height: 144px; background-image: url('{!IF(selectedLayout.Thumbnail_Id__c != null, '/servlet/servlet.FileDownload?file=' + selectedLayout.Thumbnail_Id__c, URLFOR($Resource.CmsImages,'/layout_no_image.png') )}');">
+			  <img src="{!URLFOR($Resource.CmsImages,'/layout.png')}" width="194" height="144" />
+	      	</div>
+	      	<span style="font-size: 10px; font-family: arial;">Small<br />Width: 194px - Height: 144px</span>
+	      </td>
+	      <td>&nbsp;</td>
+	      <td>
+	        <div style="display: block; width: 261px; height: 192px; background-image: url('{!IF(selectedLayout.Thumbnail_Large_Id__c != null, '/servlet/servlet.FileDownload?file=' + selectedLayout.Thumbnail_Large_Id__c, URLFOR($Resource.CmsImages,'/layout_large_no_image.png') )}');">
+			  <img src="{!URLFOR($Resource.CmsImages,'/layout_large.png')}" width="261" height="192" />
+	        </div>
+	        <span style="font-size: 10px; font-family: arial;">Large<br />Width: 261px - Height: 192px</span>
+	      </td>
+	    </tr>
+	  </table>
+	   
+	  <br /><br /><hr /><br /><br />
+	  <apex:outputPanel id="availableImages">
+	    	<apex:form style="margin: 0px; padding: 0px;" >
+	    		<strong>Upload New Image</strong><br /><br />
+	      		<apex:inputFile id="fileObj2" value="{!fileData}" filename="{!fileName}" /><br />
+	        	<apex:selectRadio value="{!filetype}">
+	            	<apex:selectOptions value="{!items}"/>
+	        	</apex:selectRadio>
+				<apex:commandButton action="{!addFile}" value="Upload New File" />
+			</apex:form>	
+		</apex:outputPanel>
+	</apex:outputPanel>
+</apex:outputPanel>
+ 
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Templates -> Content Templates permission
+   	</div>
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

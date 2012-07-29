@@ -1,0 +1,7 @@
+<apex:page id="p" controller="cms.CoreController" action="{!checkCache}" extensions="cms.EditRouter" showHeader="false" sidebar="false" cache="false" expires="0" title="Edit Page">
+  <html>
+  	  	
+    <apex:include id="i" pageName="{!page_layout_reference}" />
+  
+  </html>
+</apex:page>

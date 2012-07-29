@@ -1,0 +1,50 @@
+<apex:page controller="cms.BasicController"  showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="LibraryManager">
+
+<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+<c:CmsScripts debug="true"/>
+
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/sitemap/PageManager.js')}" />
+
+<script type="text/javascript">
+	$(document).data("allows.public.tags", {!allowPublicTags});
+	$(document).data("allows.personal.tags", {!allowPersonalTags});
+	$(document).data("user", "{!currentUser}");
+	$(document).data("cms", {
+		"context" : "orchestracms"
+	});
+	$(document).data("token", "{!token}");
+    var pgMgr;
+    $(document).ready(function() {
+		var sTerm = null;
+		if({!hasSearchTerm})
+			sTerm = '{!searchTerm}';
+        pgMgr = $('#pageMgr').ocmsPageManager({
+//            pageHelpText : 'Page.Manager.Help'.localize(),
+//			searchTerm: ({!searchTerm} == null ? null : '{!searchTerm}')
+			searchTerm: sTerm
+        });
+
+        $(window).bind('resize', function() {
+            // Calculate the ocms-content area height, based on the header/footer heights.
+            reSizeContent();
+        });
+
+    });
+
+    /**
+     * When a layout content is closed or open, then method can be called to resize the
+     *     content within the center panel.
+     */
+    function reSizeContent() {
+//        pgMgr.resizeAll();
+        //pgMgr.ocmsPageManager('resize');
+    }
+
+</script>
+
+	<div id="pageMgr" style="height:100%"></div>
+
+</apex:page>

@@ -1,0 +1,52 @@
+<apex:page controller="AutoCompleteController"> <!-- contentType="application/x-JavaScript; charset=utf-8"> showHeader="false"> standardStylesheets="false">  sidebar="false">-->
+<html>
+<head>
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'js/jquery-1.7.2.min.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'js/jquery-ui-1.8.20.custom.min.js')}"/> 
+<!-- <apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'ui/jquery.ui.autocomplete.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'ui/jquery.ui.core.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'ui/jquery.ui.position.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'ui/jquery.ui.widget.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.AutoComplete, 'ui/jquery-1.7.2.js')}"/> -->
+<apex:stylesheet value="{!URLFOR($Resource.AutoComplete, 'css/ui-lightness/jquery-ui-1.8.20.custom.css')}"/> 
+<script type='text/javascript'>
+$j = jQuery.noConflict();
+ 
+    $j(function() {
+        function log( message ) {
+            $j( "<div/>" ).text( message ).prependTo( "#log" );
+            $j( "#log" ).scrollTop( 0 );
+        }
+
+        $j( "#birds" ).autocomplete({
+            source: {!jsonString},
+            minLength: 2,
+            select: function( event, ui ) {
+                log( ui.item ?
+                    "Selected: " + ui.item.value + " aka " + ui.item.id :
+                    "Nothing selected, input was " + this.value );
+            }
+        });
+    });
+
+</script>
+</head>
+<body>
+
+<div class="demo">
+
+<div class="ui-widget">
+    <label for="birds">Accounts: </label>
+    <input id="birds" />
+</div>
+
+<div class="ui-widget" style="margin-top:2em; font-family:Arial">
+    Result:
+    <div id="log" style="height: 200px; width: 300px; overflow: auto;" class="ui-widget-content"></div>
+</div>
+
+</div><!-- End demo -->
+</body>
+</html>
+
+</apex:page>

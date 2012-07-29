@@ -1,0 +1,48 @@
+<apex:page controller="cms.SetupController" action="{!startPage}" showHeader="false" sidebar="false" cache="false" title="Setup">
+
+<html>
+
+<head>
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ <!-- This is the jquery cookie extension only -->
+ <apex:includeScript value="{!$Resource.cms__jquery}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+
+ 
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+<c:SetupMenu sname="{!sname}" />
+
+<div style="margin-left: 210px; padding: 10px;">
+
+<apex:outputText rendered="{!upgradeAvailable}">
+  <strong style="">Upgrade Required</strong><br /><br />
+  In order to take full advantage of all the new features in this<br /> latest package you must run and complete the upgrade
+  wizard.<br /> <apex:outputText rendered="{!!hasUpgradeAccess}">Please contact your site administrator to have this site upgraded.<br /></apex:outputText><br />
+  <apex:outputText rendered="{!hasUpgradeAccess}"><a href="/apex/UpgradeSite?sname={!sname}" class="setup-link">Upgrade Wizard</a></apex:outputText>
+</apex:outputText>
+
+</div>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+	<div style="padding: 10px;">
+    	You do not have Setup permission
+    </div>	
+</apex:outputPanel>
+
+
+</body>
+
+</html>
+
+</apex:page>

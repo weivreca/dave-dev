@@ -1,0 +1,108 @@
+<apex:page controller="cms.InstallSiteController" action="{!installConfiguration}">
+<html>
+
+<head>
+<title>OrchestraCMS - Site Installation</title>
+<style type="text/css">
+  ul {
+    margin: 0px;
+    padding: 0px;
+    color: #FF0000;
+    list-style-type: none;
+  }
+  ul li {
+    display: block;
+    margin: 0px; 
+    padding: 5px 0px 5px 5px;
+  }
+</style>
+</head>
+<apex:outputPanel rendered="{!installRequired}">
+  
+  <br /><br />
+  This site needs to be configured for use with OrchestraCMS. Launch OrchestraCMS
+  and click on the <strong>Setup New Site</strong>.
+
+</apex:outputPanel>
+<apex:outputPanel rendered="{!selectType}">
+  
+  <br /><br />
+  
+  <a href="/apex/InstallSite?step=properties&type=sforce">Salesforce Site</a> <br /><br /> 
+  
+  or <br /><br />
+  
+  <a href="/apex/InstallSite?step=properties&type=intranet">Salesforce Intranet</a> <br /><br />
+
+</apex:outputPanel>
+<apex:outputPanel rendered="{!selectPropertiesSiteForce}">
+
+  <apex:form >
+	<div style="padding: 25px;">
+      <h1 style="margin: 0px; padding: 0px;">Set your site properties.</h1><br /><br />
+
+	  <apex:messages />
+
+	  <apex:outputPanel rendered="{!existingSitesAvailable}">
+
+	      <table border="0" cellspacing="0" cellpadding="5">
+			  <tr>
+			    <td>Salesforce Site</td>
+			    <td>
+			      <apex:selectList value="{!selectedSite}" size="1" multiselect="false">
+		           	<apex:selectOptions value="{!existingSites}" />
+		          </apex:selectList>
+		        </td>	    
+			  </tr>
+	      </table>
+	
+	      <br />
+	      
+	      <apex:commandButton action="{!install}" value="Install" />
+	      
+      </apex:outputPanel>
+
+      <apex:outputPanel rendered="{!!existingSitesAvailable}">
+		No sites available. You must first create a Salesforce Site and then launch this installer.<br />
+		To create a Salesforce Site, go to <b>Setup</b> | <b>Develop</b> | <b>Sites.</b>
+      </apex:outputPanel>
+
+    </div>
+  </apex:form>
+
+</apex:outputPanel>
+<apex:outputPanel rendered="{!selectPropertiesIntranet}">
+
+  <apex:form >
+	<div style="padding: 25px;">
+      <h1 style="margin: 0px; padding: 0px;">Set your site properties.</h1><br /><br />
+
+	  <apex:messages />
+	    
+      <table border="0" cellspacing="0" cellpadding="5">
+      <tr>
+        <td>Label:</td><td><apex:inputText value="{!siteLabel}" /></td>
+      </tr>
+      <tr>
+        <td>Name:</td>
+        <td>
+        	<apex:inputText value="{!siteName}" />
+        </td>
+	  </tr>
+      </table>
+      
+      <br />
+      
+      <apex:commandButton action="{!install}" value="Install" />
+    </div>
+</apex:form>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!finished}">
+<div style="text-align: center;">
+  <br />
+  <apex:image value="{!URLFOR($Resource.cms__CmsImages,'/orchestra-install-success.jpg')}"></apex:image>
+</div>
+</apex:outputPanel>
+
+</html>
+</apex:page>

@@ -1,0 +1,148 @@
+<apex:page controller="cms.CreateContentController" id="createContent" showHeader="false" sidebar="false" cache="false" title="Orchestra CMS" standardStylesheets="false" >
+<head>
+
+  <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+  <apex:stylesheet value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/color/css/jPicker-1.1.6.min.css')}" />
+  
+  <c:CmsScripts debug="true"/>
+
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryManagerDlgs.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/dam/LibraryBrowser.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__ckedit, 'ckeditor/ckeditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/page/PageSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/link/LinkSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/link/LinkSelectorDialog.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/MenuEditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/color/jpicker-1.1.6.min.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/CreateContent.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/editor/TagEditor.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/AccessDialogs.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/AccessLevelSelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/selector/PrioritySelector.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/widget/JQueryFullDialog.js')}" />
+  <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, 'VersionHistory.js')}" />
+
+  <script type="text/javascript">
+
+  	$(document).data('cms', {
+			'context' 	: 'orchestracms',
+			'namespace' : '{!namespace}',
+			'csrf_token': '{!token}'
+	});
+
+	var ce;
+
+  	$(document).ready(function(){
+
+  		var saveAndCloseFunc;
+  		var saveFunc;
+  		if(typeof(saveLookAndFeelClose) != 'undefined')
+  			saveAndCloseFunc = saveLookAndFeelClose
+  		else saveAndCloseFunc=null;
+  		if(typeof(saveLookAndFeel) != 'undefined')
+  			saveFunc = saveLookAndFeel
+  		else saveFunc=null;
+
+		if({!IF(showActionBar && !ISNULL(content), 'true', 'false')}) {
+		ce = $('<div></div>').content_editor({
+			published				: {!content.Published__c},
+			sitePrefix				: '{!JSENCODE(site_info.Site_Prefix__c)}',
+			content					: {!SerializedContent},
+			disableName				: {!disableName},
+			disableAll				: {!disableAll},
+			disableDates			: {!disableDates},
+			contentName				: '{!JSENCODE(content.Name__c)}',
+			contentId				: '{!JSENCODE(content.Id)}',
+			contentVersion			: '{!JSENCODE(TEXT(content.Version_Number__c)+'.'+TEXT(content.Revision_Number__c))}',
+			contentAvailable		: '{!JSENCODE(available)}',
+			actionSaveAndClose		: saveAndCloseFunc,
+			actionSave				: saveFunc,
+			closeTab				: {!close_tab},
+			tab						: '{!JSENCODE(tab)}',
+			templates				: {!layouts},
+			template_options		: {!layoutAddOptions},
+			content_type 			: '{!content.Content_Type__r.Name__c}',
+			allow_tags				: {!allowTags},
+		 	removeBtnInactive       : '{!URLFOR($Resource.CmsImages,'/btnCloseInactive.png')}',
+		 	removeBtnActive         : '{!URLFOR($Resource.CmsImages,'/btnCloseActive.png')}',
+		 	allowPublishedDelete    : {!allowPublishedDelete},
+		 	state					: '{!state}',
+		 	allowSave				: {!allowSave},
+		 	allowDelete				: {!allowDelete},
+		 	allowPublish			: {!allowPublish},
+		 	allowClone				: {!allowClone},
+		 	allowNewVersion			: {!allowNewVersion},
+		 	allowNewRevision		: {!allowNewRevision},
+		 	allowPublishedDelete    : {!allowPublishedDelete},
+		 	showPublicTags			: {!showPublicTags},
+		 	showPersonalTags		: {!showPersonalTags},
+		 	content_status		    : '{!content_status}',
+		 	content_expiry_date		: '{!content_expiry_date}',
+		 	sname					: '{!content.Site_Name__c}',
+		 	isMenu					: {!isMenu},
+		 	uname					: '{!$User.FirstName}' + ' '	+ '{!$User.LastName}',
+			showSendForApproval		: {!showSendForApproval},
+			showShare				: {!showShare},
+			sentForApproval			: {!sentForApproval},
+			allowSentForApprovalEdit: {!allowSentForApprovalEdit},
+			token					: '{!token}',
+			showTaxonomy			: {!showTaxonomy},
+			showTemplates			: {!showTemplates},
+			preview_link			: '{!preview_link}',
+			autoSave				: {!AutoSave},
+			VersionJSON				: '{!JSENCODE(VersionsJSON)}',
+			allVisitors				: {!allVisitors},
+			allCollaborators		: {!allCollaborators},
+			allLayouts				: {!allLayouts},
+			originId				: '{!content_origin.Id}',
+			isTemplateSharingOn		: {!isTemplateSharingOn},
+			levels					: {!levels},
+			deleteUrl 				: '{!deleteUrl}',
+			cliId					: '{!current_content_layout_instance.Id}'
+		 	});
+		}
+
+        $(window).bind('resize', function() {
+            resizeContentEditorArea();
+        });
+
+        setTabStatus('{!JSENCODE(tab)}', '{!content_status_state}');
+        resizeContentEditorArea();
+  	});
+
+    function resizeContentEditorArea(){
+        var cntEditorPanel = $('.ocms-content-editor-panel');
+        var eph1 = cntEditorPanel.css('padding-top');
+        var eph2 = cntEditorPanel.css('padding-bottom');
+        if(eph1 != null && eph1 != undefined)
+            eph1 = parseInt(eph1.substring(0,eph1.length-2));
+        else
+            eph1 = 0;
+        if(eph2 != null && eph2 != undefined)
+            eph2 = parseInt(eph2.substring(0,eph2.length-2));
+        else
+            eph2 = 0;
+        $('#contentEditBlock').height(($('body').outerHeight(true))-($('#contentEditActionBar').outerHeight(true) + $('.contentEditForm').outerHeight(true))-(eph1+ eph2));
+    }
+
+  </script>
+</head>
+
+<body style="padding: 0px; margin: 0px;">
+
+  <apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">You do not have the privileges required to edit this content.</div>
+  </apex:outputPanel>
+  
+  <apex:outputPanel rendered="{!hasAccess}">
+	<div id="contentEditActionBar"></div>
+	<div id="contentEditBlock">
+		<div class="ocms-content-editor-panel">
+			<apex:include pageName="{!EditPage}" />
+		</div>
+	</div>
+  </apex:outputPanel>
+</body>
+
+</apex:page>

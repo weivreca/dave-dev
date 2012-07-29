@@ -1,0 +1,17 @@
+<apex:page id="t" controller="cms.CoreController" extensions="cms.PreviewController" showHeader="false" sidebar="false"  standardStylesheets="false">
+
+<head>
+
+  <apex:insert name="header" />
+
+</head>
+
+<body>
+
+  <apex:insert name="body" />
+  
+  <apex:outputText escape="false" value="{!UnsubscribeLink}" /><img src="{!unsubscribePrefix}{!URLFOR($Resource.jqueryui, '/css/images/cleardot.gif')}" width="1" height="1" /><apex:outputText escape="false" value="{!unsubscribeLinkClose}" />
+   
+</body>
+
+</apex:page>

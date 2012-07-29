@@ -1,0 +1,54 @@
+<apex:page controller="cms.CoreController" id="l" showHeader="false" sidebar="false" standardStylesheets="false">
+
+
+
+<apex:composition template="{!page_template}">
+
+  <apex:define name="header"> 
+  </apex:define>
+
+  <apex:define name="body">
+
+  <table width="100%" cellspacing="1" cellpadding="0" border="0">
+
+    <tr>
+      <td valign="top" height="100" style="text-align: right; background-color: #DEDEDE;" colspan="4">
+        <c:SinglePortalPanel id="panel1" panelName="panel1" panelController="{!controller}" panelHeight="100px" />
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" height="200" width="25%" style="background-color: #DEDEDE;" rowspan="2">
+        <c:SinglePortalPanel id="panel2" panelName="panel2" panelController="{!controller}" panelHeight="200px"/>  
+      </td>
+      <td valign="top" height="100" width="25%" style="background-color: #DEDEDE;">
+        <c:SinglePortalPanel id="panel3" panelName="panel3" panelController="{!controller}" panelHeight="100px"/>
+      </td>
+      <td valign="top" height="100" width="25%" style="background-color: #DEDEDE;">
+        <c:Panel id="panel4" panelName="panel4" panelController="{!controller}" panelHeight="100px"/>
+      </td>
+      <td valign="top" height="200" width="25%" style="background-color: #DEDEDE;" rowspan="2">
+        <c:Panel id="panel5" panelName="panel5" panelController="{!controller}" panelHeight="200px"/>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" height="100" style="background-color: #DEDEDE;">
+        <c:Panel id="panel6" panelName="panel6" panelController="{!controller}" panelHeight="100px"/>
+      </td>
+      <td valign="top" height="100" style="background-color: #DEDEDE;">
+        <c:Panel id="panel7" panelName="panel7" panelController="{!controller}" panelHeight="100px"/>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" height="100" style="background-color: #DEDEDE;" colspan="4">
+        <c:Panel id="panel8" panelName="panel8" panelController="{!controller}" panelHeight="100px"/>
+      </td>
+    </tr>
+
+  </table>
+  
+
+  </apex:define>
+
+</apex:composition>
+
+</apex:page>

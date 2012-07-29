@@ -1,0 +1,103 @@
+<apex:component controller="cms.Spacer" allowDml="true">
+
+    <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+	<apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+	<apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+	<apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+	<apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+	<script type="text/javascript" language="javascript" >
+
+		function saveLookAndFeel(cb) {
+			var attributes = new Array(); 
+			attributes.push({"name":"SpacerHeight", "value":$('#SpacerHeight').val(), "type":"Text"});
+			attributes.push({"name":"BackgroundColor", "value":$('#BackgroundColor').val(), "type":"Text"});
+		
+			$.ocms.saveContentLayoutInstance({"id":"{!layout_instance.Id}","content_layout_id":"{!layout_instance.Content_Layout__c}","content_id":"{!content.Id}"},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			); 				 			
+	 	}
+	 		
+	 	function saveLookAndFeelClose(cb) {
+	 		saveLookAndFeel(cb); 
+	 		closeTab('{!JSENCODE(tab)}');
+	 	}
+
+		$(document).ready(function(){
+			
+			
+			var location = "{!URLFOR($Resource.OrchestraCMSUI, '/selector/color/images/Bars.png')}";		
+			var path = location.substr(0, location.length-8);				
+			$('#BackgroundColor').jPicker({
+				window: {
+					position: {
+						x: 'screenCenter',
+						y: 'bottom'
+					}
+				},					
+				images:	{
+					clientPath: path, /* Path to image files */
+				}
+			});
+			
+			
+		
+			/*$('#BackgroundColor').ColorPicker({
+				onSubmit: function(hsb, hex, rgb, el) {
+					$(el).val(hex);
+					$(el).change();
+					$(el).ColorPickerHide(); 
+				},
+				
+				onBeforeShow: function() {
+					$(this).ColorPickerSetColor(this.value);	
+				}	
+			
+			
+			}).bind('keyup', function() {
+				$(this).ColorPickerSetColor(this.value); 
+			});*/
+			
+			
+			 
+		
+		}); 
+	</script>
+
+	<apex:outputPanel >
+		<form>			
+			<table>
+				<tr>
+					<td style="font-size: 12px; font-family: arial;">Height</td> 
+					<td>
+						<apex:outputText rendered="{!layout_disabled}">
+							<input type="text" name="SpacerHeight" id="SpacerHeight" value="{!SpacerHeight}" size="3" disabled="disabled" />
+						</apex:outputText>
+						<apex:outputText rendered="{!!layout_disabled}">
+							<input type="text" name="SpacerHeight" id="SpacerHeight" value="{!SpacerHeight}" size="3" />
+						</apex:outputText>
+					</td>
+					<td>px</td>
+				</tr>		
+				<tr>
+					<td style="font-size: 12px; font-family: arial;">Background Color</td>
+					<td>
+						<apex:outputText rendered="{!layout_disabled}">
+							<input type="text" name="BackgroundColor" id="BackgroundColor" value="{!BackgroundColor}" size="6" disabled="disabled"/>
+						</apex:outputText>
+						<apex:outputText rendered="{!!layout_disabled}">
+							<input type="text" name="BackgroundColor" id="BackgroundColor" value="{!BackgroundColor}" size="6" />
+						</apex:outputText>						
+					</td>
+					<td></td>
+				</tr>
+			</table>
+		
+		</form>
+	</apex:outputPanel>
+
+
+</apex:component>

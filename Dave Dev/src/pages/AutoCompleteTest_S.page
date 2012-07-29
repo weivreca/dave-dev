@@ -1,0 +1,53 @@
+<apex:page >
+<apex:includeScript value="{!URLFOR($Resource.AutoCompleteJS, 'ui/jquery.ui.autocomplete.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoCompleteJS, 'ui/jquery.ui.core.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoCompleteJS, 'ui/jquery.ui.position.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.AutoCompleteJS, 'ui/jquery.ui.widget.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.AutoCompleteJS, 'ui/jquery-1.7.2.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.AutoCompleteStyle, 'jquery.ui.all.css')}"/> 
+<script type='text/javascript'>
+$j = jQuery.noConflict();
+
+    $(function() {
+        var availableTags = [
+            "ActionScript",
+            "AppleScript",
+            "Asp",
+            "BASIC",
+            "C",
+            "C++",
+            "Clojure",
+            "COBOL",
+            "ColdFusion",
+            "Erlang",
+            "Fortran",
+            "Groovy",
+            "Haskell",
+            "Java",
+            "JavaScript",
+            "Lisp",
+            "Perl",
+            "PHP",
+            "Python",
+            "Ruby",
+            "Scala",
+            "Scheme"
+        ];
+        $j( "#tags" ).autocomplete({
+            source: availableTags
+        });
+    });
+    </script>
+
+
+    
+<div class="demo">
+
+<div class="ui-widget">
+    <label for="tags">Tags: </label>
+    <input id="tags" />
+</div>
+
+</div><!-- End demo -->
+
+</apex:page>

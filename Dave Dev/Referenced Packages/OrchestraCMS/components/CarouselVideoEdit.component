@@ -1,0 +1,122 @@
+<apex:component controller="cms.CarouselVideo" allowDml="true">
+
+ <apex:attribute name="disabled" type="Boolean" description="The panel unique identifier" assignTo="{!layout_disabled}" />
+ <apex:attribute name="content" type="cms__Content__c" description="The panel unique identifier" assignTo="{!content}" />
+ <apex:attribute name="properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_properties}" />
+
+ <apex:attribute name="layout_instance" type="cms__Content_Layout_Instance__c" description="The panel unique identifier" assignTo="{!content_layout_instance}" />
+ <apex:attribute name="layout_instance_properties" type="cms__Attribute__c[]" description="The panel unique identifier" assignTo="{!content_layout_instance_properties}" />
+
+ 	<script type="text/javascript" language="javascript">
+		$(document).ready(function(){
+				$('#AltText').ocmsInput({instructionalText:'Necessary for accessibility compliance'});
+				$('#TitleText').ocmsInput({instructionalText:'Text that appears when the mouse pointer hovers over the image'});
+
+				$('#carousel-image').image_selector_input({
+					type: 'Image',
+					disabled: {!layout_disabled},
+					sname: '{!JSENCODE(content.Site_Name__c)}',
+					ajaxLoader: '{!$Resource.ajaxLoader}',
+					onSelect : function(dialog) {
+						if($('AltText').val() == '' || $('AltText').val() == null)
+							$('#AltText').val(dialog.selected.name);
+					},
+					url: '{!CarouselImage}'
+				});
+
+				$('#carousel-thumbnail-image').image_selector_input({
+					type: 'Image',
+					disabled: {!content.Published__c},
+					sname: '{!JSENCODE(content.Site_Name__c)}',
+					ajaxLoader: '{!$Resource.ajaxLoader}',
+					url: '{!CarouselThumbnail}'
+				});
+
+		});
+
+		function saveLookAndFeel(cb) {
+
+			var attributes = new Array();
+
+			attributes.push({"name":"CarouselImage", "value":$('#carousel-image').image_selector_input('getSelected'), "type":"Text"});
+			attributes.push({"name":"CarouselThumbnail", "value":$('#carousel-thumbnail-image').image_selector_input('getSelected'), "type":"Text"});
+			attributes.push({"name":"CarouselVideo", "value":$('#CarouselVideoInput').val(), "type":"Text"});
+			attributes.push({"name":"CarouselLink", "value":$('#CarouselLinkInput').val(), "type":"Text"});
+			attributes.push({"name":"CarouselDescription", "value":$('#CarouselDescriptionInput').val(), "type":"Text"});
+			attributes.push({"name":"AltText", "value":$('#AltText').val(), "type":"Text"});
+			attributes.push({"name":"TitleText", "value":$('#TitleText').val(), "type":"Text"});
+
+
+			$.ocms.saveContent({"name":"{!JSENCODE(content.Name__c)}","content_id":"{!content.Id}","content_type":"{!content.Content_Type__r.Name__c}","parent_id":null},
+				attributes,
+				"{!JSENCODE(Content.Site_Name__c)}",
+				cb,
+				'{!token}'
+			);
+ 		}
+
+ 		function saveLookAndFeelClose(cb) {
+ 			saveLookAndFeel(cb);
+ 			closeTab('{!JSENCODE(tab)}');
+ 		}
+	</script>
+
+ 	<form>
+		<table border="0">
+				<tr>
+					<td>Carousel Image</td>
+					<td>
+						<div id="carousel-image"></div>
+					</td>
+				</tr>
+				<tr>
+					<td>Carousel Thumbnail</td>
+					<td>
+						<div id="carousel-thumbnail-image"></div>
+					</td>
+				</tr>
+	            <tr>
+	            	<td valign="top">Alternative Text</td>
+	            	<td valign="top"><input type="text" id="AltText" name="AltText" value="{!AltText}" size="60"  /></td>
+	            </tr>
+	            <tr>
+	            	<td valign="top">Title Text</td>
+	            	<td valign="top"><input type="text" id="TitleText" name="TitleText" value="{!TitleText}" size="60"  /></td>
+	            </tr>
+				<tr>
+					<td>Carousel Embedded Video</td>
+					<td>
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<textarea name="CarouselVideoInput" id="CarouselVideoInput" rows="7" cols="60" disabled="disabled"><apex:outputText value="{!CarouselVideo}" /></textarea>
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<textarea name="CarouselVideoInput" id="CarouselVideoInput" rows="7" cols="60"><apex:outputText value="{!CarouselVideo}" /></textarea>
+						</apex:outputText>
+					</td>
+				</tr>
+				<tr>
+					<td>Carousel Link</td>
+	                <td>
+	                    <input type="hidden" name="CarouselLinkInput"  id="CarouselLinkInput" value="{!CarouselLink}" />
+	                    <c:PageSelector cPassThroughId="CarouselLinkInput" value="{!CarouselLink}" dialogId="CarouselLink" sname="{!content.cms__Site_Name__c}" disabled="{!layout_disabled}" token="{!token}" />
+	                </td>
+				</tr>
+				<tr>
+					<td>Carousel Description</td>
+					<td>
+						<apex:outputText escape="false" rendered="{!layout_disabled}">
+							<textarea name="CarouselDescriptionInput" id="CarouselDescriptionInput" rows="12" cols="60" disabled="disabled"><apex:outputText value="{!CarouselDescription}" /></textarea>
+						</apex:outputText>
+						<apex:outputText escape="false" rendered="{!!layout_disabled}">
+							<textarea name="CarouselDescriptionInput" id="CarouselDescriptionInput" rows="12" cols="60"><apex:outputText value="{!CarouselDescription}" /></textarea>
+						</apex:outputText>
+					</td>
+				</tr>
+   				<tr>
+    				<td colspan="2"></td>
+   				</tr>
+   			</table>
+   		</form>
+
+
+</apex:component>

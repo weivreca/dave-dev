@@ -1,0 +1,86 @@
+<apex:page id="us" controller="cms.CoreController" standardStylesheets="false" showHeader="false" sidebar="false">
+	
+	<apex:composition template="{!page_template}">
+		
+		<apex:define name="header">
+
+			<link rel="stylesheet" href="{!URLFOR($Resource.UrbanStorefront, 'css/screen.css')}" type="text/css" media="screen" charset="utf-8" />
+			<link rel="stylesheet" href="{!URLFOR($Resource.UrbanStorefront, 'css/print.css')}" type="text/css" media="print" charset="utf-8" />
+
+			<!--[if lt IE 8]><link rel="stylesheet" href="{!URLFOR($Resource.everready, 'css/ie.css')}" type="text/css" media="screen" charset="utf-8" /><![endif]-->
+
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.UrbanStorefront, 'css/superfish.css')}" media="screen" charset="utf-8" />
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.UrbanStorefront, 'css/superfish-vertical.css')}" media="screen" charset="utf-8" />
+			<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.UrbanStorefront, 'css/footer.css')}" media="screen" charset="utf-8" />
+
+			<script type="text/javascript" src="{!URLFOR($Resource.UrbanStorefront, 'js/hoverIntent.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.UrbanStorefront, 'js/superfish.js')}" charset="utf-8"></script>
+			<script type="text/javascript" src="{!URLFOR($Resource.UrbanStorefront, 'js/global.js')}" charset="utf-8"></script>
+		
+        </apex:define>
+        
+		<apex:define name="body">
+
+			<div id="site">
+				<div id="header-contain">
+					<div id="header">
+						<div id="logo-wordmark"><c:SingleImagePanel panelName="logo" panelController="{!controller}" panelHeight="126px" panelWidth="496px" /></div>
+						<div id="mission-statement"><c:SinglePlainTextPanel panelName="mission-statement" panelController="{!controller}" panelHeight="70px" panelWidth="315px" /></div>
+						
+						<div style="top: 124px; position: absolute; width: 100%;"><c:SingleClassStyledMenuPanel panelName="top-menu" panelController="{!controller}" panelHeight="30px" panelWidth="982px" /></div>
+					</div>
+				</div>
+
+				<div id="contentArea">
+
+					<div class="container">
+
+						<div class="twocol-leftcol">
+							<div class="content-pad">
+								<c:Panel panelName="Content" panelController="{!controller}" panelHeight="300px" panelWidth="300px" />
+								<c:SingleFormPanel panelName="form" panelController="{!controller}" panelHeight="30px" panelWidth="300px" />
+								<c:Panel panelName="Content2" panelController="{!controller}" panelHeight="200px" panelWidth="300px" />  
+							</div>
+							<div class="clear"></div>
+							<div class="twocol-leftcol-cap"><img src="{!URLFOR($Resource.UrbanStorefront, 'images/leftcol_bkd_cap.jpg')}" alt="" /></div>
+							<div class="clear"></div>
+						</div>
+						<div class="twocol-rightcol last">
+						
+							<div class="content-pad-2">
+								<c:Panel panelName="right-column" panelController="{!controller}" panelHeight="300px" panelWidth="264px" />
+							</div>
+
+							<img src="{!URLFOR($Resource.UrbanStorefront, 'images/social_divider_bar.jpg')}" alt="" width="304" height="53" />
+	
+							<div id="social-net">
+								<c:Panel panelName="social" panelController="{!controller}" panelHeight="300px" panelWidth="264px" />
+							</div>
+	
+							<div class="clear"></div>
+	
+							<div class="twocol-rightcol-cap"><img src="{!URLFOR($Resource.UrbanStorefront, 'images/rightcol_bkd-cap.jpg')}" alt="" /></div>
+	
+							<div class="clear"></div>
+						</div>					
+					</div>
+				</div>
+				
+				<div id="footer_contain">
+				
+					<div id="footer">
+						<c:Panel panelName="footer" panelController="{!controller}" panelHeight="30px" panelWidth="281px" />
+					</div>
+				
+				</div>				
+				
+			</div>
+						
+		</apex:define>	
+		
+		<site:googleAnalyticsTracking />
+		
+	</apex:composition>        
+        
+        
+</apex:page>

@@ -1,0 +1,1 @@
+<apex:page controller="cms.PageAutoComplete" action="{!LoadResponse}" sidebar="false" showHeader="false" standardStylesheets="false" cache="false" contentType="text/json" >{!JSONResponse}</apex:page>

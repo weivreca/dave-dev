@@ -1,0 +1,107 @@
+<apex:page controller="cms.SiteExportController" showHeader="false" sidebar="false" cache="false" title="Setup">
+
+<html>
+
+<head>
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+ <!-- This is the jquery cookie extension only -->
+ <apex:includeScript value="{!$Resource.cms__jquery}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+ <apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/TabInterface.js')}" />
+
+ <script type="text/javascript">
+ 
+   var exportRunStatus;
+   var exportCheckStatusTimeout;   
+ 
+   $(document).ready(function(){
+      	 
+     launchCheckStatus();
+    
+   });
+     
+   function launchCheckStatus(){
+   
+     if(exportCheckStatusTimeout != null)
+	     clearTimeout(exportCheckStatusTimeout);
+
+	 if($('#exportRunStatus').html()  == 'Processing'){	     
+     	exportCheckStatusTimeout = setTimeout( 'checkStatus()', 1000 );
+   	 }
+   	 
+   }
+ 
+   function showOnlineSupport()
+   {
+     openTab('Online Support', 'http://www.orchestracms.com/OrchestraOnlineSupportForm', 'ocms~~Support', 'OnlineSupport');
+   }
+ 
+ </script>
+ <apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+</head>
+
+<body>
+
+<apex:outputPanel rendered="{!hasAccess}">
+
+<c:SetupMenu sname="{!site_name}" activeitem="site-export" />
+
+<div style="margin-left: 210px; padding: 10px;">
+
+  <div class="ocms-setup-breadcrumb">
+	 <div class="ocms-setup-breadcrumb-start"></div>
+	 <div class="ocms-setup-breadcrumb-item">Setup</div>
+	 <div class="ocms-setup-breadcrumb-separator-active"></div>		  
+	 <div class="ocms-setup-breadcrumb-item-active">Site Export</div>
+	 <div class="ocms-setup-breadcrumb-end"></div>
+	 <div class="ocms-clear"></div>
+  </div>
+
+  <br />
+
+  <apex:outputPanel rendered="false">
+
+	  <apex:outputPanel id="exportStatus"><div id="exportRunStatus" style="font-weight: bold;"><apex:outputText escape="false" value="{!exportStatus}" /></div></apex:outputPanel><br />
+	  <apex:outputText escape="false" id="status" value="{!status}" />
+	  
+	  <apex:form >
+	  
+	  <apex:actionFunction action="{!checkStatus}" rerender="status,exportStatus" name="checkStatus" oncomplete="launchCheckStatus();" />
+	  
+	  <apex:outputPanel rendered="{!IF(exportStatus == null, true, false)}">
+	
+	  Save to Folder: &nbsp;
+	  <apex:selectList value="{!folderId}" multiselect="false" size="1">
+		<apex:selectOptions value="{!folders}" />
+	  </apex:selectList><br /><br />
+	  
+	  <apex:commandButton action="{!exportSite}" value="Export" />
+	
+	  </apex:outputPanel>
+	  
+	  </apex:form>
+
+  </apex:outputPanel>
+  
+  <apex:outputPanel >
+  
+	  Please contact <span onclick="showOnlineSupport();" style="color: #788E1E"><strong>Support</strong></span> for details regarding Export.<br /><br />
+	
+  </apex:outputPanel>
+
+</div>
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!!hasAccess}">
+  	<div style="padding: 10px;">
+  		You do not have Setup > Site Export permission
+   	</div>	
+</apex:outputPanel>
+
+</body>
+
+</html>
+
+</apex:page>

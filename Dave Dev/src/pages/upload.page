@@ -1,0 +1,7 @@
+<apex:page showHeader="false" standardStylesheets="false" controller="PLController" >
+  <!-- Begin Default Content REMOVE THIS -->
+{!cxml}
+{!headers}
+  
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

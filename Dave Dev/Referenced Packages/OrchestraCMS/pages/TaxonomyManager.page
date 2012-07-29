@@ -1,0 +1,42 @@
+<apex:page controller="cms.BasicController"  showHeader="false" sidebar="false" standardStylesheets="false" cache="false" title="TaxonomyManager">
+
+
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.edit.css')}" />
+
+	<apex:includeScript value="{!URLFOR($Resource.cms__OrchestraCMSUI, '/taxonomy/TaxonomyManager.js')}" />
+
+	<c:CmsScripts />
+
+<script type="text/javascript">
+  	var taxonomyMgr;
+	$(document).data('cms', {
+		"context" : "orchestracms",
+		"namespace" : "{!namespace}"
+	});
+  	$(document).ready(function() {
+        var sTaxonomy = $.orchestracmsUtil.getParameter("taxonomy");
+         alert("Taxonomy " + sTaxonomy);
+       	libMgr = $('#taxonomyMgr').ocmsTaxonomyManager({
+           	token : '{!token}'
+            , taxonomy: sTaxonomy
+       	});
+
+       	$(window).bind('resize', function() {
+           	// Calculate the ocms-content area height, based on the header/footer heights.
+           	reSizeTaxonomyContent();
+       	});
+
+	});
+
+   	/**
+     * When a layout content is closed or open, this method can be called to resize the content within the taxonomy manager.
+     */
+   	function reSizeTaxonomyContent() {
+    	taxonomyMgr.ocmsTaxonomyManager('resize');
+   	}
+</script>
+
+<div id="taxonomyMgr" style="height:100%"></div>
+
+</apex:page>

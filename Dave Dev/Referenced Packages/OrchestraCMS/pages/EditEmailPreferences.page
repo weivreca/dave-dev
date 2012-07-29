@@ -1,0 +1,5 @@
+<apex:page controller="cms.CreateContentController"  showHeader="false" sidebar="false" cache="false" title="Orchestra CMS" standardStylesheets="false">
+	<apex:outputPanel layout="block" >
+		No configuration options.
+ 	</apex:outputPanel>
+</apex:page>

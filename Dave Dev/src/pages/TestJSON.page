@@ -1,0 +1,25 @@
+<apex:page controller="demoController">
+  <!-- Begin Default Content REMOVE THIS -->
+  <script type="text/javascript">
+
+   
+   
+    function getRemoteAccount() {
+        
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.demoController.getAccounts}',
+            
+            function(result, event){
+                if (event.status) {
+                    // Get DOM IDs for HTML and Visualforce elements like this
+                    document.getElementById('jsonShow').innerHTML = result
+                   }
+            }, 
+            {escape: true}
+        );
+    }
+    </script>
+  <h1>Congratulations</h1>
+    <button onclick="getRemoteAccount()">Get Account</button>
+        <span id='jsonShow' />
+</apex:page>

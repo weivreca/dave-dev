@@ -1,0 +1,81 @@
+<apex:page controller="cms.LibrariesController" showHeader="false" sidebar="false" cache="false" title="Setup">
+	<html>
+
+		<head>
+			<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/jquery.ui.all.css')}" />
+			<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery.min.js')}" />
+			<!-- This is the jquery cookie extension only -->
+			<apex:includeScript value="{!$Resource.cms__jquery}" />
+			<apex:includeScript value="{!URLFOR($Resource.cms__jqueryui, '/js/jquery-ui.custom.min.js')}" />
+			<apex:stylesheet value="{!URLFOR($Resource.cms__jqueryui, '/css/ocms.css')}" />
+		</head>
+
+		<body>
+			
+		  <apex:outputPanel rendered="{!hasAccess}">
+		  
+		    <c:SetupMenu sname="{!site_name}" activeitem="libraries" />		
+			
+			<div style="margin-left: 210px; padding: 10px;">
+		
+				<div class="ocms-setup-breadcrumb">
+				  <div class="ocms-setup-breadcrumb-start"></div>
+				  <div class="ocms-setup-breadcrumb-item">Setup</div>
+				  <div class="ocms-setup-breadcrumb-separator"></div>		  
+				  <div class="ocms-setup-breadcrumb-item">Libraries</div>
+				  <div class="ocms-setup-breadcrumb-separator-active"></div>
+				  <div class="ocms-setup-breadcrumb-item-active">Add Library</div>
+				  <div class="ocms-setup-breadcrumb-end"></div>
+				  <div class="ocms-clear"></div>
+				</div>
+
+				<p>
+					Choose the type of repository you want to connect with as an
+					OrchestraCMS library and then set the credentials. The library name
+					will appear in Manage Libraries and when browsing for content.
+				</p>
+		
+				<apex:outputPanel >
+				<apex:form >
+
+					<script type="text/javascript">
+						$(document).ready(function(){
+	
+							$('#nextButton').button().click(function(){
+							 		Next();
+							});						
+
+							$('#cancelButton').button().click(function(){
+							 		Cancel();
+							});						
+						
+						}); 
+					</script>				
+				
+		    		<apex:actionFunction action="{!NextPage}" name="Next" />
+		    		<apex:actionFunction action="{!Cancel}" name="Cancel" />
+
+		    		Repository* &nbsp; 
+		        	<apex:inputField value="{!currentLibrary.cms__Origin__c}" />
+					<br />
+					<br />
+					
+					<div id="nextButton">Next</div>
+					<div id="cancelButton">Cancel</div>
+
+				</apex:form>
+				</apex:outputPanel>
+			</div>
+			
+		  </apex:outputPanel>
+	
+		  <apex:outputPanel rendered="{!!hasAccess}">
+		    	<div style="padding: 10px;">
+		    		You do not have Setup > Libraries permission
+		    	</div>	
+		  </apex:outputPanel>
+	
+	   </body>
+
+	</html>
+</apex:page>
