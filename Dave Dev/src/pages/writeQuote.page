@@ -1,0 +1,105 @@
+<apex:page tabStyle="Workbook__c" controller="jQuerySheetController">
+  <head>
+    <apex:includeScript value="{!URLFOR($Resource.Sheet, 'jquery-1.5.2.js')}"/>
+    <apex:includescript value="{!URLFOR($Resource.TinyMCE,'/tinymce/jscripts/tiny_mce/tiny_mce.js')}" />
+    <script type="text/javascript">
+        tinyMCE.init({
+                    mode : "textareas",
+                    theme : "advanced",
+                    plugins : "save,emotions,spellchecker,advhr,insertdatetime,preview", 
+                    width : "90%",
+                    height : "90%",
+                    theme_advanced_buttons3_add : "save",
+                    save_enablewhendirty : true,
+                    save_onsavecallback : function(){
+                            var ed = tinyMCE.get('content').getContent(); 
+                            console.log(ed);
+                            jQuerySheetController.saveQuoteToWorkbook(ed,'{!$CurrentPage.parameters.wId}',function(result,event){
+                                alert('result:'+result);
+                            },{escape:true});
+                        },
+                    oninit : 'myoninit',
+                    //plugin_preview_pageurl: "preview",
+                    // Theme options - button# indicated the row# only
+                    theme_advanced_buttons1 : "newdocument,mybutton,|,bold,italic,underline,|,justifyleft,justifycenter,justifyright,fontselect,fontsizeselect,formatselect",
+                    theme_advanced_buttons2 : "cut,copy,paste,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,link,unlink,anchor,image,|,preview,|,forecolor,backcolor",
+                    theme_advanced_buttons3 : "insertdate,inserttime,|,spellchecker,advhr,,removeformat,|,sub,sup,|,charmap,emotions,code",      
+                    theme_advanced_toolbar_location : "top",
+                    theme_advanced_toolbar_align : "left",
+                    theme_advanced_statusbar_location : "bottom",
+                    theme_advanced_resizing : true,
+                    setup : function(ed) {
+                    // Add a custom button
+                    ed.addButton('mybutton', {
+                        title : 'My button',
+                        image : "{!URLFOR($Resource.Sheet, 'images/arrow_out.png')}",
+                        onclick : function() {
+                            alert('Hello');
+                            // Add you own code to execute something on click
+                            //ed.focus();
+                            //ed.selection.setContent('Hello world!');
+                        }
+                    });
+                 }
+            });
+            
+            
+             
+            function myoninit(){
+                var ed = tinyMCE.get('content');
+                ed.setProgressState(1); // Show progress
+                
+                var textHTML = '';
+                jQuerySheetController.retrieveQuoteForWorkbook('{!$CurrentPage.parameters.wId}',function(result,event){
+                                   textHTML = htmlDecode(result);
+                                   ed.setContent(textHTML);
+                                });
+            ed.setProgressState(0); // Hide progress
+            alert(getPreviewData());
+            }
+            
+            function htmlEncode(value){
+              return $('<div/>').text(value).html();
+            }
+            
+            function htmlDecode(value){
+              return $('<div/>').html(value).text();
+            }
+            /*
+            function getPreviewData () {
+                // make TinyMCE cleanup the HTML code
+                tinyMCEPopup.editor.triggerSave();
+                // get the clean code
+                return tinyMCEPopup.editor.getContent();
+            }
+
+            alert(getPreviewData());
+            */
+        
+    </script>
+</head>
+  
+  
+  <apex:sectionHeader title="Write Quote Template"/>
+  
+ <body>
+     <apex:form >
+     <apex:pageBlock >
+     
+            
+            <apex:pageblockButtons >
+                <apex:commandButton value="Return to Workbook" action="{!backToWorkbook}"/>
+                <apex:commandButton value="Merge in data" action="{!mergeInData}"/>
+            </apex:pageblockButtons>
+            <apex:pageBlockSection columns="1" collapsible="false">
+             
+            <textarea id="content" name="content"> 
+            
+            </textarea>
+            
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        </apex:form>
+</body>
+                  
+</apex:page>

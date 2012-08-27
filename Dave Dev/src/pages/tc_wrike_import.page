@@ -1,0 +1,13 @@
+<apex:page controller="TC_WrikeController">
+
+<apex:form id="theform">
+<apex:outputText value="{!message}"/><p/>
+    <apex:outputLabel value="Run As..."/>
+    <apex:selectList value="{!selectedService}" size="1">
+        <apex:selectOptions value="{!services}"/>
+        </apex:selectList>
+    <p></p>
+    <apex:commandButton action="{!updateWrike}" value="Update Wrike" rerender="theform"/>
+    
+</apex:form>
+</apex:page>

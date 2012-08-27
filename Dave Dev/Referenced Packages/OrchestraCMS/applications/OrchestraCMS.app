@@ -3,4 +3,5 @@
     <defaultLandingTab>OrchestraCMS</defaultLandingTab>
     <label>OrchestraCMS</label>
     <tab>OrchestraCMS</tab>
+    <tab>log__c</tab>
 </CustomApplication>

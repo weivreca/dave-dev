@@ -17,6 +17,13 @@
         <name>ApexTrigger</name>
     </types>
     <types>
+        <members>Cell__c</members>
+        <members>Synced_Cell__c</members>
+        <members>Workbook__c</members>
+        <members>Worksheet__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
         <members>*</members>
         <name>StaticResource</name>
     </types>

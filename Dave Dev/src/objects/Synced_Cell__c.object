@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>By nominating a worksheet and cell reference, a user can sync data from workbook to sf, and sf back to workbook.</description>
+    <enableActivities>false</enableActivities>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>true</enableReports>
+    <fields>
+        <fullName>Cell_Value__c</fullName>
+        <externalId>false</externalId>
+        <inlineHelpText>To sync a cell you must describe its location exactly, in the format of [sheetname]![column reference]:[row reference] eg. cell A1 on &apos;Sheet 1&apos; would be entered as follows - Sheet 1!A:1</inlineHelpText>
+        <label>Cell Value</label>
+        <length>250</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Workbook__c</fullName>
+        <externalId>false</externalId>
+        <label>Workbook</label>
+        <referenceTo>Workbook__c</referenceTo>
+        <relationshipLabel>Synced Cells</relationshipLabel>
+        <relationshipName>Synced_Cells</relationshipName>
+        <relationshipOrder>0</relationshipOrder>
+        <type>MasterDetail</type>
+        <writeRequiresMasterRead>true</writeRequiresMasterRead>
+    </fields>
+    <fields>
+        <fullName>force_refresh__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>if checked, forces trigger to refresh cell value</description>
+        <externalId>false</externalId>
+        <label>force refresh</label>
+        <type>Checkbox</type>
+    </fields>
+    <label>Synced Cell</label>
+    <nameField>
+        <label>Synced Cell</label>
+        <type>Text</type>
+    </nameField>
+    <pluralLabel>Synced Cells</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>ControlledByParent</sharingModel>
+</CustomObject>

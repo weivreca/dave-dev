@@ -1,0 +1,11 @@
+<apex:page controller="wrikeController" >
+  <!-- Begin Default Content REMOVE THIS -->
+  <apex:form >
+      <apex:commandButton action="{!getRequestToken}" value="Get Request Token" id="theButton"/>
+  </apex:form>
+  <p>
+  oauth token: {!oauth_token} </p>
+  <p>
+  oauth token secret: {!oauth_token} </p>
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

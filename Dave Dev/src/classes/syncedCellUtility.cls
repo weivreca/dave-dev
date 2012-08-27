@@ -3,7 +3,7 @@ public class syncedCellUtility{
     public static Pattern patt{
     	get{
     		if(patt == null){
-    			patt = Pattern.compile('[A-Za-z0-9]{1,20}![A-Z]{1}:[0-9]{1,3}');	
+    			patt = Pattern.compile('[A-Za-z0-9 ]{1,20}![A-Z]{1}:[0-9]{1,3}');	
     		}
     		return patt;
     	}
@@ -80,7 +80,7 @@ public class syncedCellUtility{
 	                sc.Cell_Value__c = jQuerySheetController.getCellContents(worksheetName, rowRef, colRef, jQuerySheetController.retrieveString(sc.Workbook__c));
 	                sc.force_refresh__c = false; // reset to false
                 } else {
-                	sc.name.addError('this is not a valid cell reference. Use format [Sheetname]![Column Letter]:[Row Number]');
+                	sc.name.addError('this is not a valid cell reference. Use format [Sheetname]![Column Letter]:[Row Number] - provided:'+sc.name);
                 }
             }
         }
